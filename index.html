@@ -3,6 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; connect-src https://api.anthropic.com https://*.supabase.co; img-src 'self' data:; frame-ancestors 'none';">
+<meta http-equiv="X-Content-Type-Options" content="nosniff">
+<meta name="referrer" content="no-referrer">
 <title>Vocab Learner</title>
 <style>
   :root {
@@ -648,6 +651,16 @@
 </div>
 
 <script>
+function sanitize(str) {
+  if (!str) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#x27;');
+}
+
 const LS_KEY = 'vocabApp_words';
 const LS_APIKEY = 'vocabApp_apikey';
 const LS_HISTORY = 'vocabApp_history';
@@ -662,7 +675,10 @@ let quizStats = JSON.parse(localStorage.getItem(LS_STATS) || '{}');
 
 function getUserId() {
   let id = localStorage.getItem(LS_USER_ID);
-  if (!id) { id = 'user_' + Math.random().toString(36).slice(2, 10); localStorage.setItem(LS_USER_ID, id); }
+  if (!id) {
+    id = 'user_' + (crypto.randomUUID ? crypto.randomUUID().replace(/-/g, '').slice(0, 16) : Math.random().toString(36).slice(2, 10) + Math.random().toString(36).slice(2, 10));
+    localStorage.setItem(LS_USER_ID, id);
+  }
   return id;
 }
 
@@ -1139,19 +1155,20 @@ function renderResult(d, count) {
   (d.definitions || []).forEach(group => {
     const groupDiv = document.createElement('div');
     groupDiv.className = 'pos-group';
-    const posLabel = `<span class="pos-label">${group.pos}</span>`;
+    const posLabel = `<span class="pos-label">${sanitize(group.pos)}</span>`;
     const sensesHtml = (group.senses || []).map((s, i) => {
       const examplesHtml = (s.examples || []).map(e => {
-        const highlighted = e.en.replace(new RegExp('\\b' + d.word + '\\b', 'gi'), m => `<em>${m}</em>`);
+        const safeEn = sanitize(e.en);
+        const highlighted = safeEn.replace(new RegExp('\\b' + sanitize(d.word) + '\\b', 'gi'), m => `<em>${m}</em>`);
         return `<div class="example-item">
           <div class="example-en">${highlighted}</div>
-          <div class="example-ja">${e.ja}</div>
+          <div class="example-ja">${sanitize(e.ja)}</div>
         </div>`;
       }).join('');
       return `<div class="def-item">
         <span class="def-num">${i + 1}.</span>
         <div class="def-body">
-          <div class="def-meaning">${s.meaning}</div>
+          <div class="def-meaning">${sanitize(s.meaning)}</div>
           ${examplesHtml}
         </div>
       </div>`;
@@ -1183,7 +1200,7 @@ function renderResult(d, count) {
     }
     document.getElementById('res-era-wrap').style.display = era ? 'block' : 'none';
     if (era) {
-      document.getElementById('res-era').innerHTML = `<div class="era-text">${era}</div>`;
+      document.getElementById('res-era').innerHTML = `<div class="era-text">${sanitize(era)}</div>`;
     }
     metaEl.style.display = 'block';
   } else {
@@ -1247,17 +1264,18 @@ function renderWordbook() {
     detail.className = 'wl-detail';
 
     if (w.definitions && w.definitions.length > 0) {
-      let detailHtml = `<div style="display:flex;align-items:baseline;gap:10px;margin-bottom:2px;"><div class="wl-detail-word">${w.word}</div>`;
-      if (w.phonetic) detailHtml += `<div class="wl-detail-phonetic" style="margin-bottom:0;">${w.phonetic}</div>`;
+      let detailHtml = `<div style="display:flex;align-items:baseline;gap:10px;margin-bottom:2px;"><div class="wl-detail-word">${sanitize(w.word)}</div>`;
+      if (w.phonetic) detailHtml += `<div class="wl-detail-phonetic" style="margin-bottom:0;">${sanitize(w.phonetic)}</div>`;
       detailHtml += `</div>`;
       w.definitions.forEach(group => {
-        detailHtml += `<div class="wl-detail-pos-group"><span class="wl-detail-pos">${group.pos}</span>`;
+        detailHtml += `<div class="wl-detail-pos-group"><span class="wl-detail-pos">${sanitize(group.pos)}</span>`;
         (group.senses || []).forEach((s, si) => {
           detailHtml += `<div class="wl-detail-sense"><span class="wl-detail-num">${si + 1}.</span><div>`;
-          detailHtml += `<div class="wl-detail-meaning">${s.meaning}</div>`;
+          detailHtml += `<div class="wl-detail-meaning">${sanitize(s.meaning)}</div>`;
           (s.examples || []).forEach(ex => {
-            const highlighted = ex.en.replace(new RegExp('\\b' + w.word + '\\b', 'gi'), m => `<em>${m}</em>`);
-            detailHtml += `<div class="wl-detail-example">${highlighted}<div class="wl-detail-example-ja">${ex.ja}</div></div>`;
+            const safeEn = sanitize(ex.en);
+            const highlighted = safeEn.replace(new RegExp('\\b' + sanitize(w.word) + '\\b', 'gi'), m => `<em>${m}</em>`);
+            detailHtml += `<div class="wl-detail-example">${highlighted}<div class="wl-detail-example-ja">${sanitize(ex.ja)}</div></div>`;
           });
           detailHtml += `</div></div>`;
         });
@@ -1265,7 +1283,7 @@ function renderWordbook() {
       });
       detail.innerHTML = detailHtml;
     } else {
-      detail.innerHTML = `<div class="wl-detail-word">${w.word}</div><div style="font-size:13px;color:var(--text-faint);margin-top:4px;">詳細データがありません。再度検索してください。</div>`;
+      detail.innerHTML = `<div class="wl-detail-word">${sanitize(w.word)}</div><div style="font-size:13px;color:var(--text-faint);margin-top:4px;">詳細データがありません。再度検索してください。</div>`;
     }
 
     if (w.synonyms && w.synonyms.length > 0) {
@@ -1294,7 +1312,7 @@ function renderWordbook() {
     if (w.era) {
       const eraWrap = document.createElement('div');
       eraWrap.style.cssText = 'margin-top:10px;';
-      eraWrap.innerHTML = `<div class="section-label" style="margin-bottom:6px;">使用年代</div><div class="era-text">${w.era}</div>`;
+      eraWrap.innerHTML = `<div class="section-label" style="margin-bottom:6px;">使用年代</div><div class="era-text">${sanitize(w.era)}</div>`;
       detail.appendChild(eraWrap);
     }
 
