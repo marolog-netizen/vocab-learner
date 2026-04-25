@@ -576,7 +576,7 @@
       <div style="margin-bottom:14px;padding:12px 14px;background:var(--amber-light);border:1px solid rgba(122,82,0,0.2);border-radius:var(--radius-sm);">
         <div style="font-size:12px;font-weight:500;color:var(--amber);margin-bottom:6px;">ユーザーID（全端末で同じIDを使用してください）</div>
         <div style="display:flex;gap:8px;align-items:center;">
-          <input type="text" id="sb-userid-input" placeholder="user_xxxxxxxx" style="flex:1;padding:8px 10px;border:1px solid rgba(122,82,0,0.3);border-radius:var(--radius-sm);font-family:-apple-system,'Helvetica Neue',Arial,sans-serif;font-size:13px;background:#fff;color:var(--text);outline:none;"/>
+          <input type="text" id="sb-userid-input" placeholder="user_xxxxxxxx" maxlength="64" style="flex:1;padding:8px 10px;border:1px solid rgba(122,82,0,0.3);border-radius:var(--radius-sm);font-family:-apple-system,'Helvetica Neue',Arial,sans-serif;font-size:13px;background:#fff;color:var(--text);outline:none;"/>
           <button id="sb-userid-copy-btn" style="padding:8px 12px;border-radius:var(--radius-sm);border:1px solid rgba(122,82,0,0.3);background:#fff;color:var(--amber);font-size:12px;cursor:pointer;white-space:nowrap;">コピー</button>
         </div>
         <div style="font-size:12px;color:var(--amber);margin-top:6px;line-height:1.6;">このIDを他の端末の同欄に入力すると単語帳が共有されます。</div>
@@ -670,9 +670,9 @@ const LS_SB_URL = 'vocabApp_sbUrl';
 const LS_SB_KEY = 'vocabApp_sbKey';
 const LS_USER_ID = 'vocabApp_userId';
 
-let wordbook = JSON.parse(localStorage.getItem(LS_KEY) || '[]');
-let searchHistory = JSON.parse(localStorage.getItem(LS_HISTORY) || '{}');
-let quizStats = JSON.parse(localStorage.getItem(LS_STATS) || '{}');
+let wordbook = (() => { try { return JSON.parse(localStorage.getItem(LS_KEY) || '[]'); } catch(e) { return []; } })();
+let searchHistory = (() => { try { return JSON.parse(localStorage.getItem(LS_HISTORY) || '{}'); } catch(e) { return {}; } })();
+let quizStats = (() => { try { return JSON.parse(localStorage.getItem(LS_STATS) || '{}'); } catch(e) { return {}; } })();
 
 function getUserId() {
   let id = localStorage.getItem(LS_USER_ID);
@@ -706,7 +706,7 @@ async function sbFetch(path, options = {}) {
 
 async function syncWordbookFromSupabase() {
   try {
-    const userId = getUserId();
+    const userId = encodeURIComponent(getUserId());
     const rows = await sbFetch(`/wordbook?user_id=eq.${userId}&order=added_at.desc`);
     if (!rows) return;
     wordbook = rows.map(r => ({ word: r.word, phonetic: r.phonetic, definitions: r.definitions, learned: r.learned, addedAt: new Date(r.added_at).getTime() }));
@@ -718,50 +718,48 @@ async function syncWordbookFromSupabase() {
       statRows.forEach(r => { quizStats[r.word.toLowerCase()] = { correct: r.correct, total: r.total }; });
       localStorage.setItem(LS_STATS, JSON.stringify(quizStats));
     }
-  } catch(e) { console.warn('Supabase sync error:', e); }
+  } catch(e) { }
 }
 
 async function saveWordbook() {
   localStorage.setItem(LS_KEY, JSON.stringify(wordbook));
   const { url } = getSupabaseConfig();
   if (!url) return;
-  const userId = getUserId();
+  const userId = encodeURIComponent(getUserId());
   for (const w of wordbook) {
     try {
       await sbFetch('/wordbook', {
         method: 'POST',
         headers: { 'Prefer': 'resolution=merge-duplicates' },
-        body: JSON.stringify({ user_id: userId, word: w.word, phonetic: w.phonetic || '', definitions: w.definitions || [], learned: w.learned, added_at: new Date(w.addedAt).toISOString() })
+        body: JSON.stringify({ user_id: getUserId(), word: w.word, phonetic: w.phonetic || '', definitions: w.definitions || [], learned: w.learned, added_at: new Date(w.addedAt).toISOString() })
       });
-    } catch(e) { console.warn('Supabase save error:', e); }
+    } catch(e) { }
   }
 }
 
 async function deleteWordFromSupabase(word) {
   const { url } = getSupabaseConfig();
   if (!url) return;
-  const userId = getUserId();
-  try { await sbFetch(`/wordbook?user_id=eq.${userId}&word=eq.${encodeURIComponent(word)}`, { method: 'DELETE' }); } catch(e) { console.warn(e); }
+  const userId = encodeURIComponent(getUserId());
+  try { await sbFetch(`/wordbook?user_id=eq.${userId}&word=eq.${encodeURIComponent(word)}`, { method: 'DELETE' }); } catch(e) { }
 }
 
 async function saveSearchHistoryToSupabase(word) {
   const { url } = getSupabaseConfig();
   if (!url) return;
-  const userId = getUserId();
-  try { await sbFetch('/search_history', { method: 'POST', body: JSON.stringify({ user_id: userId, word: word, searched_at: new Date().toISOString() }) }); } catch(e) { console.warn(e); }
+  try { await sbFetch('/search_history', { method: 'POST', body: JSON.stringify({ user_id: getUserId(), word: word, searched_at: new Date().toISOString() }) }); } catch(e) { }
 }
 
 async function saveQuizStatToSupabase(word, correct, total) {
   const { url } = getSupabaseConfig();
   if (!url) return;
-  const userId = getUserId();
   try {
     await sbFetch('/quiz_stats', {
       method: 'POST',
       headers: { 'Prefer': 'resolution=merge-duplicates' },
-      body: JSON.stringify({ user_id: userId, word: word, correct, total })
+      body: JSON.stringify({ user_id: getUserId(), word: word, correct, total })
     });
-  } catch(e) { console.warn(e); }
+  } catch(e) { }
 }
 
 async function saveSupabaseConfig() {
@@ -772,6 +770,12 @@ async function saveSupabaseConfig() {
 
   if (!url.match(/^https:\/\/[a-zA-Z0-9\-]+\.supabase\.co$/)) {
     document.getElementById('sb-error').textContent = 'エラー: URLはhttps://xxxx.supabase.coの形式で入力してください。';
+    document.getElementById('sb-error').style.display = 'block';
+    return;
+  }
+
+  if (userIdInput && !userIdInput.match(/^[a-zA-Z0-9_\-]{4,64}$/)) {
+    document.getElementById('sb-error').textContent = 'エラー: ユーザーIDは英数字・アンダースコア・ハイフンのみ、4〜64文字で入力してください。';
     document.getElementById('sb-error').style.display = 'block';
     return;
   }
@@ -823,7 +827,7 @@ function showSbUsagePanel() {
 async function fetchSbUsage() {
   const { url } = getSupabaseConfig();
   if (!url) return;
-  const userId = getUserId();
+  const userId = encodeURIComponent(getUserId());
   const errEl = document.getElementById('sb-usage-error');
   errEl.style.display = 'none';
   document.getElementById('sb-count-wordbook').textContent = '…';
@@ -849,7 +853,7 @@ async function fetchSbUsage() {
 async function resetAllDbData() {
   if (!confirm('Supabase上の全データ（単語帳・検索履歴・クイズ統計）とこの端末のデータをすべて削除します。よろしいですか？')) return;
   const { url } = getSupabaseConfig();
-  const userId = getUserId();
+  const userId = encodeURIComponent(getUserId());
   try {
     if (url) {
       await Promise.all([
@@ -1258,8 +1262,8 @@ function renderWordbook() {
     row.innerHTML = `
       <div style="flex:1;min-width:0;">
         <div style="display:flex;align-items:center;gap:8px;">
-          <span class="wl-word">${w.word}</span>
-          <span class="wl-meaning">${getPrimaryMeaning(w)}</span>
+          <span class="wl-word">${sanitize(w.word)}</span>
+          <span class="wl-meaning">${sanitize(getPrimaryMeaning(w))}</span>
         </div>
         ${histHtml}
       </div>
@@ -1369,8 +1373,8 @@ async function clearWordbook() {
   if (!confirm('単語帳をすべて削除しますか？')) return;
   const { url } = getSupabaseConfig();
   if (url) {
-    const userId = getUserId();
-    try { await sbFetch(`/wordbook?user_id=eq.${userId}`, { method: 'DELETE' }); } catch(e) { console.warn(e); }
+    const userId = encodeURIComponent(getUserId());
+    try { await sbFetch(`/wordbook?user_id=eq.${userId}`, { method: 'DELETE' }); } catch(e) { }
   }
   wordbook.forEach(w => { delete searchHistory[w.word.toLowerCase()]; });
   wordbook.length = 0;
