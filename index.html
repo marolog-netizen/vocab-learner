@@ -1432,8 +1432,8 @@ function renderQuiz() {
     </div>
     <div class="quiz-progress-wrap"><div class="quiz-progress-bar" style="width:${pct}%"></div></div>
     <div class="card quiz-card">
-      <div class="quiz-word">${q.word}</div>
-      <div class="quiz-phonetic">${q.phonetic || ''}</div>
+      <div class="quiz-word">${sanitize(q.word)}</div>
+      <div class="quiz-phonetic">${sanitize(q.phonetic || '')}</div>
       <div style="font-size:14px;color:var(--text-faint);margin-bottom:20px;">この単語の意味はどれ？</div>
       <div class="quiz-choices" id="quiz-choices-container"></div>
     </div>
