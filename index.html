@@ -662,6 +662,10 @@ function sanitize(str) {
     .replace(/'/g, '&#x27;');
 }
 
+function escapeRegex(str) {
+  return String(str || '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
 const LS_KEY = 'vocabApp_words';
 const LS_APIKEY = 'vocabApp_apikey';
 const LS_HISTORY = 'vocabApp_history';
@@ -708,14 +712,31 @@ async function syncWordbookFromSupabase() {
   try {
     const userId = encodeURIComponent(getUserId());
     const rows = await sbFetch(`/wordbook?user_id=eq.${userId}&order=added_at.desc`);
-    if (!rows) return;
-    wordbook = rows.map(r => ({ word: r.word, phonetic: r.phonetic, definitions: r.definitions, learned: r.learned, addedAt: new Date(r.added_at).getTime() }));
+    if (!Array.isArray(rows)) return;
+    wordbook = rows
+      .filter(r => r && typeof r.word === 'string' && r.word.length > 0 && r.word.length <= 100)
+      .map(r => ({
+        word: String(r.word),
+        phonetic: typeof r.phonetic === 'string' ? r.phonetic : '',
+        definitions: Array.isArray(r.definitions) ? r.definitions : [],
+        synonyms: Array.isArray(r.synonyms) ? r.synonyms : [],
+        era: typeof r.era === 'string' ? r.era : '',
+        learned: !!r.learned,
+        addedAt: r.added_at ? new Date(r.added_at).getTime() : Date.now()
+      }));
     localStorage.setItem(LS_KEY, JSON.stringify(wordbook));
 
     const statRows = await sbFetch(`/quiz_stats?user_id=eq.${userId}`);
-    if (statRows) {
+    if (Array.isArray(statRows)) {
       quizStats = Object.create(null);
-      statRows.forEach(r => { const key = safeKey(r.word); if (key) quizStats[key] = { correct: r.correct, total: r.total }; });
+      statRows.forEach(r => {
+        if (!r || typeof r.word !== 'string') return;
+        const key = safeKey(r.word);
+        if (key) quizStats[key] = {
+          correct: Number.isFinite(r.correct) ? r.correct : 0,
+          total: Number.isFinite(r.total) ? r.total : 0
+        };
+      });
       localStorage.setItem(LS_STATS, JSON.stringify(quizStats));
     }
   } catch(e) { }
@@ -1180,7 +1201,7 @@ function renderResult(d, count) {
     const sensesHtml = (group.senses || []).map((s, i) => {
       const examplesHtml = (s.examples || []).map(e => {
         const safeEn = sanitize(e.en);
-        const highlighted = safeEn.replace(new RegExp('\\b' + sanitize(d.word) + '\\b', 'gi'), m => `<em>${m}</em>`);
+        const highlighted = safeEn.replace(new RegExp('\\b' + escapeRegex(d.word) + '\\b', 'gi'), m => `<em>${m}</em>`);
         return `<div class="example-item">
           <div class="example-en">${highlighted}</div>
           <div class="example-ja">${sanitize(e.ja)}</div>
@@ -1295,7 +1316,7 @@ function renderWordbook() {
           detailHtml += `<div class="wl-detail-meaning">${sanitize(s.meaning)}</div>`;
           (s.examples || []).forEach(ex => {
             const safeEn = sanitize(ex.en);
-            const highlighted = safeEn.replace(new RegExp('\\b' + sanitize(w.word) + '\\b', 'gi'), m => `<em>${m}</em>`);
+            const highlighted = safeEn.replace(new RegExp('\\b' + escapeRegex(w.word) + '\\b', 'gi'), m => `<em>${m}</em>`);
             detailHtml += `<div class="wl-detail-example">${highlighted}<div class="wl-detail-example-ja">${sanitize(ex.ja)}</div></div>`;
           });
           detailHtml += `</div></div>`;
