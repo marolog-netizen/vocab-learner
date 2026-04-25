@@ -3,8 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; connect-src https://api.anthropic.com https://*.supabase.co; img-src 'self' data:; frame-ancestors 'none';">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; connect-src https://api.anthropic.com https://*.supabase.co; img-src 'self' data:; frame-ancestors 'none'; form-action 'none'; base-uri 'self';">
 <meta http-equiv="X-Content-Type-Options" content="nosniff">
+<meta http-equiv="Permissions-Policy" content="camera=(), microphone=(), geolocation=()">
 <meta name="referrer" content="no-referrer">
 <title>Vocab Learner</title>
 <style>
@@ -485,7 +486,7 @@
       <button class="btn-primary" data-goto="settings">設定へ →</button>
     </div>
     <div class="search-wrap">
-      <input type="text" id="search-input" placeholder="英単語を入力..." onkeydown="if(event.key==='Enter') doSearch()"/>
+      <input type="text" id="search-input" placeholder="英単語を入力..." maxlength="100" onkeydown="if(event.key==='Enter') doSearch()"/>
       <button class="btn-primary" id="search-btn">調べる</button>
     </div>
     <div id="search-error" class="error-msg" style="display:none;"></div>
@@ -557,7 +558,7 @@
     <div class="card">
       <div style="font-size:15px;font-weight:500;margin-bottom:6px;color:var(--text);">Anthropic APIキー</div>
       <p style="font-size:13px;color:var(--text-muted);line-height:1.7;margin-bottom:14px;">
-        <a href="https://console.anthropic.com/" target="_blank" style="color:var(--accent);">console.anthropic.com</a> でAPIキーを取得し、下に入力してください。キーはこのブラウザにのみ保存されます。
+        <a href="https://console.anthropic.com/" target="_blank" rel="noopener noreferrer" style="color:var(--accent);">console.anthropic.com</a> でAPIキーを取得し、下に入力してください。キーはこのブラウザにのみ保存されます。
       </p>
       <input type="password" id="apikey-input" placeholder="sk-ant-..." style="width:100%;padding:11px 13px;border:1px solid var(--border-strong);border-radius:var(--radius-sm);font-family:-apple-system,'Helvetica Neue',Arial,sans-serif;font-size:14px;margin-bottom:10px;background:var(--surface);color:var(--text);outline:none;"/>
       <button class="btn-primary" data-action="save-api">保存する</button>
@@ -614,7 +615,7 @@
           </div>
           <div id="sb-usage-error" style="display:none;font-size:12px;color:var(--red);margin-bottom:8px;"></div>
           <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
-            <a id="sb-dashboard-link" href="#" target="_blank" style="display:inline-flex;align-items:center;gap:6px;padding:8px 14px;background:var(--accent-light);border:1px solid rgba(42,92,170,0.25);border-radius:var(--radius-sm);font-size:13px;font-weight:500;color:var(--accent);text-decoration:none;">
+            <a id="sb-dashboard-link" href="#" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;gap:6px;padding:8px 14px;background:var(--accent-light);border:1px solid rgba(42,92,170,0.25);border-radius:var(--radius-sm);font-size:13px;font-weight:500;color:var(--accent);text-decoration:none;">
               <svg width="13" height="13" viewBox="0 0 14 14" fill="none"><path d="M2 7h10M7 2l5 5-5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
               ダッシュボードを開く
             </a>
@@ -634,11 +635,11 @@
         残高はAnthropicのコンソールで確認できます。残高が少なくなったらコンソールからクレジットを追加してください。
       </p>
       <div style="display:flex;gap:8px;flex-wrap:wrap;">
-        <a href="https://console.anthropic.com/settings/billing" target="_blank" style="display:inline-flex;align-items:center;gap:6px;padding:9px 14px;background:var(--accent-light);border:1px solid rgba(42,92,170,0.25);border-radius:var(--radius-sm);font-size:14px;font-weight:500;color:var(--accent);text-decoration:none;">
+        <a href="https://console.anthropic.com/settings/billing" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;gap:6px;padding:9px 14px;background:var(--accent-light);border:1px solid rgba(42,92,170,0.25);border-radius:var(--radius-sm);font-size:14px;font-weight:500;color:var(--accent);text-decoration:none;">
           <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="5.5" stroke="currentColor" stroke-width="1.3"/><path d="M7 4v3.5l2 1.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
           残高を確認する
         </a>
-        <a href="https://console.anthropic.com/settings/billing" target="_blank" style="display:inline-flex;align-items:center;gap:6px;padding:9px 14px;background:var(--green-light);border:1px solid rgba(26,122,74,0.25);border-radius:var(--radius-sm);font-size:14px;font-weight:500;color:var(--green);text-decoration:none;">
+        <a href="https://console.anthropic.com/settings/billing" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;gap:6px;padding:9px 14px;background:var(--green-light);border:1px solid rgba(26,122,74,0.25);border-radius:var(--radius-sm);font-size:14px;font-weight:500;color:var(--green);text-decoration:none;">
           <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 2v10M2 7h10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
           クレジットを追加する
         </a>
@@ -768,6 +769,12 @@ async function saveSupabaseConfig() {
   const key = document.getElementById('sb-key-input').value.trim();
   const userIdInput = document.getElementById('sb-userid-input').value.trim();
   if (!url || !key) return;
+
+  if (!url.match(/^https:\/\/[a-zA-Z0-9\-]+\.supabase\.co$/)) {
+    document.getElementById('sb-error').textContent = 'エラー: URLはhttps://xxxx.supabase.coの形式で入力してください。';
+    document.getElementById('sb-error').style.display = 'block';
+    return;
+  }
   if (userIdInput) localStorage.setItem(LS_USER_ID, userIdInput);
   document.getElementById('sb-status').textContent = '接続確認中...';
   document.getElementById('sb-saved').style.display = 'none';
@@ -805,7 +812,7 @@ function showSbUsagePanel() {
     document.getElementById('sb-usage-unconfigured').style.display = 'none';
     document.getElementById('sb-usage-configured').style.display = 'block';
     const dashLink = document.getElementById('sb-dashboard-link');
-    const projectRef = url.replace('https://', '').replace('.supabase.co', '');
+    const projectRef = url.replace('https://', '').replace('.supabase.co', '').replace(/[^a-zA-Z0-9\-]/g, '');
     dashLink.href = `https://supabase.com/dashboard/project/${projectRef}`;
   } else {
     document.getElementById('sb-usage-unconfigured').style.display = 'block';
