@@ -560,7 +560,7 @@
       <p style="font-size:13px;color:var(--text-muted);line-height:1.7;margin-bottom:14px;">
         <a href="https://console.anthropic.com/" target="_blank" rel="noopener noreferrer" style="color:var(--accent);">console.anthropic.com</a> でAPIキーを取得し、下に入力してください。キーはこのブラウザにのみ保存されます。
       </p>
-      <input type="password" id="apikey-input" placeholder="sk-ant-..." style="width:100%;padding:11px 13px;border:1px solid var(--border-strong);border-radius:var(--radius-sm);font-family:-apple-system,'Helvetica Neue',Arial,sans-serif;font-size:14px;margin-bottom:10px;background:var(--surface);color:var(--text);outline:none;"/>
+      <input type="password" id="apikey-input" placeholder="sk-ant-..." maxlength="256" style="width:100%;padding:11px 13px;border:1px solid var(--border-strong);border-radius:var(--radius-sm);font-family:-apple-system,'Helvetica Neue',Arial,sans-serif;font-size:14px;margin-bottom:10px;background:var(--surface);color:var(--text);outline:none;"/>
       <button class="btn-primary" data-action="save-api">保存する</button>
       <div id="key-saved" style="display:none;font-size:13px;color:var(--green);margin-top:8px;">✓ 保存しました</div>
     </div>
@@ -570,8 +570,8 @@
       <p style="font-size:13px;color:var(--text-muted);line-height:1.7;margin-bottom:14px;">
         SupabaseのProject URLとanon keyを入力すると、iPhoneとPC間で単語帳が同期されます。
       </p>
-      <input type="text" id="sb-url-input" placeholder="https://xxxx.supabase.co" style="width:100%;padding:11px 13px;border:1px solid var(--border-strong);border-radius:var(--radius-sm);font-family:-apple-system,'Helvetica Neue',Arial,sans-serif;font-size:13px;margin-bottom:8px;background:var(--surface);color:var(--text);outline:none;"/>
-      <input type="password" id="sb-key-input" placeholder="eyJ... (anon public key)" style="width:100%;padding:11px 13px;border:1px solid var(--border-strong);border-radius:var(--radius-sm);font-family:-apple-system,'Helvetica Neue',Arial,sans-serif;font-size:13px;margin-bottom:10px;background:var(--surface);color:var(--text);outline:none;"/>
+      <input type="text" id="sb-url-input" placeholder="https://xxxx.supabase.co" maxlength="100" style="width:100%;padding:11px 13px;border:1px solid var(--border-strong);border-radius:var(--radius-sm);font-family:-apple-system,'Helvetica Neue',Arial,sans-serif;font-size:13px;margin-bottom:8px;background:var(--surface);color:var(--text);outline:none;"/>
+      <input type="password" id="sb-key-input" placeholder="eyJ... (anon public key)" maxlength="512" style="width:100%;padding:11px 13px;border:1px solid var(--border-strong);border-radius:var(--radius-sm);font-family:-apple-system,'Helvetica Neue',Arial,sans-serif;font-size:13px;margin-bottom:10px;background:var(--surface);color:var(--text);outline:none;"/>
 
       <div style="margin-bottom:14px;padding:12px 14px;background:var(--amber-light);border:1px solid rgba(122,82,0,0.2);border-radius:var(--radius-sm);">
         <div style="font-size:12px;font-weight:500;color:var(--amber);margin-bottom:6px;">ユーザーID（全端末で同じIDを使用してください）</div>
@@ -671,8 +671,8 @@ const LS_SB_KEY = 'vocabApp_sbKey';
 const LS_USER_ID = 'vocabApp_userId';
 
 let wordbook = (() => { try { return JSON.parse(localStorage.getItem(LS_KEY) || '[]'); } catch(e) { return []; } })();
-let searchHistory = (() => { try { return JSON.parse(localStorage.getItem(LS_HISTORY) || '{}'); } catch(e) { return {}; } })();
-let quizStats = (() => { try { return JSON.parse(localStorage.getItem(LS_STATS) || '{}'); } catch(e) { return {}; } })();
+let searchHistory = (() => { try { const d = JSON.parse(localStorage.getItem(LS_HISTORY) || '{}'); return Object.assign(Object.create(null), d); } catch(e) { return Object.create(null); } })();
+let quizStats = (() => { try { const d = JSON.parse(localStorage.getItem(LS_STATS) || '{}'); return Object.assign(Object.create(null), d); } catch(e) { return Object.create(null); } })();
 
 function getUserId() {
   let id = localStorage.getItem(LS_USER_ID);
@@ -700,7 +700,7 @@ async function sbFetch(path, options = {}) {
     ...options,
     headers: { ...sbHeaders(), ...(options.headers || {}) }
   });
-  if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.message || `HTTP ${res.status}`); }
+  if (!res.ok) throw new Error(`データベース操作に失敗しました (HTTP ${res.status})`);
   return res.status === 204 ? null : res.json();
 }
 
@@ -714,8 +714,8 @@ async function syncWordbookFromSupabase() {
 
     const statRows = await sbFetch(`/quiz_stats?user_id=eq.${userId}`);
     if (statRows) {
-      quizStats = {};
-      statRows.forEach(r => { quizStats[r.word.toLowerCase()] = { correct: r.correct, total: r.total }; });
+      quizStats = Object.create(null);
+      statRows.forEach(r => { const key = safeKey(r.word); if (key) quizStats[key] = { correct: r.correct, total: r.total }; });
       localStorage.setItem(LS_STATS, JSON.stringify(quizStats));
     }
   } catch(e) { }
@@ -863,8 +863,8 @@ async function resetAllDbData() {
       ]);
     }
     wordbook.length = 0;
-    searchHistory = {};
-    quizStats = {};
+    searchHistory = Object.create(null);
+    quizStats = Object.create(null);
     localStorage.setItem(LS_KEY, JSON.stringify(wordbook));
     localStorage.setItem(LS_HISTORY, JSON.stringify(searchHistory));
     localStorage.setItem(LS_STATS, JSON.stringify(quizStats));
@@ -893,7 +893,8 @@ function updateSyncStatus() {
 }
 
 function getWordWeight(word) {
-  const s = quizStats[word.toLowerCase()];
+  const key = safeKey(word);
+  const s = key ? quizStats[key] : null;
   if (!s) return 10;
   const correct = s.correct || 0;
   const total = s.total || 0;
@@ -919,8 +920,16 @@ function weightedShuffle(arr) {
 let currentWord = null;
 let _isSearching = false;
 
-function recordSearch(word) {
+const SAFE_KEY_RE = /^[a-z0-9 '\-\.]+$/i;
+
+function safeKey(word) {
   const key = word.toLowerCase();
+  return SAFE_KEY_RE.test(key) && key !== '__proto__' && key !== 'constructor' && key !== 'prototype' ? key : null;
+}
+
+function recordSearch(word) {
+  const key = safeKey(word);
+  if (!key) return;
   if (!searchHistory[key]) searchHistory[key] = [];
   searchHistory[key].push(Date.now());
   localStorage.setItem(LS_HISTORY, JSON.stringify(searchHistory));
@@ -928,7 +937,8 @@ function recordSearch(word) {
 }
 
 function getSearchCount(word) {
-  return (searchHistory[word.toLowerCase()] || []).length;
+  const key = safeKey(word);
+  return key ? (searchHistory[key] || []).length : 0;
 }
 
 function formatDate(ts) {
@@ -1249,7 +1259,7 @@ function renderWordbook() {
   wordbook.forEach((w, i) => {
     const div = document.createElement('div');
     div.className = 'wl-item';
-    const key = w.word.toLowerCase();
+    const key = safeKey(w.word) || '';
     const hist = searchHistory[key] || [];
     const count = hist.length;
     const dates = hist.slice(-3).reverse().map(formatDate);
@@ -1362,8 +1372,8 @@ async function removeWord(idx) {
   wordbook.splice(idx, 1);
   await saveWordbook();
   await deleteWordFromSupabase(word);
-  const key = word.toLowerCase();
-  delete searchHistory[key];
+  const key = safeKey(word);
+  if (key) delete searchHistory[key];
   localStorage.setItem(LS_HISTORY, JSON.stringify(searchHistory));
   renderWordbook();
 }
@@ -1376,7 +1386,7 @@ async function clearWordbook() {
     const userId = encodeURIComponent(getUserId());
     try { await sbFetch(`/wordbook?user_id=eq.${userId}`, { method: 'DELETE' }); } catch(e) { }
   }
-  wordbook.forEach(w => { delete searchHistory[w.word.toLowerCase()]; });
+  wordbook.forEach(w => { const key = safeKey(w.word); if (key) delete searchHistory[key]; });
   wordbook.length = 0;
   localStorage.setItem(LS_KEY, JSON.stringify(wordbook));
   localStorage.setItem(LS_HISTORY, JSON.stringify(searchHistory));
@@ -1400,7 +1410,7 @@ function startQuiz() {
   const now = Date.now();
 
   const scored = wordbook.map(w => {
-    const key = w.word.toLowerCase();
+    const key = safeKey(w.word) || '';
     const s = quizStats[key] || { correct: 0, total: 0 };
     const mistakes = (s.total || 0) - (s.correct || 0);
     const hist = searchHistory[key] || [];
@@ -1476,12 +1486,14 @@ function answerQuiz(correct, wordStr, btn) {
   }
   const w = wordbook.find(x => x.word === wordStr);
   if (w) { w.learned = correct; saveWordbook(); }
-  const key = wordStr.toLowerCase();
-  if (!quizStats[key]) quizStats[key] = { correct: 0, total: 0 };
-  quizStats[key].total++;
-  if (correct) quizStats[key].correct++;
-  saveStats();
-  saveQuizStatToSupabase(wordStr, quizStats[key].correct, quizStats[key].total);
+  const key = safeKey(wordStr);
+  if (key) {
+    if (!quizStats[key]) quizStats[key] = { correct: 0, total: 0 };
+    quizStats[key].total++;
+    if (correct) quizStats[key].correct++;
+    saveStats();
+    saveQuizStatToSupabase(wordStr, quizStats[key].correct, quizStats[key].total);
+  }
   setTimeout(nextQuiz, 1300);
 }
 
