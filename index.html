@@ -2,503 +2,184 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; connect-src https://api.anthropic.com https://*.supabase.co; img-src 'self' data:; frame-ancestors 'none'; form-action 'none'; base-uri 'self';">
 <meta http-equiv="X-Content-Type-Options" content="nosniff">
 <meta http-equiv="Permissions-Policy" content="camera=(), microphone=(), geolocation=()">
 <meta name="referrer" content="no-referrer">
 <title>Vocab Learner</title>
 <style>
-  :root {
-    --bg: #f7f5f0;
-    --surface: #ffffff;
-    --border: rgba(0,0,0,0.1);
-    --border-strong: rgba(0,0,0,0.18);
-    --text: #1a1a18;
-    --text-muted: #6b6b66;
-    --text-faint: #a0a09a;
-    --accent: #2a5caa;
-    --accent-light: #e8eef9;
-    --green: #1a7a4a;
-    --green-light: #e6f4ec;
-    --red: #b03030;
-    --red-light: #faeaea;
-    --amber: #7a5200;
-    --amber-light: #fdf3dc;
-    --radius: 14px;
-    --radius-sm: 8px;
-    --shadow: 0 2px 8px rgba(0,0,0,0.06);
-  }
-
-  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-
-  body {
-    font-family: -apple-system, 'Helvetica Neue', Arial, sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    min-height: 100vh;
-    -webkit-text-size-adjust: 100%;
-  }
-
-  .app-shell {
-    max-width: 520px;
-    margin: 0 auto;
-    padding: 20px 16px 60px;
-  }
-
-  /* Header */
-  .app-header {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 28px;
-  }
-  .app-logo {
-    width: 36px; height: 36px;
-    background: var(--accent);
-    border-radius: 10px;
-    display: flex; align-items: center; justify-content: center;
-  }
-  .app-logo svg { width: 20px; height: 20px; }
-  .app-title {
-    font-family: Georgia, 'Times New Roman', serif;
-    font-size: 22px;
-    color: var(--text);
-    letter-spacing: -0.3px;
-  }
-  .api-status {
-    margin-left: auto;
-    font-size: 12px;
-    padding: 4px 10px;
-    border-radius: 20px;
-    background: var(--green-light);
-    color: var(--green);
-    font-weight: 500;
-  }
-  .api-status.error { background: var(--red-light); color: var(--red); }
-
-  /* Tab bar */
-  .tab-bar {
-    display: flex;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 4px;
-    gap: 4px;
-    margin-bottom: 24px;
-    box-shadow: var(--shadow);
-  }
-  .tab {
-    flex: 1; padding: 9px 8px;
-    border: none; border-radius: 10px;
-    font-family: -apple-system, 'Helvetica Neue', Arial, sans-serif;
-    font-size: 14px; font-weight: 500;
-    cursor: pointer;
-    background: transparent;
-    color: var(--text-muted);
-    transition: all 0.15s;
-  }
-  .tab.active {
-    background: var(--accent);
-    color: #fff;
-  }
-
-  /* Pages */
-  .page { display: none; }
-  .page.active { display: block; }
-
-  /* Card */
-  .card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 20px;
-    margin-bottom: 14px;
-    box-shadow: var(--shadow);
-  }
-
-  /* Search */
-  .search-wrap {
-    display: flex; gap: 8px;
-    margin-bottom: 16px;
-  }
-  .search-wrap input {
-    flex: 1;
-    padding: 12px 14px;
-    border: 1px solid var(--border-strong);
-    border-radius: var(--radius-sm);
-    font-family: -apple-system, 'Helvetica Neue', Arial, sans-serif;
-    font-size: 16px;
-    background: var(--surface);
-    color: var(--text);
-    outline: none;
-    transition: border-color 0.15s;
-  }
-  .search-wrap input:focus { border-color: var(--accent); }
-  .search-wrap input::placeholder { color: var(--text-faint); }
-  .btn-primary {
-    padding: 12px 20px;
-    background: var(--accent);
-    color: #fff;
-    border: none;
-    border-radius: var(--radius-sm);
-    font-family: -apple-system, 'Helvetica Neue', Arial, sans-serif;
-    font-size: 15px; font-weight: 500;
-    cursor: pointer;
-    transition: opacity 0.15s;
-    white-space: nowrap;
-  }
-  .btn-primary:hover { opacity: 0.88; }
-  .btn-primary:disabled { opacity: 0.45; cursor: default; }
-
-  /* Result */
-  .word-header {
-    display: flex; align-items: baseline;
-    gap: 10px; flex-wrap: wrap;
-    margin-bottom: 6px;
-  }
-  .word-title {
-    font-family: Georgia, 'Times New Roman', serif;
-    font-size: 28px; color: var(--text);
-    letter-spacing: -0.4px;
-  }
-  .word-phonetic { font-size: 15px; color: var(--text-muted); }
-  .word-pos {
-    font-size: 12px; padding: 3px 9px;
-    background: var(--accent-light); color: var(--accent);
-    border-radius: 20px; font-weight: 500;
-  }
-  .section-label {
-    font-size: 11px; font-weight: 500;
-    color: var(--text-faint);
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    margin: 14px 0 6px;
-  }
-  .meaning-text { font-size: 16px; color: var(--text); line-height: 1.6; }
-  .pos-group { margin-top: 14px; }
-  .pos-group:first-child { margin-top: 8px; }
-  .pos-label {
-    display: inline-block;
-    font-size: 11px; font-weight: 500;
-    padding: 2px 8px;
-    background: var(--accent-light); color: var(--accent);
-    border-radius: 20px;
-    margin-bottom: 10px;
-    letter-spacing: 0.02em;
-  }
-  .def-item {
-    display: flex; gap: 10px;
-    margin-bottom: 12px;
-  }
-  .def-item:last-child { margin-bottom: 0; }
-  .def-num {
-    font-size: 12px; font-weight: 500;
-    color: var(--accent);
-    min-width: 18px; padding-top: 2px;
-  }
-  .def-body { flex: 1; }
-  .def-meaning { font-size: 15px; color: var(--text); line-height: 1.6; margin-bottom: 6px; }
-  .example-item {
-    padding: 9px 12px;
-    background: var(--bg);
-    border-radius: var(--radius-sm);
-    margin-top: 5px;
-    border-left: 3px solid var(--accent);
-  }
-  .example-en { font-size: 14px; color: var(--text); line-height: 1.6; }
-  .example-en em { color: var(--accent); font-style: normal; font-weight: 500; }
-  .example-ja { font-size: 13px; color: var(--text-muted); margin-top: 2px; }
-
-  .spell-suggest {
-    background: var(--amber-light);
-    border: 1px solid rgba(122,82,0,0.2);
-    border-radius: var(--radius);
-    padding: 14px 16px;
-    margin-bottom: 14px;
-  }
-  .spell-suggest-label {
-    font-size: 13px; color: var(--amber);
-    margin-bottom: 10px; line-height: 1.5;
-  }
-  .spell-candidates {
-    display: flex; flex-wrap: wrap; gap: 8px;
-  }
-  .spell-candidate {
-    padding: 7px 16px;
-    border: 1px solid rgba(122,82,0,0.3);
-    border-radius: 20px;
-    font-family: -apple-system, 'Helvetica Neue', Arial, sans-serif;
-    font-size: 14px; font-weight: 500;
-    cursor: pointer;
-    background: var(--surface); color: var(--amber);
-    transition: background 0.12s;
-  }
-  .spell-candidate:hover { background: rgba(122,82,0,0.08); }
-
-  .synonym-tag {
-    display: inline-block;
-    font-size: 13px; padding: 3px 10px;
-    background: var(--bg); border: 1px solid var(--border-strong);
-    border-radius: 20px; color: var(--text-muted);
-    margin: 3px 4px 3px 0;
-    transition: background 0.12s, color 0.12s;
-  }
-  .synonym-tag:hover { background: var(--accent-light); color: var(--accent); border-color: var(--accent); }
-  .era-text {
-    font-size: 14px; color: var(--text); line-height: 1.6;
-    padding: 8px 12px;
-    background: var(--bg); border-radius: var(--radius-sm);
-    border-left: 3px solid var(--amber);
-  }
-
-  .badge-en2ja { background: var(--accent-light); color: var(--accent); }
-  .badge-ja2en { background: #fce8d4; color: #8a4a00; }
-
-  .search-count-badge {
-    font-size: 12px; font-weight: 500;
-    padding: 4px 10px;
-    background: var(--accent-light); color: var(--accent);
-    border-radius: 20px;
-    white-space: nowrap;
-  }
-  .search-count-badge.repeat { background: var(--amber-light); color: var(--amber); }
-
-  .wl-history {
-    font-size: 12px; color: var(--text-faint);
-    margin-top: 3px; line-height: 1.5;
-  }
-  .wl-history span { color: var(--accent); font-weight: 500; }
-
-  .action-row { display: flex; gap: 8px; margin-top: 16px; flex-wrap: wrap; }
-  .btn-sound {
-    display: flex; align-items: center; gap: 6px;
-    padding: 9px 14px;
-    background: var(--bg); border: 1px solid var(--border-strong);
-    border-radius: var(--radius-sm);
-    font-family: -apple-system, 'Helvetica Neue', Arial, sans-serif;
-    font-size: 14px; cursor: pointer;
-    color: var(--text);
-    transition: background 0.15s;
-  }
-  .btn-sound:hover { background: #eeece7; }
-  .btn-add {
-    display: flex; align-items: center; gap: 6px;
-    padding: 9px 14px;
-    background: var(--green-light); border: 1px solid rgba(26,122,74,0.25);
-    border-radius: var(--radius-sm);
-    font-family: -apple-system, 'Helvetica Neue', Arial, sans-serif;
-    font-size: 14px; font-weight: 500; cursor: pointer;
-    color: var(--green);
-    transition: opacity 0.15s;
-  }
-  .btn-add:disabled { opacity: 0.45; cursor: default; }
-
-  /* Settings */
-  .api-setup {
-    background: var(--amber-light);
-    border: 1px solid rgba(122,82,0,0.2);
-    border-radius: var(--radius);
-    padding: 16px 20px;
-    margin-bottom: 16px;
-  }
-  .api-setup p { font-size: 14px; color: var(--amber); line-height: 1.6; margin-bottom: 10px; }
-  .api-setup input {
-    width: 100%; padding: 10px 12px;
-    border: 1px solid rgba(122,82,0,0.3);
-    border-radius: var(--radius-sm);
-    font-family: -apple-system, 'Helvetica Neue', Arial, sans-serif;
-    font-size: 14px; background: #fff;
-    color: var(--text); outline: none;
-    margin-bottom: 8px;
-  }
-
-  /* Wordbook */
-  .wl-header {
-    display: flex; justify-content: space-between; align-items: center;
-    margin-bottom: 12px;
-  }
-  .wl-count { font-size: 14px; color: var(--text-muted); }
-  .btn-danger {
-    font-size: 13px; color: var(--red);
-    background: none; border: none; cursor: pointer;
-    font-family: -apple-system, 'Helvetica Neue', Arial, sans-serif;
-  }
-  .wl-item {
-    display: block;
-    padding: 12px 0;
-    border-bottom: 1px solid var(--border);
-  }
-  .wl-item:last-child { border-bottom: none; }
-  .wl-item-row {
-    display: flex; align-items: center; gap: 12px;
-    cursor: pointer;
-  }
-  .wl-word {
-    font-size: 15px; font-weight: 500; min-width: 120px;
-    color: var(--accent); text-decoration: underline;
-    text-decoration-color: rgba(42,92,170,0.3);
-    text-underline-offset: 3px;
-  }
-  .wl-meaning { font-size: 14px; color: var(--text-muted); flex: 1; }
-  .wl-detail {
-    display: none;
-    margin-top: 12px;
-    padding: 12px 14px;
-    background: var(--bg);
-    border-radius: var(--radius-sm);
-    border-left: 3px solid var(--accent);
-  }
-  .wl-detail.open { display: block; }
-  .wl-detail-word {
-    font-size: 20px; font-weight: 500; color: var(--text);
-    margin-bottom: 2px;
-  }
-  .wl-detail-phonetic { font-size: 13px; color: var(--text-muted); margin-bottom: 10px; }
-  .wl-detail-pos-group { margin-bottom: 10px; }
-  .wl-detail-pos-group:last-child { margin-bottom: 0; }
-  .wl-detail-pos {
-    display: inline-block; font-size: 11px; font-weight: 500;
-    padding: 1px 7px; background: var(--accent-light); color: var(--accent);
-    border-radius: 20px; margin-bottom: 6px;
-  }
-  .wl-detail-sense { margin-bottom: 8px; display: flex; gap: 8px; }
-  .wl-detail-sense:last-child { margin-bottom: 0; }
-  .wl-detail-num { font-size: 12px; font-weight: 500; color: var(--accent); min-width: 16px; padding-top: 2px; }
-  .wl-detail-meaning { font-size: 14px; color: var(--text); line-height: 1.5; }
-  .wl-detail-example {
-    font-size: 13px; color: var(--text-muted); line-height: 1.5;
-    padding: 6px 10px; background: var(--surface);
-    border-radius: var(--radius-sm); margin-top: 4px;
-    border-left: 2px solid var(--accent);
-  }
-  .wl-detail-example em { color: var(--accent); font-style: normal; font-weight: 500; }
-  .wl-detail-example-ja { font-size: 12px; color: var(--text-faint); margin-top: 1px; }
-  .badge {
-    font-size: 11px; padding: 3px 9px;
-    border-radius: 20px; font-weight: 500; white-space: nowrap;
-  }
-  .badge-new { background: var(--amber-light); color: var(--amber); }
-  .badge-ok { background: var(--green-light); color: var(--green); }
-  .btn-remove {
-    background: none; border: none; cursor: pointer;
-    color: var(--text-faint); font-size: 18px; padding: 0 4px;
-    line-height: 1;
-  }
-  .btn-remove:hover { color: var(--red); }
-
-  /* Quiz */
-  .quiz-progress-wrap {
-    height: 4px; background: var(--border);
-    border-radius: 4px; margin-bottom: 20px; overflow: hidden;
-  }
-  .quiz-progress-bar {
-    height: 4px; background: var(--accent);
-    border-radius: 4px; transition: width 0.4s;
-  }
-  .quiz-meta {
-    display: flex; justify-content: space-between;
-    font-size: 13px; color: var(--text-muted);
-    margin-bottom: 8px;
-  }
-  .quiz-card { text-align: center; padding: 28px 20px; }
-  .quiz-word {
-    font-family: Georgia, 'Times New Roman', serif;
-    font-size: 36px; color: var(--text);
-    letter-spacing: -0.5px; margin-bottom: 6px;
-  }
-  .quiz-phonetic { font-size: 15px; color: var(--text-faint); margin-bottom: 24px; }
-  .quiz-choices { display: flex; flex-direction: column; gap: 8px; }
-  .quiz-choice {
-    padding: 13px 16px;
-    border: 1px solid var(--border-strong);
-    border-radius: var(--radius-sm);
-    font-family: -apple-system, 'Helvetica Neue', Arial, sans-serif;
-    font-size: 15px; cursor: pointer;
-    text-align: left; background: var(--surface);
-    color: var(--text);
-    transition: background 0.12s, border-color 0.12s;
-  }
-  .quiz-choice:hover:not(:disabled) { background: var(--bg); }
-  .quiz-choice.correct { border-color: var(--green); background: var(--green-light); color: var(--green); }
-  .quiz-choice.wrong { border-color: var(--red); background: var(--red-light); color: var(--red); }
-  .quiz-skip {
-    display: block; margin: 14px auto 0;
-    font-size: 13px; color: var(--text-faint);
-    background: none; border: none; cursor: pointer;
-    font-family: -apple-system, 'Helvetica Neue', Arial, sans-serif;
-  }
-  .quiz-result { text-align: center; padding: 32px 20px; }
-  .quiz-result .score { font-size: 52px; font-weight: 500; color: var(--accent); line-height: 1; }
-  .quiz-result .score-label { font-size: 15px; color: var(--text-muted); margin: 6px 0 24px; }
-
-  /* Misc */
-  .empty-state {
-    text-align: center; padding: 48px 16px;
-    font-size: 14px; color: var(--text-faint); line-height: 1.8;
-  }
-  .loading-state {
-    text-align: center; padding: 32px;
-    font-size: 14px; color: var(--text-muted);
-  }
-  .spinner {
-    display: inline-block; width: 18px; height: 18px;
-    border: 2px solid var(--border-strong);
-    border-top-color: var(--accent);
-    border-radius: 50%;
-    animation: spin 0.7s linear infinite;
-    vertical-align: middle; margin-right: 8px;
-  }
-  @keyframes spin { to { transform: rotate(360deg); } }
-  .error-msg {
-    padding: 12px 14px;
-    background: var(--red-light);
-    color: var(--red);
-    border-radius: var(--radius-sm);
-    font-size: 14px; margin-bottom: 12px;
-  }
+:root{
+  --bg:#f7f5f0;--surface:#fff;--text:#1a1a1a;--text-muted:#6b6963;--text-faint:#9b9890;
+  --border:#e8e4dc;--border-strong:#d8d3c8;--accent:#2a5caa;--accent-light:#e3edfa;
+  --green:#1a7a4a;--green-light:#dcefe2;--red:#b03030;--red-light:#f7e4e0;
+  --amber:#7a5200;--amber-light:#fce8d4;
+  --radius:16px;--radius-sm:10px;--shadow:0 1px 2px rgba(0,0,0,0.04);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:-apple-system,'Helvetica Neue',Arial,sans-serif;font-size:15px;line-height:1.6;min-height:100vh}
+.app-shell{max-width:540px;margin:0 auto;padding:16px}
+.app-header{display:flex;align-items:center;gap:10px;padding:6px 4px 16px}
+.app-logo{width:32px;height:32px;background:var(--accent);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.app-title{font-family:Georgia,'Times New Roman',serif;font-size:20px;color:var(--text);flex:1}
+.api-status{font-size:11px;padding:3px 9px;border-radius:20px;font-weight:500;background:var(--red-light);color:var(--red)}
+.api-status.ok{background:var(--green-light);color:var(--green)}
+.gear-wrap{position:relative}
+.gear-btn{background:none;border:none;cursor:pointer;padding:6px;display:flex;align-items:center;justify-content:center;color:var(--text-muted);border-radius:50%}
+.gear-btn:hover{background:var(--bg)}
+.gear-menu{display:none;position:absolute;top:calc(100% + 4px);right:0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);box-shadow:0 4px 16px rgba(0,0,0,.1);min-width:160px;z-index:100;overflow:hidden}
+.gear-menu.open{display:block}
+.gear-menu button{display:block;width:100%;padding:10px 14px;border:none;background:transparent;text-align:left;cursor:pointer;font-size:14px;color:var(--text);font-family:inherit}
+.gear-menu button:hover{background:var(--bg)}
+.gear-menu button+button{border-top:1px solid var(--border)}
+.tab-bar{display:flex;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:4px;gap:4px;margin-bottom:16px;box-shadow:var(--shadow)}
+.tab{flex:1;padding:10px 6px;border:none;border-radius:12px;font-family:inherit;font-size:14px;font-weight:500;cursor:pointer;background:transparent;color:var(--text-muted);transition:all .15s}
+.tab.active{background:var(--accent);color:#fff}
+.dir-toggle{display:flex;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:4px;gap:4px;margin-bottom:16px;box-shadow:var(--shadow)}
+.dir-toggle button{flex:1;padding:8px 6px;border:none;border-radius:10px;font-family:inherit;font-size:13px;font-weight:500;cursor:pointer;background:transparent;color:var(--text-muted);transition:all .15s}
+.dir-toggle button.active{background:var(--accent);color:#fff}
+.page{display:none}
+.page.active{display:block}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:16px;box-shadow:var(--shadow)}
+.search-wrap{display:flex;gap:8px;margin-bottom:8px}
+.search-wrap .input-wrap{flex:1;position:relative;display:flex}
+.search-wrap input{width:100%;padding:12px 36px 12px 14px;border:1px solid var(--border-strong);border-radius:var(--radius-sm);font-family:inherit;font-size:15px;background:var(--surface);color:var(--text);outline:none}
+.search-wrap input:focus{border-color:var(--accent)}
+.search-clear{display:none;position:absolute;right:8px;top:50%;transform:translateY(-50%);width:22px;height:22px;border-radius:50%;border:none;background:var(--text-faint);color:#fff;cursor:pointer;padding:0;font-size:13px;line-height:1;align-items:center;justify-content:center}
+.search-clear.show{display:flex}
+.btn-primary{background:var(--accent);color:#fff;border:none;padding:11px 18px;border-radius:var(--radius-sm);font-family:inherit;font-size:14px;font-weight:500;cursor:pointer}
+.btn-primary:disabled{opacity:.5;cursor:not-allowed}
+.btn-danger{background:var(--red-light);color:var(--red);border:1px solid rgba(176,48,48,.25);padding:8px 14px;border-radius:var(--radius-sm);font-family:inherit;font-size:13px;font-weight:500;cursor:pointer}
+.btn-sound{background:var(--bg);color:var(--text);border:1px solid var(--border-strong);padding:7px 12px;border-radius:20px;font-family:inherit;font-size:13px;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+.btn-sound-mini{margin-left:6px;padding:3px 9px;font-size:12px;background:var(--bg);border:1px solid var(--border-strong);border-radius:20px;cursor:pointer;color:var(--text);vertical-align:middle;font-family:inherit}
+.btn-add{background:var(--accent-light);color:var(--accent);border:1px solid rgba(42,92,170,.25);padding:8px 14px;border-radius:var(--radius-sm);font-family:inherit;font-size:13px;font-weight:500;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+.btn-add:disabled{background:var(--green-light);color:var(--green);border-color:rgba(26,122,74,.25)}
+.error-msg{color:var(--red);font-size:13px;margin-top:8px}
+.spell-suggest{margin-top:12px;padding:12px;background:var(--amber-light);border-radius:var(--radius-sm);border:1px solid rgba(122,82,0,.2)}
+.spell-suggest-label{font-size:13px;color:var(--amber);margin-bottom:8px}
+.spell-candidates{display:flex;flex-wrap:wrap;gap:6px}
+.spell-candidate{background:#fff;border:1px solid rgba(122,82,0,.3);color:var(--text);padding:6px 12px;border-radius:20px;font-size:13px;cursor:pointer;font-family:inherit}
+.loading-state{display:flex;align-items:center;gap:8px;padding:14px;color:var(--text-muted);font-size:13px}
+.spinner{width:14px;height:14px;border:2px solid var(--border-strong);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;display:inline-block}
+@keyframes spin{to{transform:rotate(360deg)}}
+.word-header{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:0}
+.word-title{font-family:Georgia,'Times New Roman',serif;font-size:28px;color:var(--text)}
+.word-phonetic{font-size:14px;color:var(--text-muted)}
+.word-pos{font-size:12px;padding:2px 8px;background:var(--accent-light);color:var(--accent);border-radius:4px;font-weight:500}
+.search-count-badge{font-size:11px;padding:3px 8px;border-radius:20px;font-weight:500;background:var(--bg);color:var(--text-muted)}
+.search-count-badge.repeat{background:var(--green-light);color:var(--green)}
+.direction-badge{font-size:11px;padding:3px 8px;border-radius:20px;font-weight:500}
+.badge-en2ja{background:var(--accent-light);color:var(--accent)}
+.badge-ja2en{background:#fce8d4;color:#8a4a00}
+.pos-group{margin-top:14px;padding-top:14px;border-top:1px solid var(--border)}
+.pos-group:first-child{margin-top:0;padding-top:0;border-top:none}
+.pos-label{display:inline-block;font-size:12px;padding:2px 8px;background:var(--accent-light);color:var(--accent);border-radius:4px;font-weight:500;margin-bottom:8px}
+.def-item{display:flex;gap:8px;margin-top:10px}
+.def-item:first-of-type{margin-top:0}
+.def-num{color:var(--accent);font-weight:500;flex-shrink:0;min-width:18px}
+.def-body{flex:1}
+.def-meaning{font-size:15px;color:var(--text);margin-bottom:6px}
+.example-item{margin-top:6px;padding-left:0}
+.example-en{font-size:13px;color:var(--text);line-height:1.6}
+.example-en em{background:#fff3a8;font-style:normal;padding:0 2px;border-radius:2px}
+.example-ja{font-size:13px;color:var(--text-muted);margin-top:2px}
+.section-label{font-size:12px;color:var(--text-faint);font-weight:500;margin-top:14px;margin-bottom:8px}
+.synonym-tag{display:inline-block;font-size:13px;padding:4px 10px;background:var(--bg);border:1px solid var(--border-strong);border-radius:20px;color:var(--text);margin:0 4px 4px 0;cursor:pointer}
+.nuance-box{font-size:13px;color:var(--text-muted);line-height:1.7;margin-top:8px;padding:10px 12px;background:var(--bg);border-radius:var(--radius-sm);border-left:3px solid var(--accent)}
+.era-text{font-size:13px;color:var(--text-muted);line-height:1.6}
+.action-row{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}
+.empty-state{text-align:center;padding:32px 20px;color:var(--text-muted);font-size:14px;line-height:1.7}
+.wl-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;padding:0 4px}
+.wl-count{font-size:14px;color:var(--text-muted)}
+.wl-item{border-bottom:1px solid var(--border)}
+.wl-item:last-child{border-bottom:none}
+.wl-item-row{display:flex;align-items:center;gap:10px;padding:12px 0;cursor:pointer}
+.wl-word{font-size:15px;font-weight:500;color:var(--text);cursor:pointer}
+.wl-meaning{font-size:13px;color:var(--text-muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;min-width:0}
+.wl-history{font-size:11px;color:var(--text-faint);margin-top:2px}
+.wl-history span{color:var(--green);font-weight:500}
+.badge{font-size:11px;padding:2px 8px;border-radius:20px;font-weight:500;flex-shrink:0}
+.badge-ok{background:var(--green-light);color:var(--green)}
+.badge-new{background:var(--bg);color:var(--text-muted)}
+.btn-remove{background:transparent;border:none;color:var(--text-faint);cursor:pointer;padding:4px 8px;font-size:18px;line-height:1}
+.wl-detail{display:none;padding:0 4px 16px}
+.wl-detail.open{display:block}
+.wl-detail-word{font-family:Georgia,'Times New Roman',serif;font-size:20px;color:var(--text);margin-bottom:0}
+.wl-detail-phonetic{font-size:13px;color:var(--text-muted)}
+.wl-detail-pos-group{margin-top:10px;padding-top:10px;border-top:1px solid var(--border)}
+.wl-detail-pos-group:first-of-type{border-top:none;padding-top:0;margin-top:8px}
+.wl-detail-pos{display:inline-block;font-size:11px;padding:2px 7px;background:var(--accent-light);color:var(--accent);border-radius:4px;font-weight:500;margin-bottom:6px}
+.wl-detail-sense{display:flex;gap:6px;margin-top:6px}
+.wl-detail-num{color:var(--accent);font-weight:500;flex-shrink:0;min-width:16px;font-size:13px}
+.wl-detail-meaning{font-size:14px;color:var(--text);margin-bottom:4px}
+.wl-detail-example{font-size:12px;color:var(--text);margin-top:4px;line-height:1.5}
+.wl-detail-example em{background:#fff3a8;font-style:normal;padding:0 2px;border-radius:2px}
+.wl-detail-example-ja{color:var(--text-muted);font-size:12px}
+.quiz-meta{display:flex;justify-content:space-between;font-size:13px;color:var(--text-muted);margin-bottom:8px;padding:0 4px}
+.quiz-progress-wrap{height:4px;background:var(--border);border-radius:2px;overflow:hidden;margin-bottom:16px}
+.quiz-progress-bar{height:100%;background:var(--accent);transition:width .3s}
+.quiz-card{text-align:center;padding:32px 20px}
+.quiz-word{font-family:Georgia,'Times New Roman',serif;font-size:32px;color:var(--text);margin-bottom:6px}
+.quiz-phonetic{font-size:14px;color:var(--text-muted);margin-bottom:6px}
+.quiz-choices{display:flex;flex-direction:column;gap:10px;margin-top:8px}
+.quiz-choice{padding:14px 16px;border:1px solid var(--border-strong);border-radius:var(--radius-sm);background:var(--surface);font-family:inherit;font-size:14px;cursor:pointer;text-align:left;color:var(--text);transition:all .15s}
+.quiz-choice:hover:not(:disabled){border-color:var(--accent);background:var(--accent-light)}
+.quiz-choice.correct{background:var(--green-light);border-color:var(--green);color:var(--green)}
+.quiz-choice.wrong{background:var(--red-light);border-color:var(--red);color:var(--red)}
+.quiz-skip{margin-top:14px;background:transparent;border:none;color:var(--text-muted);font-size:13px;cursor:pointer;padding:8px;font-family:inherit}
+.quiz-result{text-align:center;padding:32px 20px}
+.quiz-result .score{font-family:Georgia,'Times New Roman',serif;font-size:48px;color:var(--accent);margin-bottom:6px}
+.quiz-result .score-label{color:var(--text-muted);margin-bottom:18px}
+.apikey-notice{padding:14px;background:var(--amber-light);border:1px solid rgba(122,82,0,.2);border-radius:var(--radius-sm);margin-bottom:16px;color:var(--amber);font-size:13px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.apikey-notice button{background:var(--accent);color:#fff;border:none;padding:7px 14px;border-radius:8px;font-family:inherit;font-size:12px;font-weight:500;cursor:pointer}
+input,textarea,button{font-family:inherit}
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1000;align-items:flex-start;justify-content:center;padding:20px;overflow-y:auto}
+.modal.open{display:flex}
+.modal-content{background:var(--surface);border-radius:var(--radius);max-width:480px;width:100%;padding:24px;margin:auto;box-shadow:0 10px 40px rgba(0,0,0,.2)}
+.modal-close{background:none;border:none;cursor:pointer;font-size:22px;color:var(--text-muted);padding:4px 8px;line-height:1}
+.usage-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:6px}
+.usage-cell{background:var(--bg);border-radius:var(--radius-sm);padding:10px;text-align:center}
+.usage-cell .label{font-size:11px;color:var(--text-faint);margin-bottom:4px}
+.usage-cell .num{font-size:20px;font-weight:500;color:var(--text)}
+.usage-cell .sub{font-size:10px;color:var(--text-faint);line-height:1.4}
+.link-btn{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:var(--radius-sm);font-size:13px;font-weight:500;text-decoration:none;cursor:pointer;font-family:inherit}
+.link-btn-accent{background:var(--accent-light);border:1px solid rgba(42,92,170,.25);color:var(--accent)}
+.link-btn-green{background:var(--green-light);border:1px solid rgba(26,122,74,.25);color:var(--green)}
+.link-btn-red{background:var(--red-light);border:1px solid rgba(176,48,48,.25);color:var(--red)}
+.refresh-btn{font-size:12px;padding:4px 10px;border-radius:20px;border:1px solid var(--border-strong);background:var(--bg);color:var(--text-muted);cursor:pointer;font-family:inherit}
+.text-input{width:100%;padding:11px 13px;border:1px solid var(--border-strong);border-radius:var(--radius-sm);font-family:inherit;font-size:13px;margin-bottom:8px;background:var(--surface);color:var(--text);outline:none}
 </style>
 </head>
 <body>
 <div class="app-shell">
-
-  <!-- Header -->
   <div class="app-header">
-    <div class="app-logo">
-      <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <rect x="3" y="3" width="14" height="14" rx="3" stroke="white" stroke-width="1.5"/>
-        <path d="M6 10h8M6 7h8M6 13h5" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
-      </svg>
-    </div>
+    <div class="app-logo"><svg viewBox="0 0 20 20" fill="none" width="20" height="20"><rect x="3" y="3" width="14" height="14" rx="3" stroke="#fff" stroke-width="1.5"/><path d="M6 10h8M6 7h8M6 13h5" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/></svg></div>
     <span class="app-title">Vocab Learner</span>
     <span class="api-status" id="api-status">APIキー未設定</span>
-    <div style="position:relative;">
-      <button id="gear-btn" aria-label="メニュー" style="background:none;border:none;cursor:pointer;padding:6px;display:flex;align-items:center;justify-content:center;color:var(--text-muted);border-radius:50%;">
-        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-          <path d="M10 13.5a3.5 3.5 0 100-7 3.5 3.5 0 000 7z" stroke="currentColor" stroke-width="1.4"/>
-          <path d="M16.5 10c0-.4 0-.8-.1-1.2l1.7-1.3-1.7-2.9-2 .8c-.6-.5-1.3-.9-2-1.2L12 2H8l-.4 2.2c-.7.3-1.4.7-2 1.2l-2-.8L1.9 7.5l1.7 1.3c-.1.4-.1.8-.1 1.2s0 .8.1 1.2L1.9 12.5l1.7 2.9 2-.8c.6.5 1.3.9 2 1.2L8 18h4l.4-2.2c.7-.3 1.4-.7 2-1.2l2 .8 1.7-2.9-1.7-1.3c.1-.4.1-.8.1-1.2z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>
-        </svg>
+    <div class="gear-wrap">
+      <button class="gear-btn" id="gear-btn" aria-label="メニュー">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 13.5a3.5 3.5 0 100-7 3.5 3.5 0 000 7z" stroke="currentColor" stroke-width="1.4"/><path d="M16.5 10c0-.4 0-.8-.1-1.2l1.7-1.3-1.7-2.9-2 .8c-.6-.5-1.3-.9-2-1.2L12 2H8l-.4 2.2c-.7.3-1.4.7-2 1.2l-2-.8L1.9 7.5l1.7 1.3c-.1.4-.1.8-.1 1.2s0 .8.1 1.2L1.9 12.5l1.7 2.9 2-.8c.6.5 1.3.9 2 1.2L8 18h4l.4-2.2c.7-.3 1.4-.7 2-1.2l2 .8 1.7-2.9-1.7-1.3c.1-.4.1-.8.1-1.2z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>
       </button>
-      <div id="gear-menu" style="display:none;position:absolute;top:calc(100% + 4px);right:0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);box-shadow:0 4px 16px rgba(0,0,0,0.1);min-width:160px;z-index:100;overflow:hidden;">
-        <button id="menu-settings" style="display:block;width:100%;padding:10px 14px;border:none;background:transparent;text-align:left;cursor:pointer;font-size:14px;color:var(--text);font-family:inherit;">設定</button>
-        <button id="menu-version" style="display:block;width:100%;padding:10px 14px;border:none;background:transparent;text-align:left;cursor:pointer;font-size:14px;color:var(--text);font-family:inherit;border-top:1px solid var(--border);">バージョン情報</button>
+      <div class="gear-menu" id="gear-menu">
+        <button data-menu="settings">設定</button>
+        <button data-menu="version">バージョン情報</button>
       </div>
     </div>
   </div>
 
-  <div id="version-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:1000;align-items:flex-start;justify-content:center;padding:20px;overflow-y:auto;">
-    <div style="background:var(--surface);border-radius:var(--radius);max-width:480px;width:100%;padding:24px;margin:auto;box-shadow:0 10px 40px rgba(0,0,0,0.2);">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+  <div class="modal" id="version-modal">
+    <div class="modal-content">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
         <div>
-          <div style="font-family:Georgia,'Times New Roman',serif;font-size:22px;color:var(--text);">Vocab Learner</div>
-          <div style="font-size:13px;color:var(--text-muted);margin-top:2px;">Version 1.0.0</div>
-          <div style="font-size:12px;color:var(--text-faint);margin-top:2px;">リリース: 2026-04-26 14:19 (JST)</div>
+          <div style="font-family:Georgia,'Times New Roman',serif;font-size:22px;color:var(--text)">Vocab Learner</div>
+          <div style="font-size:13px;color:var(--text-muted);margin-top:2px">Version 1.0.0</div>
+          <div style="font-size:12px;color:var(--text-faint);margin-top:2px">リリース: 2026-04-26 14:19 (JST)</div>
         </div>
-        <button id="version-close" aria-label="閉じる" style="background:none;border:none;cursor:pointer;font-size:22px;color:var(--text-muted);padding:4px 8px;line-height:1;">×</button>
+        <button class="modal-close" data-close-modal aria-label="閉じる">×</button>
       </div>
-      <div style="font-size:14px;color:var(--text);line-height:1.7;">
-        <div style="font-weight:500;margin-bottom:6px;color:var(--text);">🔍 検索機能</div>
-        <ul style="margin:0 0 14px 18px;color:var(--text-muted);font-size:13px;">
+      <div style="font-size:14px;line-height:1.7">
+        <div style="font-weight:500;margin-bottom:6px">🔍 検索機能</div>
+        <ul style="margin:0 0 14px 18px;color:var(--text-muted);font-size:13px">
           <li>英単語・日本語の自動判別検索</li>
           <li>スペルミス候補の表示・選択</li>
           <li>複数の意味・品詞・例文（Cambridge Dictionary形式）</li>
@@ -509,30 +190,30 @@
           <li>単語帳キャッシュ利用でAPI節約</li>
           <li>検索窓クリアボタン</li>
         </ul>
-        <div style="font-weight:500;margin-bottom:6px;color:var(--text);">📚 単語帳機能</div>
-        <ul style="margin:0 0 14px 18px;color:var(--text-muted);font-size:13px;">
+        <div style="font-weight:500;margin-bottom:6px">📚 単語帳機能</div>
+        <ul style="margin:0 0 14px 18px;color:var(--text-muted);font-size:13px">
           <li>英→日 / 日→英のトグル切替</li>
           <li>単語タップで詳細展開（意味・例文・類語・発音）</li>
           <li>習得済み／未習得バッジ</li>
           <li>検索回数・最終検索日の表示</li>
           <li>削除時に検索履歴もリセット</li>
         </ul>
-        <div style="font-weight:500;margin-bottom:6px;color:var(--text);">🎯 テスト機能</div>
-        <ul style="margin:0 0 14px 18px;color:var(--text-muted);font-size:13px;">
+        <div style="font-weight:500;margin-bottom:6px">🎯 テスト機能</div>
+        <ul style="margin:0 0 14px 18px;color:var(--text-muted);font-size:13px">
           <li>英→日 / 日→英のトグル切替</li>
           <li>4択クイズ（最大10問）</li>
           <li>間違いが多い・古い単語を優先出題</li>
         </ul>
-        <div style="font-weight:500;margin-bottom:6px;color:var(--text);">⚙️ 設定・同期</div>
-        <ul style="margin:0 0 14px 18px;color:var(--text-muted);font-size:13px;">
+        <div style="font-weight:500;margin-bottom:6px">⚙️ 設定・同期</div>
+        <ul style="margin:0 0 14px 18px;color:var(--text-muted);font-size:13px">
           <li>Anthropic APIキー管理</li>
           <li>Supabaseによる端末間リアルタイム同期</li>
           <li>DB使用状況（方向別内訳付き）</li>
           <li>ローカルストレージ使用状況表示</li>
           <li>クレジット残高確認・追加リンク</li>
         </ul>
-        <div style="font-weight:500;margin-bottom:6px;color:var(--text);">🛡️ セキュリティ</div>
-        <ul style="margin:0 0 4px 18px;color:var(--text-muted);font-size:13px;">
+        <div style="font-weight:500;margin-bottom:6px">🛡️ セキュリティ</div>
+        <ul style="margin:0 0 4px 18px;color:var(--text-muted);font-size:13px">
           <li>XSS対策・正規表現エスケープ・プロトタイプ汚染防止</li>
           <li>CSP・ReDoS対策・URLバリデーション</li>
           <li>Supabase RLS・暗号学的乱数によるユーザーID生成</li>
@@ -541,776 +222,476 @@
     </div>
   </div>
 
-  <!-- Tab bar -->
   <div class="tab-bar">
     <button class="tab active" data-page="search">検索</button>
     <button class="tab" data-page="wordbook">単語帳</button>
     <button class="tab" data-page="quiz">テスト</button>
   </div>
 
-  <!-- 検索ページ -->
   <div id="page-search" class="page active">
-    <div id="apikey-notice" class="api-setup" style="display:none;">
-      <p>APIキーが設定されていません。「設定」タブからAnthropicのAPIキーを入力してください。</p>
-      <button class="btn-primary" data-goto="settings">設定へ →</button>
+    <div id="apikey-notice" class="apikey-notice" style="display:none">
+      <span>APIキーを設定してください</span>
+      <button data-goto="settings">設定へ →</button>
     </div>
-    <div class="search-wrap">
-      <div style="flex:1;position:relative;display:flex;">
-        <input type="text" id="search-input" placeholder="英単語または日本語を入力..." maxlength="100" style="width:100%;padding-right:36px;" onkeydown="if(event.key==='Enter') doSearch()"/>
-        <button id="search-clear-btn" type="button" aria-label="クリア" style="display:none;position:absolute;right:8px;top:50%;transform:translateY(-50%);width:22px;height:22px;border-radius:50%;border:none;background:var(--text-faint);color:#fff;cursor:pointer;padding:0;font-size:13px;line-height:1;display:none;align-items:center;justify-content:center;">×</button>
+    <div class="card">
+      <div class="search-wrap">
+        <div class="input-wrap">
+          <input type="text" id="search-input" placeholder="英単語または日本語を入力..." maxlength="100">
+          <button class="search-clear" id="search-clear" type="button" aria-label="クリア">×</button>
+        </div>
+        <button class="btn-primary" id="search-btn">調べる</button>
       </div>
-      <button class="btn-primary" id="search-btn">調べる</button>
+      <div id="search-error" class="error-msg" style="display:none"></div>
+      <div id="spell-suggest" class="spell-suggest" style="display:none">
+        <div class="spell-suggest-label" id="spell-suggest-label"></div>
+        <div class="spell-candidates" id="spell-candidates"></div>
+      </div>
+      <div id="search-loading" class="loading-state" style="display:none"><span class="spinner"></span><span id="loading-text">取得中...</span></div>
     </div>
-    <div id="search-error" class="error-msg" style="display:none;"></div>
-    <div id="spell-suggest" class="spell-suggest" style="display:none;">
-      <div class="spell-suggest-label" id="spell-suggest-label"></div>
-      <div class="spell-candidates" id="spell-candidates"></div>
-    </div>
-    <div id="search-loading" class="loading-state" style="display:none;">
-      <span class="spinner"></span>取得中...
-    </div>
-    <div id="result-area" style="display:none;">
-      <div class="card">
-        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px;flex-wrap:wrap;gap:6px;">
-          <div class="word-header" style="margin-bottom:0;flex:1;min-width:0;">
-            <span class="word-title" id="res-word"></span>
-            <span class="word-phonetic" id="res-phonetic"></span>
-            <span class="word-pos" id="res-pos"></span>
-          </div>
-          <div style="display:flex;gap:6px;flex-shrink:0;align-items:center;">
-            <span class="direction-badge" id="res-direction-badge" style="font-size:11px;padding:3px 8px;border-radius:20px;font-weight:500;"></span>
-            <span class="search-count-badge" id="res-search-count"></span>
-          </div>
+    <div class="card" id="result-area" style="display:none">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px;flex-wrap:wrap;gap:6px">
+        <div class="word-header" style="flex:1;min-width:0">
+          <span class="word-title" id="res-word"></span>
+          <span class="word-phonetic" id="res-phonetic"></span>
         </div>
-        <div id="res-definitions"></div>
-        <div id="res-meta" style="display:none;">
-          <div id="res-synonyms-wrap">
-            <div class="section-label">類語</div>
-            <div id="res-synonyms"></div>
-            <div id="res-synonyms-nuance" style="display:none;font-size:13px;color:var(--text-muted);line-height:1.7;margin-top:8px;padding:10px 12px;background:var(--bg);border-radius:var(--radius-sm);border-left:3px solid var(--accent);"></div>
-          </div>
-          <div id="res-era-wrap" style="margin-top:10px;">
-            <div class="section-label">使用年代</div>
-            <div id="res-era"></div>
-          </div>
+        <div style="display:flex;gap:6px;flex-shrink:0;align-items:center">
+          <span class="direction-badge" id="res-direction-badge"></span>
+          <span class="search-count-badge" id="res-search-count"></span>
         </div>
-        <div class="action-row">
-          <button class="btn-sound" data-action="speak">
-            <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
-              <path d="M3.5 5.5H1.5v4h2l3.5 3V2.5L3.5 5.5z" fill="currentColor"/>
-              <path d="M10 3C11.7 4.2 13 5.9 13 7.5S11.7 10.8 10 12M8 5C9.2 5.9 10 6.6 10 7.5S9.2 9.1 8 10" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
-            </svg>
-            発音を聞く
-          </button>
-          <button class="btn-add" id="add-btn" data-action="add">
-            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-              <path d="M7 2v10M2 7h10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
-            </svg>
-            単語帳に追加
-          </button>
+      </div>
+      <div id="res-definitions"></div>
+      <div id="res-meta" style="display:none">
+        <div id="res-synonyms-wrap">
+          <div class="section-label">類語</div>
+          <div id="res-synonyms"></div>
+          <div id="res-synonyms-nuance" class="nuance-box" style="display:none"></div>
         </div>
+        <div id="res-era-wrap" style="margin-top:10px">
+          <div class="section-label">使用年代</div>
+          <div id="res-era"></div>
+        </div>
+      </div>
+      <div class="action-row">
+        <button class="btn-sound" id="res-speak-btn">
+          <svg width="15" height="15" viewBox="0 0 15 15" fill="none"><path d="M3.5 5.5H1.5v4h2l3.5 3V2.5L3.5 5.5z" fill="currentColor"/><path d="M10 3C11.7 4.2 13 5.9 13 7.5S11.7 10.8 10 12M8 5C9.2 5.9 10 6.6 10 7.5S9.2 9.1 8 10" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+          発音を聞く
+        </button>
+        <button class="btn-add" id="add-btn">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 2v10M2 7h10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+          単語帳に追加
+        </button>
       </div>
     </div>
   </div>
 
-  <!-- 単語帳ページ -->
   <div id="page-wordbook" class="page">
-    <div class="dir-toggle" style="display:flex;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:4px;gap:4px;margin-bottom:16px;box-shadow:var(--shadow);">
-      <button class="dir-toggle-btn active" data-wl-dir="en2ja" style="flex:1;padding:8px 6px;border:none;border-radius:10px;font-family:inherit;font-size:13px;font-weight:500;cursor:pointer;background:var(--accent);color:#fff;">英 → 日</button>
-      <button class="dir-toggle-btn" data-wl-dir="ja2en" style="flex:1;padding:8px 6px;border:none;border-radius:10px;font-family:inherit;font-size:13px;font-weight:500;cursor:pointer;background:transparent;color:var(--text-muted);">日 → 英</button>
+    <div class="dir-toggle" id="wl-toggle">
+      <button data-wl-dir="en2ja" class="active">英 → 日</button>
+      <button data-wl-dir="ja2en">日 → 英</button>
     </div>
     <div class="wl-header">
       <span class="wl-count" id="wl-count">0 単語</span>
-      <button class="btn-danger" data-action="clear-wl">すべて削除</button>
+      <button class="btn-danger" id="wl-clear">すべて削除</button>
     </div>
     <div class="card" id="wordbook-list">
       <div class="empty-state">単語帳はまだ空です。<br>検索して単語を追加しましょう。</div>
     </div>
   </div>
 
-  <!-- テストページ -->
   <div id="page-quiz" class="page">
-    <div class="dir-toggle" style="display:flex;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:4px;gap:4px;margin-bottom:16px;box-shadow:var(--shadow);">
-      <button class="dir-toggle-btn active" data-quiz-dir="en2ja" style="flex:1;padding:8px 6px;border:none;border-radius:10px;font-family:inherit;font-size:13px;font-weight:500;cursor:pointer;background:var(--accent);color:#fff;">英 → 日</button>
-      <button class="dir-toggle-btn" data-quiz-dir="ja2en" style="flex:1;padding:8px 6px;border:none;border-radius:10px;font-family:inherit;font-size:13px;font-weight:500;cursor:pointer;background:transparent;color:var(--text-muted);">日 → 英</button>
+    <div class="dir-toggle" id="quiz-toggle">
+      <button data-quiz-dir="en2ja" class="active">英 → 日</button>
+      <button data-quiz-dir="ja2en">日 → 英</button>
     </div>
     <div id="quiz-area"></div>
   </div>
 
-  <!-- 設定ページ -->
   <div id="page-settings" class="page">
     <div class="card">
-      <div style="font-size:15px;font-weight:500;margin-bottom:6px;color:var(--text);">Anthropic APIキー</div>
-      <p style="font-size:13px;color:var(--text-muted);line-height:1.7;margin-bottom:14px;">
-        <a href="https://console.anthropic.com/" target="_blank" rel="noopener noreferrer" style="color:var(--accent);">console.anthropic.com</a> でAPIキーを取得し、下に入力してください。キーはこのブラウザにのみ保存されます。
+      <div style="font-size:15px;font-weight:500;margin-bottom:6px">Anthropic APIキー</div>
+      <p style="font-size:13px;color:var(--text-muted);line-height:1.7;margin:0 0 14px">
+        <a href="https://console.anthropic.com/" target="_blank" rel="noopener noreferrer" style="color:var(--accent)">console.anthropic.com</a> でAPIキーを取得し、下に入力してください。キーはこのブラウザにのみ保存されます。
       </p>
-      <input type="password" id="apikey-input" placeholder="sk-ant-..." maxlength="256" style="width:100%;padding:11px 13px;border:1px solid var(--border-strong);border-radius:var(--radius-sm);font-family:-apple-system,'Helvetica Neue',Arial,sans-serif;font-size:14px;margin-bottom:10px;background:var(--surface);color:var(--text);outline:none;"/>
-      <button class="btn-primary" data-action="save-api">保存する</button>
-      <div id="key-saved" style="display:none;font-size:13px;color:var(--green);margin-top:8px;">✓ 保存しました</div>
+      <input type="password" id="apikey-input" placeholder="sk-ant-..." maxlength="256" class="text-input" style="font-size:14px;margin-bottom:10px">
+      <button class="btn-primary" id="save-api-btn">保存する</button>
+      <div id="key-saved" style="display:none;font-size:13px;color:var(--green);margin-top:8px">✓ 保存しました</div>
     </div>
 
-    <div class="card" style="margin-top:4px;">
-      <div style="font-size:15px;font-weight:500;margin-bottom:6px;color:var(--text);">端末間同期（Supabase）</div>
-      <p style="font-size:13px;color:var(--text-muted);line-height:1.7;margin-bottom:14px;">
+    <div class="card">
+      <div style="font-size:15px;font-weight:500;margin-bottom:6px">端末間同期（Supabase）</div>
+      <p style="font-size:13px;color:var(--text-muted);line-height:1.7;margin:0 0 14px">
         SupabaseのProject URLとanon keyを入力すると、iPhoneとPC間で単語帳が同期されます。
       </p>
-      <input type="text" id="sb-url-input" placeholder="https://xxxx.supabase.co" maxlength="100" style="width:100%;padding:11px 13px;border:1px solid var(--border-strong);border-radius:var(--radius-sm);font-family:-apple-system,'Helvetica Neue',Arial,sans-serif;font-size:13px;margin-bottom:8px;background:var(--surface);color:var(--text);outline:none;"/>
-      <input type="password" id="sb-key-input" placeholder="eyJ... (anon public key)" maxlength="512" style="width:100%;padding:11px 13px;border:1px solid var(--border-strong);border-radius:var(--radius-sm);font-family:-apple-system,'Helvetica Neue',Arial,sans-serif;font-size:13px;margin-bottom:10px;background:var(--surface);color:var(--text);outline:none;"/>
-
-      <div style="margin-bottom:14px;padding:12px 14px;background:var(--amber-light);border:1px solid rgba(122,82,0,0.2);border-radius:var(--radius-sm);">
-        <div style="font-size:12px;font-weight:500;color:var(--amber);margin-bottom:6px;">ユーザーID（全端末で同じIDを使用してください）</div>
-        <div style="display:flex;gap:8px;align-items:center;">
-          <input type="text" id="sb-userid-input" placeholder="user_xxxxxxxx" maxlength="64" style="flex:1;padding:8px 10px;border:1px solid rgba(122,82,0,0.3);border-radius:var(--radius-sm);font-family:-apple-system,'Helvetica Neue',Arial,sans-serif;font-size:13px;background:#fff;color:var(--text);outline:none;"/>
-          <button id="sb-userid-copy-btn" style="padding:8px 12px;border-radius:var(--radius-sm);border:1px solid rgba(122,82,0,0.3);background:#fff;color:var(--amber);font-size:12px;cursor:pointer;white-space:nowrap;">コピー</button>
+      <input type="text" id="sb-url-input" placeholder="https://xxxx.supabase.co" maxlength="100" class="text-input">
+      <input type="password" id="sb-key-input" placeholder="eyJ... (anon public key)" maxlength="512" class="text-input" style="margin-bottom:10px">
+      <div style="margin-bottom:14px;padding:12px 14px;background:var(--amber-light);border:1px solid rgba(122,82,0,.2);border-radius:var(--radius-sm)">
+        <div style="font-size:12px;font-weight:500;color:var(--amber);margin-bottom:6px">ユーザーID（全端末で同じIDを使用）</div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <input type="text" id="sb-userid-input" placeholder="user_xxxxxxxx" maxlength="64" class="text-input" style="flex:1;margin-bottom:0;padding:8px 10px;background:#fff">
+          <button id="sb-userid-copy" class="refresh-btn" style="white-space:nowrap;background:#fff;color:var(--amber);border-color:rgba(122,82,0,.3)">コピー</button>
         </div>
-        <div style="font-size:12px;color:var(--amber);margin-top:6px;line-height:1.6;">このIDを他の端末の同欄に入力すると単語帳が共有されます。</div>
+        <div style="font-size:12px;color:var(--amber);margin-top:6px;line-height:1.6">このIDを他の端末の同欄に入力すると単語帳が共有されます。</div>
       </div>
-
-      <div style="display:flex;gap:8px;align-items:center;">
-        <button class="btn-primary" data-action="save-sb">保存して同期</button>
-        <span id="sb-status" style="font-size:13px;color:var(--text-muted);"></span>
+      <div style="display:flex;gap:8px;align-items:center">
+        <button class="btn-primary" id="save-sb-btn">保存して同期</button>
+        <span id="sb-status" style="font-size:13px;color:var(--text-muted)"></span>
       </div>
-      <div id="sb-saved" style="display:none;font-size:13px;color:var(--green);margin-top:8px;">✓ 接続しました</div>
-      <div id="sb-error" style="display:none;font-size:13px;color:var(--red);margin-top:8px;"></div>
+      <div id="sb-saved" style="display:none;font-size:13px;color:var(--green);margin-top:8px">✓ 接続しました</div>
+      <div id="sb-error" style="display:none;font-size:13px;color:var(--red);margin-top:8px"></div>
 
-      <div id="sb-usage-wrap" style="margin-top:16px;padding-top:14px;border-top:0.5px solid var(--border);">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
-          <span style="font-size:13px;font-weight:500;color:var(--text);">DB使用状況</span>
-          <button id="sb-refresh-btn" style="font-size:12px;padding:4px 10px;border-radius:20px;border:1px solid var(--border-strong);background:var(--bg);color:var(--text-muted);cursor:pointer;">更新</button>
+      <div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--border)">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+          <span style="font-size:13px;font-weight:500">DB使用状況</span>
+          <button id="sb-refresh-btn" class="refresh-btn">更新</button>
         </div>
-        <div id="sb-usage-unconfigured" style="font-size:13px;color:var(--text-faint);margin-bottom:10px;">Supabaseを設定すると使用状況が表示されます。</div>
-        <div id="sb-usage-configured" style="display:none;">
-          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:6px;">
-            <div style="background:var(--bg);border-radius:var(--radius-sm);padding:10px;text-align:center;">
-              <div style="font-size:11px;color:var(--text-faint);margin-bottom:4px;">単語帳</div>
-              <div id="sb-count-wordbook" style="font-size:20px;font-weight:500;color:var(--text);">-</div>
-              <div style="font-size:10px;color:var(--text-faint);line-height:1.4;">
-                <span style="color:var(--accent);">英→日</span>: <span id="sb-count-wordbook-en2ja">-</span><br>
-                <span style="color:#8a4a00;">日→英</span>: <span id="sb-count-wordbook-ja2en">-</span>
-              </div>
+        <div id="sb-usage-unconfigured" style="font-size:13px;color:var(--text-faint);margin-bottom:10px">Supabaseを設定すると使用状況が表示されます。</div>
+        <div id="sb-usage-configured" style="display:none">
+          <div class="usage-grid">
+            <div class="usage-cell">
+              <div class="label">単語帳</div>
+              <div class="num" id="sb-count-wordbook">-</div>
+              <div class="sub"><span style="color:var(--accent)">英→日</span>: <span id="sb-count-wordbook-en2ja">-</span><br><span style="color:#8a4a00">日→英</span>: <span id="sb-count-wordbook-ja2en">-</span></div>
             </div>
-            <div style="background:var(--bg);border-radius:var(--radius-sm);padding:10px;text-align:center;">
-              <div style="font-size:11px;color:var(--text-faint);margin-bottom:4px;">検索履歴</div>
-              <div id="sb-count-history" style="font-size:20px;font-weight:500;color:var(--text);">-</div>
-              <div style="font-size:10px;color:var(--text-faint);line-height:1.4;">
-                <span style="color:var(--accent);">英→日</span>: <span id="sb-count-history-en2ja">-</span><br>
-                <span style="color:#8a4a00;">日→英</span>: <span id="sb-count-history-ja2en">-</span>
-              </div>
+            <div class="usage-cell">
+              <div class="label">検索履歴</div>
+              <div class="num" id="sb-count-history">-</div>
+              <div class="sub"><span style="color:var(--accent)">英→日</span>: <span id="sb-count-history-en2ja">-</span><br><span style="color:#8a4a00">日→英</span>: <span id="sb-count-history-ja2en">-</span></div>
             </div>
-            <div style="background:var(--bg);border-radius:var(--radius-sm);padding:10px;text-align:center;">
-              <div style="font-size:11px;color:var(--text-faint);margin-bottom:4px;">クイズ統計</div>
-              <div id="sb-count-stats" style="font-size:20px;font-weight:500;color:var(--text);">-</div>
-              <div style="font-size:10px;color:var(--text-faint);line-height:1.4;">
-                <span style="color:var(--accent);">英→日</span>: <span id="sb-count-stats-en2ja">-</span><br>
-                <span style="color:#8a4a00;">日→英</span>: <span id="sb-count-stats-ja2en">-</span>
-              </div>
+            <div class="usage-cell">
+              <div class="label">クイズ統計</div>
+              <div class="num" id="sb-count-stats">-</div>
+              <div class="sub"><span style="color:var(--accent)">英→日</span>: <span id="sb-count-stats-en2ja">-</span><br><span style="color:#8a4a00">日→英</span>: <span id="sb-count-stats-ja2en">-</span></div>
             </div>
           </div>
-          <div style="font-size:11px;color:var(--text-faint);text-align:center;margin-bottom:12px;">大きい数字は合計件数</div>
-          <div id="sb-usage-error" style="display:none;font-size:12px;color:var(--red);margin-bottom:8px;"></div>
-          <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
-            <a id="sb-dashboard-link" href="#" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;gap:6px;padding:8px 14px;background:var(--accent-light);border:1px solid rgba(42,92,170,0.25);border-radius:var(--radius-sm);font-size:13px;font-weight:500;color:var(--accent);text-decoration:none;">
+          <div style="font-size:11px;color:var(--text-faint);text-align:center;margin-bottom:12px">大きい数字は合計件数</div>
+          <div id="sb-usage-error" style="display:none;font-size:12px;color:var(--red);margin-bottom:8px"></div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+            <a id="sb-dashboard-link" href="#" target="_blank" rel="noopener noreferrer" class="link-btn link-btn-accent">
               <svg width="13" height="13" viewBox="0 0 14 14" fill="none"><path d="M2 7h10M7 2l5 5-5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
               ダッシュボードを開く
             </a>
-            <button id="sb-reset-btn" style="display:inline-flex;align-items:center;gap:6px;padding:8px 14px;background:var(--red-light);border:1px solid rgba(176,48,48,0.25);border-radius:var(--radius-sm);font-size:13px;font-weight:500;color:var(--red);cursor:pointer;">
+            <button id="sb-reset-btn" class="link-btn link-btn-red">
               <svg width="13" height="13" viewBox="0 0 14 14" fill="none"><path d="M2 2l10 10M12 2L2 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
               DBデータを全リセット
             </button>
           </div>
-          <div id="sb-reset-msg" style="display:none;font-size:12px;color:var(--green);margin-top:8px;">✓ 全データをリセットしました</div>
+          <div id="sb-reset-msg" style="display:none;font-size:12px;color:var(--green);margin-top:8px">✓ 全データをリセットしました</div>
         </div>
       </div>
     </div>
 
-    <div class="card" style="margin-top:4px;">
-      <div style="font-size:15px;font-weight:500;margin-bottom:6px;color:var(--text);">Anthropic クレジット残高</div>
-      <p style="font-size:13px;color:var(--text-muted);line-height:1.7;margin-bottom:12px;">
+    <div class="card">
+      <div style="font-size:15px;font-weight:500;margin-bottom:6px">Anthropic クレジット残高</div>
+      <p style="font-size:13px;color:var(--text-muted);line-height:1.7;margin:0 0 12px">
         残高はAnthropicのコンソールで確認できます。残高が少なくなったらコンソールからクレジットを追加してください。
       </p>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;">
-        <a href="https://console.anthropic.com/settings/billing" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;gap:6px;padding:9px 14px;background:var(--accent-light);border:1px solid rgba(42,92,170,0.25);border-radius:var(--radius-sm);font-size:14px;font-weight:500;color:var(--accent);text-decoration:none;">
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <a href="https://console.anthropic.com/settings/billing" target="_blank" rel="noopener noreferrer" class="link-btn link-btn-accent" style="font-size:14px;padding:9px 14px">
           <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="5.5" stroke="currentColor" stroke-width="1.3"/><path d="M7 4v3.5l2 1.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
           残高を確認する
         </a>
-        <a href="https://console.anthropic.com/settings/billing" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;gap:6px;padding:9px 14px;background:var(--green-light);border:1px solid rgba(26,122,74,0.25);border-radius:var(--radius-sm);font-size:14px;font-weight:500;color:var(--green);text-decoration:none;">
+        <a href="https://console.anthropic.com/settings/billing" target="_blank" rel="noopener noreferrer" class="link-btn link-btn-green" style="font-size:14px;padding:9px 14px">
           <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 2v10M2 7h10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
           クレジットを追加する
         </a>
       </div>
     </div>
 
-    <div class="card" style="margin-top:4px;">
-      <div style="font-size:15px;font-weight:500;margin-bottom:10px;color:var(--text);">単語帳データ</div>
-      <button class="btn-danger" style="font-size:14px;padding:9px 14px;border:1px solid rgba(176,48,48,0.25);border-radius:var(--radius-sm);background:var(--red-light);" data-action="reset-wl">単語帳をリセット</button>
+    <div class="card">
+      <div style="font-size:15px;font-weight:500;margin-bottom:10px">単語帳データ</div>
+      <button class="btn-danger" id="reset-wl-btn">単語帳をリセット</button>
     </div>
 
-    <div class="card" style="margin-top:4px;">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
-        <span style="font-size:15px;font-weight:500;color:var(--text);">ローカルストレージ使用状況</span>
-        <button id="storage-refresh-btn" style="font-size:12px;padding:4px 10px;border-radius:20px;border:1px solid var(--border-strong);background:var(--bg);color:var(--text-muted);cursor:pointer;">更新</button>
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <span style="font-size:15px;font-weight:500">ローカルストレージ使用状況</span>
+        <button id="storage-refresh-btn" class="refresh-btn">更新</button>
       </div>
-      <p style="font-size:13px;color:var(--text-muted);line-height:1.7;margin-bottom:14px;">
+      <p style="font-size:13px;color:var(--text-muted);line-height:1.7;margin:0 0 14px">
         この端末のブラウザに保存されているデータの容量を表示します。容量が上限に近づいたら、古い単語の削除をご検討ください。
       </p>
-      <div style="background:var(--bg);border-radius:var(--radius-sm);padding:14px;margin-bottom:10px;">
-        <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px;">
-          <span style="font-size:13px;color:var(--text-muted);">使用量</span>
-          <span id="storage-usage-text" style="font-size:14px;font-weight:500;color:var(--text);">-</span>
+      <div style="background:var(--bg);border-radius:var(--radius-sm);padding:14px">
+        <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px">
+          <span style="font-size:13px;color:var(--text-muted)">使用量</span>
+          <span id="storage-usage-text" style="font-size:14px;font-weight:500">-</span>
         </div>
-        <div style="height:8px;background:var(--border);border-radius:4px;overflow:hidden;">
-          <div id="storage-usage-bar" style="height:100%;width:0%;background:var(--accent);transition:width 0.3s, background 0.3s;border-radius:4px;"></div>
+        <div style="height:8px;background:var(--border);border-radius:4px;overflow:hidden">
+          <div id="storage-usage-bar" style="height:100%;width:0%;background:var(--accent);transition:width .3s,background .3s;border-radius:4px"></div>
         </div>
-        <div id="storage-usage-status" style="font-size:12px;color:var(--text-faint);margin-top:8px;line-height:1.5;">読み込み中...</div>
+        <div id="storage-usage-status" style="font-size:12px;color:var(--text-faint);margin-top:8px;line-height:1.5">読み込み中...</div>
       </div>
     </div>
-
   </div>
-
 </div>
 
 <script>
-function sanitize(str) {
-  if (!str) return '';
-  return String(str)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#x27;');
+'use strict';
+
+// ===== Constants =====
+const LS = {
+  KEY:'vocabApp_words', KEY_JA:'vocabApp_words_ja',
+  HIST:'vocabApp_history', HIST_JA:'vocabApp_history_ja',
+  STATS:'vocabApp_quizStats', STATS_JA:'vocabApp_quizStats_ja',
+  APIKEY:'vocabApp_apikey', SB_URL:'vocabApp_sbUrl', SB_KEY:'vocabApp_sbKey',
+  USER_ID:'vocabApp_userId', WL_DIR:'vocabApp_wlDirection', QUIZ_DIR:'vocabApp_quizDirection'
+};
+const STORAGE_LIMIT = 4 * 1024 * 1024;
+const STORAGE_WARN = 0.8;
+const SAFE_KEY_RE = /^[a-z0-9 '\-\.ぁ-んァ-ヶー一-龯々]+$/i;
+const SB_URL_RE = /^https:\/\/[a-zA-Z0-9\-]+\.supabase\.co$/;
+const USER_ID_RE = /^[a-zA-Z0-9_\-]{4,64}$/;
+const JA_RE = /[ぁ-んァ-ヶー一-龯々]/;
+
+// ===== Helpers =====
+const $ = id => document.getElementById(id);
+const sanitize = s => !s ? '' : String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#x27;');
+const escapeRegex = s => String(s||'').replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+const isJapanese = t => JA_RE.test(t);
+const getDirection = t => isJapanese(t) ? 'ja2en' : 'en2ja';
+const safeKey = w => {
+  const k = String(w||'').toLowerCase();
+  return (SAFE_KEY_RE.test(k) && k!=='__proto__' && k!=='constructor' && k!=='prototype') ? k : null;
+};
+const parseJSON = (v, fallback) => { try { return JSON.parse(v); } catch(e) { return fallback; } };
+const toNullProto = obj => Object.assign(Object.create(null), obj || {});
+
+// ===== State =====
+const state = {
+  wb: parseJSON(localStorage.getItem(LS.KEY), []) || [],
+  wbJa: parseJSON(localStorage.getItem(LS.KEY_JA), []) || [],
+  hist: toNullProto(parseJSON(localStorage.getItem(LS.HIST), {})),
+  histJa: toNullProto(parseJSON(localStorage.getItem(LS.HIST_JA), {})),
+  stats: toNullProto(parseJSON(localStorage.getItem(LS.STATS), {})),
+  statsJa: toNullProto(parseJSON(localStorage.getItem(LS.STATS_JA), {})),
+  currentWord: null,
+  currentDir: 'en2ja',
+  searching: false,
+  quotaShown: false,
+  quizWords: [], quizIdx: 0, quizScore: 0
+};
+
+const wb = dir => dir === 'ja2en' ? state.wbJa : state.wb;
+const hist = dir => dir === 'ja2en' ? state.histJa : state.hist;
+const stats = dir => dir === 'ja2en' ? state.statsJa : state.stats;
+const wlDir = () => localStorage.getItem(LS.WL_DIR) || 'en2ja';
+const quizDir = () => localStorage.getItem(LS.QUIZ_DIR) || 'en2ja';
+
+// ===== Storage =====
+function safeSet(key, val) {
+  try { localStorage.setItem(key, val); updateStorage(); return true; }
+  catch(e) {
+    if (e.name === 'QuotaExceededError' || e.code === 22 || e.code === 1014) {
+      if (!state.quotaShown) {
+        state.quotaShown = true;
+        alert('ストレージ容量が上限に達しました。古い単語を削除してから再度お試しください。');
+        setTimeout(() => state.quotaShown = false, 5000);
+      }
+      return false;
+    }
+    throw e;
+  }
 }
-
-function escapeRegex(str) {
-  return String(str || '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-}
-
-const STORAGE_QUOTA_LIMIT = 4 * 1024 * 1024; // 4MB（5MBブラウザの安全マージン）
-const STORAGE_WARN_THRESHOLD = 0.8; // 80%超過で警告
-let _quotaWarningShown = false;
-
-function getStorageUsage() {
+function getUsage() {
   let total = 0;
   try {
     for (let i = 0; i < localStorage.length; i++) {
       const k = localStorage.key(i);
       if (k && k.startsWith('vocabApp_')) {
         const v = localStorage.getItem(k);
-        total += (k.length + (v ? v.length : 0)) * 2; // UTF-16なので×2
+        total += (k.length + (v ? v.length : 0)) * 2;
       }
     }
   } catch(e) {}
   return total;
 }
-
-function safeSetItem(key, value) {
-  try {
-    localStorage.setItem(key, value);
-    updateStorageDisplay();
-    return true;
-  } catch(e) {
-    if (e.name === 'QuotaExceededError' || e.code === 22 || e.code === 1014) {
-      showStorageError();
-      return false;
-    }
-    throw e;
-  }
+function fmtBytes(b) {
+  if (b < 1024) return b + ' B';
+  if (b < 1024*1024) return (b/1024).toFixed(1) + ' KB';
+  return (b/1024/1024).toFixed(2) + ' MB';
 }
-
-function formatBytes(bytes) {
-  if (bytes < 1024) return bytes + ' B';
-  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
-  return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
-}
-
-function updateStorageDisplay() {
-  const usage = getStorageUsage();
-  const ratio = usage / STORAGE_QUOTA_LIMIT;
-  const pct = Math.min(100, Math.round(ratio * 100));
-  const bar = document.getElementById('storage-usage-bar');
-  const text = document.getElementById('storage-usage-text');
-  const status = document.getElementById('storage-usage-status');
-  if (!bar || !text || !status) return;
-  text.textContent = `${formatBytes(usage)} / ${formatBytes(STORAGE_QUOTA_LIMIT)} (${pct}%)`;
-  bar.style.width = pct + '%';
-  if (ratio >= 1) {
+function updateStorage() {
+  const u = getUsage(), r = u/STORAGE_LIMIT, p = Math.min(100, Math.round(r*100));
+  const bar = $('storage-usage-bar'), txt = $('storage-usage-text'), st = $('storage-usage-status');
+  if (!bar || !txt || !st) return;
+  txt.textContent = `${fmtBytes(u)} / ${fmtBytes(STORAGE_LIMIT)} (${p}%)`;
+  bar.style.width = p + '%';
+  if (r >= 1) {
     bar.style.background = 'var(--red)';
-    status.textContent = '⚠️ 容量が上限に達しました。古い単語を削除してください。';
-    status.style.color = 'var(--red)';
-  } else if (ratio >= STORAGE_WARN_THRESHOLD) {
+    st.textContent = '⚠️ 容量が上限に達しました。古い単語を削除してください。';
+    st.style.color = 'var(--red)';
+  } else if (r >= STORAGE_WARN) {
     bar.style.background = 'var(--amber)';
-    status.textContent = `⚠️ 使用量が ${pct}% に達しています。古い単語の削除をご検討ください。`;
-    status.style.color = 'var(--amber)';
+    st.textContent = `⚠️ 使用量が ${p}% に達しています。古い単語の削除をご検討ください。`;
+    st.style.color = 'var(--amber)';
   } else {
     bar.style.background = 'var(--accent)';
-    status.textContent = `余裕があります（残り約 ${formatBytes(STORAGE_QUOTA_LIMIT - usage)}）`;
-    status.style.color = 'var(--text-faint)';
+    st.textContent = `余裕があります（残り約 ${fmtBytes(STORAGE_LIMIT - u)}）`;
+    st.style.color = 'var(--text-faint)';
   }
 }
 
-function showStorageError() {
-  if (_quotaWarningShown) return;
-  _quotaWarningShown = true;
-  alert('ストレージ容量が上限に達しました。古い単語を削除してから再度お試しください。');
-  setTimeout(() => { _quotaWarningShown = false; }, 5000);
-}
-
-const LS_KEY = 'vocabApp_words';
-const LS_KEY_JA = 'vocabApp_words_ja';
-const LS_APIKEY = 'vocabApp_apikey';
-const LS_HISTORY = 'vocabApp_history';
-const LS_HISTORY_JA = 'vocabApp_history_ja';
-const LS_STATS = 'vocabApp_quizStats';
-const LS_STATS_JA = 'vocabApp_quizStats_ja';
-const LS_SB_URL = 'vocabApp_sbUrl';
-const LS_SB_KEY = 'vocabApp_sbKey';
-const LS_USER_ID = 'vocabApp_userId';
-const LS_WL_DIR = 'vocabApp_wlDirection';
-const LS_QUIZ_DIR = 'vocabApp_quizDirection';
-
-let wordbook = (() => { try { return JSON.parse(localStorage.getItem(LS_KEY) || '[]'); } catch(e) { return []; } })();
-let wordbookJa = (() => { try { return JSON.parse(localStorage.getItem(LS_KEY_JA) || '[]'); } catch(e) { return []; } })();
-let searchHistory = (() => { try { const d = JSON.parse(localStorage.getItem(LS_HISTORY) || '{}'); return Object.assign(Object.create(null), d); } catch(e) { return Object.create(null); } })();
-let searchHistoryJa = (() => { try { const d = JSON.parse(localStorage.getItem(LS_HISTORY_JA) || '{}'); return Object.assign(Object.create(null), d); } catch(e) { return Object.create(null); } })();
-let quizStats = (() => { try { const d = JSON.parse(localStorage.getItem(LS_STATS) || '{}'); return Object.assign(Object.create(null), d); } catch(e) { return Object.create(null); } })();
-let quizStatsJa = (() => { try { const d = JSON.parse(localStorage.getItem(LS_STATS_JA) || '{}'); return Object.assign(Object.create(null), d); } catch(e) { return Object.create(null); } })();
-
-function isJapanese(text) {
-  return /[ぁ-んァ-ヶー一-龯々]/.test(text);
-}
-
-function getDirection(text) {
-  return isJapanese(text) ? 'ja2en' : 'en2ja';
-}
-
+// ===== User & Config =====
 function getUserId() {
-  let id = localStorage.getItem(LS_USER_ID);
+  let id = localStorage.getItem(LS.USER_ID);
   if (!id) {
-    id = 'user_' + (crypto.randomUUID ? crypto.randomUUID().replace(/-/g, '').slice(0, 16) : Math.random().toString(36).slice(2, 10) + Math.random().toString(36).slice(2, 10));
-    localStorage.setItem(LS_USER_ID, id);
+    id = 'user_' + (crypto.randomUUID ? crypto.randomUUID().replace(/-/g,'').slice(0,16) : Math.random().toString(36).slice(2,10) + Math.random().toString(36).slice(2,10));
+    localStorage.setItem(LS.USER_ID, id);
   }
   return id;
 }
+const getApiKey = () => localStorage.getItem(LS.APIKEY) || '';
+const getSbConfig = () => ({ url: localStorage.getItem(LS.SB_URL) || '', key: localStorage.getItem(LS.SB_KEY) || '' });
 
-function getSupabaseConfig() {
-  return { url: localStorage.getItem(LS_SB_URL) || '', key: localStorage.getItem(LS_SB_KEY) || '' };
+// ===== Search History =====
+function recordSearch(word, dir) {
+  dir = dir || getDirection(word);
+  const k = safeKey(word);
+  if (!k) return;
+  const h = hist(dir);
+  if (!h[k]) h[k] = [];
+  const now = Date.now();
+  if (h[k].length > 0 && now - h[k][h[k].length-1] < 2000) return;
+  h[k].push(now);
+  safeSet(dir === 'ja2en' ? LS.HIST_JA : LS.HIST, JSON.stringify(h));
+  saveHistorySb(word, dir);
 }
+function getSearchCount(word, dir) {
+  dir = dir || getDirection(word);
+  const k = safeKey(word);
+  if (!k) return 0;
+  return (hist(dir)[k] || []).length;
+}
+const formatDate = ts => {
+  const d = new Date(ts);
+  return `${d.getFullYear()}/${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')}`;
+};
 
+// ===== Supabase =====
 function sbHeaders() {
-  const { key } = getSupabaseConfig();
-  return { 'Content-Type': 'application/json', 'apikey': key, 'Authorization': `Bearer ${key}` };
+  const { key } = getSbConfig();
+  return { 'Content-Type': 'application/json', apikey: key, Authorization: `Bearer ${key}` };
 }
-
-async function sbFetch(path, options = {}) {
-  const { url } = getSupabaseConfig();
+async function sbFetch(path, opts = {}) {
+  const { url } = getSbConfig();
   if (!url) return null;
-  const res = await fetch(`${url}/rest/v1${path}`, {
-    mode: 'cors',
-    ...options,
-    headers: { ...sbHeaders(), ...(options.headers || {}) }
-  });
+  const res = await fetch(`${url}/rest/v1${path}`, { mode:'cors', ...opts, headers:{ ...sbHeaders(), ...(opts.headers||{}) } });
   if (!res.ok) throw new Error(`データベース操作に失敗しました (HTTP ${res.status})`);
   return res.status === 204 ? null : res.json();
 }
-
-async function syncWordbookFromSupabase() {
+async function syncFromSb() {
   try {
-    const userId = encodeURIComponent(getUserId());
-    const rows = await sbFetch(`/wordbook?user_id=eq.${userId}&order=added_at.desc`);
+    const uid = encodeURIComponent(getUserId());
+    const rows = await sbFetch(`/wordbook?user_id=eq.${uid}&order=added_at.desc`);
     if (!Array.isArray(rows)) return;
     const en = [], ja = [];
-    rows
-      .filter(r => r && typeof r.word === 'string' && r.word.length > 0 && r.word.length <= 100)
-      .forEach(r => {
-        const item = {
-          word: String(r.word),
-          phonetic: typeof r.phonetic === 'string' ? r.phonetic : '',
-          definitions: Array.isArray(r.definitions) ? r.definitions : [],
-          synonyms: Array.isArray(r.synonyms) ? r.synonyms : [],
-          synonymsNuance: typeof r.synonymsNuance === 'string' ? r.synonymsNuance : '',
-          era: typeof r.era === 'string' ? r.era : '',
-          learned: !!r.learned,
-          addedAt: r.added_at ? new Date(r.added_at).getTime() : Date.now()
-        };
-        if (r.direction === 'ja2en') ja.push(item);
-        else en.push(item);
-      });
-    wordbook = en;
-    wordbookJa = ja;
-    safeSetItem(LS_KEY, JSON.stringify(wordbook));
-    safeSetItem(LS_KEY_JA, JSON.stringify(wordbookJa));
+    rows.filter(r => r && typeof r.word === 'string' && r.word.length > 0 && r.word.length <= 100).forEach(r => {
+      const item = {
+        word: String(r.word),
+        phonetic: typeof r.phonetic === 'string' ? r.phonetic : '',
+        definitions: Array.isArray(r.definitions) ? r.definitions : [],
+        synonyms: Array.isArray(r.synonyms) ? r.synonyms : [],
+        synonymsNuance: typeof r.synonymsNuance === 'string' ? r.synonymsNuance : '',
+        era: typeof r.era === 'string' ? r.era : '',
+        learned: !!r.learned,
+        addedAt: r.added_at ? new Date(r.added_at).getTime() : Date.now()
+      };
+      (r.direction === 'ja2en' ? ja : en).push(item);
+    });
+    state.wb = en;
+    state.wbJa = ja;
+    safeSet(LS.KEY, JSON.stringify(state.wb));
+    safeSet(LS.KEY_JA, JSON.stringify(state.wbJa));
 
-    const statRows = await sbFetch(`/quiz_stats?user_id=eq.${userId}`);
+    const statRows = await sbFetch(`/quiz_stats?user_id=eq.${uid}`);
     if (Array.isArray(statRows)) {
-      quizStats = Object.create(null);
-      quizStatsJa = Object.create(null);
+      state.stats = Object.create(null);
+      state.statsJa = Object.create(null);
       statRows.forEach(r => {
         if (!r || typeof r.word !== 'string') return;
-        const key = safeKey(r.word);
-        if (!key) return;
-        const target = r.direction === 'ja2en' ? quizStatsJa : quizStats;
-        target[key] = {
-          correct: Number.isFinite(r.correct) ? r.correct : 0,
-          total: Number.isFinite(r.total) ? r.total : 0
-        };
+        const k = safeKey(r.word);
+        if (!k) return;
+        const t = r.direction === 'ja2en' ? state.statsJa : state.stats;
+        t[k] = { correct: Number.isFinite(r.correct) ? r.correct : 0, total: Number.isFinite(r.total) ? r.total : 0 };
       });
-      safeSetItem(LS_STATS, JSON.stringify(quizStats));
-      safeSetItem(LS_STATS_JA, JSON.stringify(quizStatsJa));
+      safeSet(LS.STATS, JSON.stringify(state.stats));
+      safeSet(LS.STATS_JA, JSON.stringify(state.statsJa));
     }
-  } catch(e) { }
+  } catch(e) {}
 }
-
-async function saveWordbook(direction) {
-  const dir = direction || 'en2ja';
-  const target = dir === 'ja2en' ? wordbookJa : wordbook;
-  safeSetItem(dir === 'ja2en' ? LS_KEY_JA : LS_KEY, JSON.stringify(target));
-  const { url } = getSupabaseConfig();
-  if (!url) return;
+async function saveWordbook(dir) {
+  dir = dir || 'en2ja';
+  const target = wb(dir);
+  safeSet(dir === 'ja2en' ? LS.KEY_JA : LS.KEY, JSON.stringify(target));
+  if (!getSbConfig().url) return;
   for (const w of target) {
     try {
       await sbFetch('/wordbook', {
-        method: 'POST',
-        headers: { 'Prefer': 'resolution=merge-duplicates' },
-        body: JSON.stringify({ user_id: getUserId(), word: w.word, phonetic: w.phonetic || '', definitions: w.definitions || [], learned: w.learned, direction: dir, added_at: new Date(w.addedAt).toISOString() })
+        method:'POST',
+        headers:{ Prefer:'resolution=merge-duplicates' },
+        body: JSON.stringify({ user_id:getUserId(), word:w.word, phonetic:w.phonetic||'', definitions:w.definitions||[], learned:w.learned, direction:dir, added_at:new Date(w.addedAt).toISOString() })
       });
-    } catch(e) { }
+    } catch(e) {}
   }
 }
-
-async function deleteWordFromSupabase(word, direction) {
-  const { url } = getSupabaseConfig();
-  if (!url) return;
-  const userId = encodeURIComponent(getUserId());
-  const dir = direction || getDirection(word);
-  try { await sbFetch(`/wordbook?user_id=eq.${userId}&word=eq.${encodeURIComponent(word)}&direction=eq.${dir}`, { method: 'DELETE' }); } catch(e) { }
+async function deleteWordSb(word, dir) {
+  if (!getSbConfig().url) return;
+  dir = dir || getDirection(word);
+  const uid = encodeURIComponent(getUserId());
+  try { await sbFetch(`/wordbook?user_id=eq.${uid}&word=eq.${encodeURIComponent(word)}&direction=eq.${dir}`, { method:'DELETE' }); } catch(e) {}
 }
-
-async function saveSearchHistoryToSupabase(word, direction) {
-  const { url } = getSupabaseConfig();
-  if (!url) return;
-  const dir = direction || getDirection(word);
-  try { await sbFetch('/search_history', { method: 'POST', body: JSON.stringify({ user_id: getUserId(), word: word, direction: dir, searched_at: new Date().toISOString() }) }); } catch(e) { }
+async function saveHistorySb(word, dir) {
+  if (!getSbConfig().url) return;
+  dir = dir || getDirection(word);
+  try { await sbFetch('/search_history', { method:'POST', body: JSON.stringify({ user_id:getUserId(), word, direction:dir, searched_at:new Date().toISOString() }) }); } catch(e) {}
 }
-
-async function saveQuizStatToSupabase(word, correct, total, direction) {
-  const { url } = getSupabaseConfig();
-  if (!url) return;
-  const dir = direction || getDirection(word);
+async function saveQuizStatSb(word, correct, total, dir) {
+  if (!getSbConfig().url) return;
+  dir = dir || getDirection(word);
   try {
     await sbFetch('/quiz_stats', {
-      method: 'POST',
-      headers: { 'Prefer': 'resolution=merge-duplicates' },
-      body: JSON.stringify({ user_id: getUserId(), word: word, correct, total, direction: dir })
+      method:'POST',
+      headers:{ Prefer:'resolution=merge-duplicates' },
+      body: JSON.stringify({ user_id:getUserId(), word, correct, total, direction:dir })
     });
-  } catch(e) { }
+  } catch(e) {}
 }
 
-async function saveSupabaseConfig() {
-  const url = document.getElementById('sb-url-input').value.trim().replace(/\/$/, '');
-  const key = document.getElementById('sb-key-input').value.trim();
-  const userIdInput = document.getElementById('sb-userid-input').value.trim();
-  if (!url || !key) return;
-
-  if (!url.match(/^https:\/\/[a-zA-Z0-9\-]+\.supabase\.co$/)) {
-    document.getElementById('sb-error').textContent = 'エラー: URLはhttps://xxxx.supabase.coの形式で入力してください。';
-    document.getElementById('sb-error').style.display = 'block';
-    return;
-  }
-
-  if (userIdInput && !userIdInput.match(/^[a-zA-Z0-9_\-]{4,64}$/)) {
-    document.getElementById('sb-error').textContent = 'エラー: ユーザーIDは英数字・アンダースコア・ハイフンのみ、4〜64文字で入力してください。';
-    document.getElementById('sb-error').style.display = 'block';
-    return;
-  }
-  if (userIdInput) localStorage.setItem(LS_USER_ID, userIdInput);
-  document.getElementById('sb-status').textContent = '接続確認中...';
-  document.getElementById('sb-saved').style.display = 'none';
-  document.getElementById('sb-error').style.display = 'none';
-  try {
-    const res = await fetch(`${url}/rest/v1/wordbook?limit=1`, {
-      method: 'GET',
-      mode: 'cors',
-      headers: {
-        'apikey': key,
-        'Authorization': `Bearer ${key}`,
-        'Content-Type': 'application/json'
-      }
-    });
-    if (!res.ok) throw new Error(`接続失敗 (HTTP ${res.status})`);
-    localStorage.setItem(LS_SB_URL, url);
-    localStorage.setItem(LS_SB_KEY, key);
-    document.getElementById('sb-status').textContent = '';
-    document.getElementById('sb-saved').style.display = 'block';
-    updateSyncStatus();
-    showSbUsagePanel();
-    await syncWordbookFromSupabase();
-    renderWordbook();
-    await fetchSbUsage();
-  } catch(e) {
-    document.getElementById('sb-status').textContent = '';
-    document.getElementById('sb-error').textContent = `エラー: ${e.message}`;
-    document.getElementById('sb-error').style.display = 'block';
-  }
-}
-
-function showSbUsagePanel() {
-  const { url } = getSupabaseConfig();
-  if (url) {
-    document.getElementById('sb-usage-unconfigured').style.display = 'none';
-    document.getElementById('sb-usage-configured').style.display = 'block';
-    const dashLink = document.getElementById('sb-dashboard-link');
-    const projectRef = url.replace('https://', '').replace('.supabase.co', '').replace(/[^a-zA-Z0-9\-]/g, '');
-    dashLink.href = `https://supabase.com/dashboard/project/${projectRef}`;
-  } else {
-    document.getElementById('sb-usage-unconfigured').style.display = 'block';
-    document.getElementById('sb-usage-configured').style.display = 'none';
-  }
-}
-
-async function fetchSbUsage() {
-  const { url } = getSupabaseConfig();
-  if (!url) return;
-  const userId = encodeURIComponent(getUserId());
-  const errEl = document.getElementById('sb-usage-error');
-  errEl.style.display = 'none';
-  ['sb-count-wordbook','sb-count-history','sb-count-stats',
-   'sb-count-wordbook-en2ja','sb-count-wordbook-ja2en',
-   'sb-count-history-en2ja','sb-count-history-ja2en',
-   'sb-count-stats-en2ja','sb-count-stats-ja2en'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.textContent = '…';
-  });
-  try {
-    const fetchOpts = { mode: 'cors', headers: sbHeaders() };
-    const [wbRes, histRes, statRes] = await Promise.all([
-      fetch(`${url}/rest/v1/wordbook?user_id=eq.${userId}&select=word,direction`, fetchOpts),
-      fetch(`${url}/rest/v1/search_history?user_id=eq.${userId}&select=id,direction`, fetchOpts),
-      fetch(`${url}/rest/v1/quiz_stats?user_id=eq.${userId}&select=word,direction`, fetchOpts)
-    ]);
-    const [wb, hist, stat] = await Promise.all([wbRes.json(), histRes.json(), statRes.json()]);
-
-    function countByDir(arr) {
-      if (!Array.isArray(arr)) return { total: 0, en2ja: 0, ja2en: 0 };
-      let en2ja = 0, ja2en = 0;
-      arr.forEach(r => {
-        if (r && r.direction === 'ja2en') ja2en++;
-        else en2ja++;
-      });
-      return { total: arr.length, en2ja, ja2en };
-    }
-
-    const wbC = countByDir(wb);
-    const histC = countByDir(hist);
-    const statC = countByDir(stat);
-
-    document.getElementById('sb-count-wordbook').textContent = wbC.total;
-    document.getElementById('sb-count-wordbook-en2ja').textContent = wbC.en2ja;
-    document.getElementById('sb-count-wordbook-ja2en').textContent = wbC.ja2en;
-
-    document.getElementById('sb-count-history').textContent = histC.total;
-    document.getElementById('sb-count-history-en2ja').textContent = histC.en2ja;
-    document.getElementById('sb-count-history-ja2en').textContent = histC.ja2en;
-
-    document.getElementById('sb-count-stats').textContent = statC.total;
-    document.getElementById('sb-count-stats-en2ja').textContent = statC.en2ja;
-    document.getElementById('sb-count-stats-ja2en').textContent = statC.ja2en;
-  } catch(e) {
-    errEl.textContent = '取得に失敗しました。';
-    errEl.style.display = 'block';
-  }
-}
-
-async function resetAllDbData() {
-  if (!confirm('Supabase上の全データ（英→日・日→英の単語帳、検索履歴、クイズ統計）とこの端末のデータをすべて削除します。よろしいですか？')) return;
-  const { url } = getSupabaseConfig();
-  const userId = encodeURIComponent(getUserId());
-  try {
-    if (url) {
-      await Promise.all([
-        sbFetch(`/wordbook?user_id=eq.${userId}`, { method: 'DELETE' }),
-        sbFetch(`/search_history?user_id=eq.${userId}`, { method: 'DELETE' }),
-        sbFetch(`/quiz_stats?user_id=eq.${userId}`, { method: 'DELETE' })
-      ]);
-    }
-    wordbook.length = 0;
-    wordbookJa.length = 0;
-    searchHistory = Object.create(null);
-    searchHistoryJa = Object.create(null);
-    quizStats = Object.create(null);
-    quizStatsJa = Object.create(null);
-    safeSetItem(LS_KEY, JSON.stringify(wordbook));
-    safeSetItem(LS_KEY_JA, JSON.stringify(wordbookJa));
-    safeSetItem(LS_HISTORY, JSON.stringify(searchHistory));
-    safeSetItem(LS_HISTORY_JA, JSON.stringify(searchHistoryJa));
-    safeSetItem(LS_STATS, JSON.stringify(quizStats));
-    safeSetItem(LS_STATS_JA, JSON.stringify(quizStatsJa));
-    renderWordbook();
-    await fetchSbUsage();
-    const msg = document.getElementById('sb-reset-msg');
-    msg.style.display = 'block';
-    setTimeout(() => { msg.style.display = 'none'; }, 3000);
-  } catch(e) {
-    alert('リセット中にエラーが発生しました: ' + e.message);
-  }
-}
-
-function saveStats() {
-  safeSetItem(LS_STATS, JSON.stringify(quizStats));
-}
-
-function updateSyncStatus() {
-  const { url } = getSupabaseConfig();
-  const el = document.getElementById('api-status');
-  if (url) {
-    el.textContent = '同期中';
-    el.style.background = 'var(--green-light)';
-    el.style.color = 'var(--green)';
-  }
-}
-
-function getWordWeight(word, direction) {
-  const dir = direction || 'en2ja';
-  const key = safeKey(word);
-  const stats = dir === 'ja2en' ? quizStatsJa : quizStats;
-  const s = key ? stats[key] : null;
-  if (!s) return 10;
-  const correct = s.correct || 0;
-  const total = s.total || 0;
-  if (correct >= 10) return 1;
-  const rate = total > 0 ? correct / total : 0.5;
-  return Math.max(1, Math.round((1 - rate) * 10 + 1));
-}
-
-function weightedShuffle(arr, direction) {
-  const pool = [];
-  arr.forEach(w => {
-    const weight = getWordWeight(w.word, direction);
-    for (let i = 0; i < weight; i++) pool.push(w);
-  });
-  const seen = new Set();
-  const result = [];
-  pool.sort(() => Math.random() - 0.5);
-  for (const w of pool) {
-    if (!seen.has(w.word)) { seen.add(w.word); result.push(w); }
-  }
-  return result;
-}
-let currentWord = null;
-let currentDirection = 'en2ja';
-let _isSearching = false;
-
-const SAFE_KEY_RE = /^[a-z0-9 '\-\.ぁ-んァ-ヶー一-龯々]+$/i;
-
-function safeKey(word) {
-  const key = word.toLowerCase();
-  return SAFE_KEY_RE.test(key) && key !== '__proto__' && key !== 'constructor' && key !== 'prototype' ? key : null;
-}
-
-function recordSearch(word, direction) {
-  const dir = direction || getDirection(word);
-  const key = safeKey(word);
-  if (!key) return;
-  const hist = dir === 'ja2en' ? searchHistoryJa : searchHistory;
-  if (!hist[key]) hist[key] = [];
-  const now = Date.now();
-  // 直前2秒以内の重複記録を防止
-  if (hist[key].length > 0 && now - hist[key][hist[key].length - 1] < 2000) return;
-  hist[key].push(now);
-  safeSetItem(dir === 'ja2en' ? LS_HISTORY_JA : LS_HISTORY, JSON.stringify(hist));
-  saveSearchHistoryToSupabase(word, dir);
-}
-
-function getSearchCount(word, direction) {
-  const dir = direction || getDirection(word);
-  const key = safeKey(word);
-  if (!key) return 0;
-  const hist = dir === 'ja2en' ? searchHistoryJa : searchHistory;
-  return (hist[key] || []).length;
-}
-
-function formatDate(ts) {
-  const d = new Date(ts);
-  return `${d.getFullYear()}/${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')}`;
-}
-let quizWords = [];
-let quizIndex = 0;
-let quizScore = 0;
-
-function getApiKey() { return localStorage.getItem(LS_APIKEY) || ''; }
-
+// ===== UI: Status =====
 function updateApiStatus() {
-  const key = getApiKey();
-  const el = document.getElementById('api-status');
-  if (key) {
-    el.textContent = 'APIキー設定済';
-    el.className = 'api-status';
-  } else {
-    el.textContent = 'APIキー未設定';
-    el.className = 'api-status error';
-  }
+  const el = $('api-status');
+  if (getApiKey()) { el.textContent='APIキー済'; el.classList.add('ok'); }
+  else { el.textContent='APIキー未設定'; el.classList.remove('ok'); }
+}
+function updateSyncStatus() {
+  const el = $('api-status');
+  if (getSbConfig().url) { el.textContent='同期中'; el.classList.add('ok'); }
 }
 
-function saveApiKey() {
-  const val = document.getElementById('apikey-input').value.trim();
-  if (!val) return;
-  localStorage.setItem(LS_APIKEY, val);
-  updateApiStatus();
-  document.getElementById('key-saved').style.display = 'block';
-  setTimeout(() => document.getElementById('key-saved').style.display = 'none', 2000);
-}
-
-function showPage(name, btn) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  document.getElementById('page-' + name).classList.add('active');
-  if (btn) btn.classList.add('active');
-  if (name === 'wordbook') renderWordbook();
-  if (name === 'quiz') startQuiz();
-  if (name === 'search') {
-    const notice = document.getElementById('apikey-notice');
-    notice.style.display = getApiKey() ? 'none' : 'block';
-  }
-  if (name === 'settings') {
-    const k = getApiKey();
-    if (k) document.getElementById('apikey-input').value = k;
-    const { url, key: sbKey } = getSupabaseConfig();
-    if (url) document.getElementById('sb-url-input').value = url;
-    if (sbKey) document.getElementById('sb-key-input').value = sbKey;
-    document.getElementById('sb-userid-input').value = getUserId();
-    showSbUsagePanel();
-    if (url) fetchSbUsage();
-    updateStorageDisplay();
-  }
-}
-
+// ===== Claude API =====
 async function callClaude(systemPrompt, userContent) {
   const apiKey = getApiKey();
   const maxRetries = 3;
   for (let attempt = 0; attempt < maxRetries; attempt++) {
     if (attempt > 0) {
-      const wait = attempt * 2000;
-      document.getElementById('search-loading').querySelector('span').nextSibling
-        && (document.getElementById('search-loading').innerHTML =
-          `<span class="spinner"></span>混み合っています。再試行中 (${attempt}/${maxRetries - 1})...`);
-      await new Promise(r => setTimeout(r, wait));
+      $('loading-text').textContent = `混み合っています。再試行中 (${attempt}/${maxRetries-1})...`;
+      await new Promise(r => setTimeout(r, attempt * 2000));
     }
     const res = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01',
-        'anthropic-dangerous-direct-browser-access': 'true'
+      method:'POST',
+      headers:{
+        'Content-Type':'application/json',
+        'x-api-key':apiKey,
+        'anthropic-version':'2023-06-01',
+        'anthropic-dangerous-direct-browser-access':'true'
       },
       body: JSON.stringify({
-        model: 'claude-haiku-4-5-20251001',
-        max_tokens: 1000,
-        system: systemPrompt,
-        messages: [{ role: 'user', content: userContent }]
+        model:'claude-haiku-4-5-20251001',
+        max_tokens:1000,
+        system:systemPrompt,
+        messages:[{ role:'user', content:userContent }]
       })
     });
-    if (res.status === 529 || res.status === 503) {
-      if (attempt < maxRetries - 1) continue;
-    }
+    if ((res.status === 529 || res.status === 503) && attempt < maxRetries - 1) continue;
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));
       throw new Error(err?.error?.message || `HTTP ${res.status}`);
@@ -1318,110 +699,21 @@ async function callClaude(systemPrompt, userContent) {
     const data = await res.json();
     const text = data.content.filter(b => b.type === 'text').map(b => b.text).join('');
     const cleaned = text.replace(/```json|```/g, '');
-    const start = cleaned.indexOf('{');
-    const end = cleaned.lastIndexOf('}');
+    const start = cleaned.indexOf('{'), end = cleaned.lastIndexOf('}');
     if (start === -1 || end === -1 || end <= start) throw new Error('レスポンスの解析に失敗しました。再度お試しください。');
     return JSON.parse(cleaned.slice(start, end + 1));
   }
   throw new Error('しばらく混み合っています。少し待ってから再度お試しください。');
 }
 
-async function doSearch(wordOverride) {
-  if (_isSearching) return;
-  _isSearching = true;
-  const apiKey = getApiKey();
-  if (!apiKey) {
-    document.getElementById('apikey-notice').style.display = 'block';
-    _isSearching = false;
-    return;
-  }
-  const word = wordOverride || document.getElementById('search-input').value.trim();
-  if (!word) { _isSearching = false; return; }
-
-  document.getElementById('search-error').style.display = 'none';
-  document.getElementById('spell-suggest').style.display = 'none';
-  document.getElementById('result-area').style.display = 'none';
-
-  const direction = getDirection(word);
-  const targetBook = direction === 'ja2en' ? wordbookJa : wordbook;
-  const cached = targetBook.find(w => w.word.toLowerCase() === word.toLowerCase());
-  if (cached && cached.definitions && cached.definitions.length > 0) {
-    currentWord = cached;
-    currentDirection = direction;
-    recordSearch(cached.word, direction);
-    const count = getSearchCount(cached.word, direction);
-    renderResult(cached, count, direction);
-    updateAddBtn(true);
-    _isSearching = false;
-    return;
-  }
-
-  document.getElementById('search-loading').style.display = 'block';
-  document.getElementById('search-btn').disabled = true;
-
-  try {
-    if (direction === 'ja2en') {
-      // ja2en時は_isSearchingを保持したままdoSearchDirectを呼ぶ
-      await doSearchDirect(word, true);
-      return;
-    }
-
-    const spellResult = await callClaude(
-      `You are a spell checker for English words and phrases. Given an input, respond ONLY with a valid JSON object (no markdown, no backticks) with:
+// ===== Prompts =====
+const PROMPT_SPELL = `You are a spell checker for English words and phrases. Given an input, respond ONLY with a valid JSON object (no markdown, no backticks) with:
 - correct: true if the input is a valid English word or phrase (including idioms and multi-word expressions), false only if it appears to be a misspelling
 - suggestions: if correct is false, array of 3-5 suggested corrections. If correct is true, empty array.
 Important: multi-word phrases like "in spite of", "as well as", "by the way" are valid and should have correct: true.
-Respond with valid JSON only. No extra text.`,
-      word
-    );
+Respond with valid JSON only. No extra text.`;
 
-    if (!spellResult.correct && spellResult.suggestions && spellResult.suggestions.length > 0) {
-      document.getElementById('search-loading').style.display = 'none';
-      document.getElementById('search-btn').disabled = false;
-      _isSearching = false;
-      document.getElementById('spell-suggest-label').textContent =
-        `「${word}」は見つかりませんでした。もしかして：`;
-      const container = document.getElementById('spell-candidates');
-      container.innerHTML = '';
-      spellResult.suggestions.forEach(s => {
-        const btn = document.createElement('button');
-        btn.className = 'spell-candidate';
-        btn.textContent = s;
-        btn.addEventListener('click', function() {
-          document.getElementById('search-input').value = s;
-          document.getElementById('spell-suggest').style.display = 'none';
-          doSearchDirect(s);
-        });
-        container.appendChild(btn);
-      });
-      document.getElementById('spell-suggest').style.display = 'block';
-      return;
-    }
-
-    await doSearchDirect(word, true);
-  } catch (e) {
-    document.getElementById('search-error').textContent = `エラー: ${e.message}`;
-    document.getElementById('search-error').style.display = 'block';
-  } finally {
-    document.getElementById('search-loading').style.display = 'none';
-    document.getElementById('search-btn').disabled = false;
-    _isSearching = false;
-  }
-}
-
-async function doSearchDirect(word, fromSpellCheck = false) {
-  if (!fromSpellCheck) {
-    if (_isSearching) return;
-    _isSearching = true;
-    document.getElementById('search-error').style.display = 'none';
-    document.getElementById('spell-suggest').style.display = 'none';
-    document.getElementById('result-area').style.display = 'none';
-    document.getElementById('search-loading').style.display = 'block';
-    document.getElementById('search-btn').disabled = true;
-  }
-  try {
-    const direction = getDirection(word);
-    const promptEn = `You are an English dictionary like Cambridge Dictionary. Given a word or phrase, respond ONLY with a valid JSON object (no markdown, no backticks) with these fields:
+const PROMPT_EN = `You are an English dictionary like Cambridge Dictionary. Given a word or phrase, respond ONLY with a valid JSON object (no markdown, no backticks) with these fields:
 - word: the word or phrase as given
 - phonetic: IPA pronunciation string (empty string if multi-word phrase)
 - definitions: array of 1-3 definition groups ordered by most common usage first. Each group has:
@@ -1430,646 +722,743 @@ async function doSearchDirect(word, fromSpellCheck = false) {
     - meaning: Japanese meaning (concise, within 30 characters)
     - examples: array of 1-2 objects each with "en" (natural English sentence) and "ja" (Japanese translation)
 - synonyms: array of 3-5 synonym words or phrases (English only)
-- synonymsNuance: a Japanese string explaining the subtle nuance differences between the synonyms and the original word (concise, within 200 characters). Compare each synonym briefly. Example: "resilientは精神的・身体的な強さに、toughnessは耐久性に重点を置く。adaptabilityは状況適応の意味合いが強い。"
-- era: a single Japanese string describing the historical usage period, e.g. "現代英語（1990年代〜現在）で広く使われる表現", "1920〜1950年代に多用された古風な表現", "シェイクスピア時代（16〜17世紀）の古語" etc.
+- synonymsNuance: a Japanese string explaining the subtle nuance differences between the synonyms and the original word (concise, within 200 characters).
+- era: a single Japanese string describing the historical usage period.
 Respond with valid JSON only. No extra text.`;
 
-    const promptJa = `You are a Japanese-to-English dictionary. Given a Japanese word or phrase, respond ONLY with a valid JSON object (no markdown, no backticks) with these fields:
+const PROMPT_JA = `You are a Japanese-to-English dictionary. Given a Japanese word or phrase, respond ONLY with a valid JSON object (no markdown, no backticks) with these fields:
 - word: the Japanese word or phrase as given
 - definitions: array of 1-3 groups, each representing a different sense or usage of the Japanese word. Each group has:
   - pos: part of speech in Japanese (名詞/動詞/形容詞/副詞/etc.)
   - senses: array of 2-4 English equivalent words/phrases ordered by frequency, each with:
-    - meaning: English equivalent word or short phrase (e.g. "resilient", "bounce back")
-    - phonetic: IPA pronunciation of the English word/phrase (e.g. /rɪˈzɪliənt/)
+    - meaning: English equivalent word or short phrase
+    - phonetic: IPA pronunciation of the English word/phrase
     - examples: array of 1-2 objects each with "en" (natural English sentence using the English equivalent) and "ja" (Japanese translation)
 - synonyms: array of 3-5 related English synonyms for the most common meaning
-- synonymsNuance: a Japanese string explaining the subtle nuance differences between the suggested English equivalents (within 200 characters). Compare each English word briefly. Example: "resilientは精神的な強さ、toughは身体的な耐久性、adaptableは適応力を強調する。"
-- era: a single Japanese string describing how commonly used the equivalents are in modern English (within 100 chars). Example: "いずれも現代英語で広く使われる。"
+- synonymsNuance: a Japanese string explaining the subtle nuance differences between the suggested English equivalents (within 200 characters).
+- era: a single Japanese string describing how commonly used the equivalents are in modern English (within 100 chars).
 Respond with valid JSON only. No extra text.`;
 
-    const result = await callClaude(direction === 'ja2en' ? promptJa : promptEn, word);
-    currentWord = result;
-    currentDirection = direction;
-    recordSearch(result.word, direction);
-    const count = getSearchCount(result.word, direction);
-    renderResult(result, count, direction);
-    const targetBook = direction === 'ja2en' ? wordbookJa : wordbook;
-    const already = targetBook.some(w => w.word.toLowerCase() === result.word.toLowerCase());
-    updateAddBtn(already);
-  } catch (e) {
-    document.getElementById('search-error').textContent = `エラー: ${e.message}`;
-    document.getElementById('search-error').style.display = 'block';
+// ===== Search =====
+async function doSearch(wordOverride) {
+  if (state.searching) return;
+  state.searching = true;
+  const apiKey = getApiKey();
+  if (!apiKey) { $('apikey-notice').style.display = 'block'; state.searching = false; return; }
+  const word = wordOverride || $('search-input').value.trim();
+  if (!word) { state.searching = false; return; }
+
+  $('search-error').style.display = 'none';
+  $('spell-suggest').style.display = 'none';
+  $('result-area').style.display = 'none';
+
+  const dir = getDirection(word);
+  const cached = wb(dir).find(w => w.word.toLowerCase() === word.toLowerCase());
+  if (cached && cached.definitions && cached.definitions.length > 0) {
+    state.currentWord = cached;
+    state.currentDir = dir;
+    recordSearch(cached.word, dir);
+    renderResult(cached, getSearchCount(cached.word, dir), dir);
+    updateAddBtn(true);
+    state.searching = false;
+    return;
+  }
+
+  $('loading-text').textContent = '取得中...';
+  $('search-loading').style.display = 'flex';
+  $('search-btn').disabled = true;
+
+  try {
+    if (dir === 'ja2en') {
+      await doSearchDirect(word, true);
+      return;
+    }
+    const spell = await callClaude(PROMPT_SPELL, word);
+    if (!spell.correct && spell.suggestions && spell.suggestions.length > 0) {
+      $('search-loading').style.display = 'none';
+      $('search-btn').disabled = false;
+      state.searching = false;
+      $('spell-suggest-label').textContent = `「${word}」は見つかりませんでした。もしかして：`;
+      const c = $('spell-candidates');
+      c.innerHTML = '';
+      spell.suggestions.forEach(s => {
+        const b = document.createElement('button');
+        b.className = 'spell-candidate';
+        b.textContent = s;
+        b.addEventListener('click', () => {
+          $('search-input').value = s;
+          updateClearBtn();
+          $('spell-suggest').style.display = 'none';
+          doSearchDirect(s);
+        });
+        c.appendChild(b);
+      });
+      $('spell-suggest').style.display = 'block';
+      return;
+    }
+    await doSearchDirect(word, true);
+  } catch(e) {
+    $('search-error').textContent = `エラー: ${e.message}`;
+    $('search-error').style.display = 'block';
   } finally {
-    document.getElementById('search-loading').style.display = 'none';
-    document.getElementById('search-btn').disabled = false;
-    _isSearching = false;
+    $('search-loading').style.display = 'none';
+    $('search-btn').disabled = false;
+    state.searching = false;
   }
 }
 
-function updateAddBtn(already) {
-  const btn = document.getElementById('add-btn');
-  btn.disabled = already;
-  btn.innerHTML = already
-    ? `<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7l4 4 6-6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg> 追加済み`
-    : `<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 2v10M2 7h10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg> 単語帳に追加`;
+async function doSearchDirect(word, fromSpell = false) {
+  if (!fromSpell) {
+    if (state.searching) return;
+    state.searching = true;
+    $('search-error').style.display = 'none';
+    $('spell-suggest').style.display = 'none';
+    $('result-area').style.display = 'none';
+  }
+
+  const dir = getDirection(word);
+  const cached = wb(dir).find(w => w.word.toLowerCase() === word.toLowerCase());
+  if (cached && cached.definitions && cached.definitions.length > 0) {
+    state.currentWord = cached;
+    state.currentDir = dir;
+    recordSearch(cached.word, dir);
+    renderResult(cached, getSearchCount(cached.word, dir), dir);
+    updateAddBtn(true);
+    $('search-loading').style.display = 'none';
+    $('search-btn').disabled = false;
+    state.searching = false;
+    return;
+  }
+
+  if (!fromSpell) {
+    $('loading-text').textContent = '取得中...';
+    $('search-loading').style.display = 'flex';
+    $('search-btn').disabled = true;
+  }
+  try {
+    const result = await callClaude(dir === 'ja2en' ? PROMPT_JA : PROMPT_EN, word);
+    state.currentWord = result;
+    state.currentDir = dir;
+    recordSearch(result.word, dir);
+    renderResult(result, getSearchCount(result.word, dir), dir);
+    updateAddBtn(wb(dir).some(w => w.word.toLowerCase() === result.word.toLowerCase()));
+  } catch(e) {
+    $('search-error').textContent = `エラー: ${e.message}`;
+    $('search-error').style.display = 'block';
+  } finally {
+    $('search-loading').style.display = 'none';
+    $('search-btn').disabled = false;
+    state.searching = false;
+  }
 }
 
-function renderResult(d, count, direction) {
-  const dir = direction || 'en2ja';
-  document.getElementById('res-word').textContent = d.word;
-  document.getElementById('res-phonetic').textContent = d.phonetic || '';
-  const posEl = document.getElementById('res-pos');
-  posEl.style.display = 'none';
-  const badge = document.getElementById('res-search-count');
+// ===== Render Result =====
+function renderResult(d, count, dir) {
+  dir = dir || 'en2ja';
+  $('res-word').textContent = d.word;
+  $('res-phonetic').textContent = d.phonetic || '';
+  const badge = $('res-search-count');
   badge.textContent = `${count}回目の検索`;
   badge.className = 'search-count-badge' + (count > 1 ? ' repeat' : '');
+  const dirBadge = $('res-direction-badge');
+  dirBadge.textContent = dir === 'ja2en' ? '日 → 英' : '英 → 日';
+  dirBadge.className = 'direction-badge ' + (dir === 'ja2en' ? 'badge-ja2en' : 'badge-en2ja');
+  $('res-speak-btn').style.display = dir === 'ja2en' ? 'none' : '';
 
-  const dirBadge = document.getElementById('res-direction-badge');
-  if (dirBadge) {
-    dirBadge.textContent = dir === 'ja2en' ? '日 → 英' : '英 → 日';
-    dirBadge.className = 'direction-badge ' + (dir === 'ja2en' ? 'badge-ja2en' : 'badge-en2ja');
-  }
-
-  // 全体の発音ボタンは英→日のみ表示
-  const speakBtn = document.querySelector('[data-action="speak"]');
-  if (speakBtn) speakBtn.style.display = dir === 'ja2en' ? 'none' : '';
-
-  const defsEl = document.getElementById('res-definitions');
+  const defsEl = $('res-definitions');
   defsEl.innerHTML = '';
   (d.definitions || []).forEach(group => {
     const groupDiv = document.createElement('div');
     groupDiv.className = 'pos-group';
-    const posLabel = `<span class="pos-label">${sanitize(group.pos)}</span>`;
-    groupDiv.innerHTML = posLabel;
+    groupDiv.innerHTML = `<span class="pos-label">${sanitize(group.pos)}</span>`;
     (group.senses || []).forEach((s, i) => {
-      const senseDiv = document.createElement('div');
-      senseDiv.className = 'def-item';
-
-      const highlightTarget = dir === 'ja2en' ? s.meaning : d.word;
-      const examplesHtml = (s.examples || []).map(e => {
-        const safeEn = sanitize(e.en);
-        const highlighted = highlightTarget
-          ? safeEn.replace(new RegExp('\\b' + escapeRegex(highlightTarget) + '\\b', 'gi'), m => `<em>${m}</em>`)
-          : safeEn;
-        return `<div class="example-item">
-          <div class="example-en">${highlighted}</div>
-          <div class="example-ja">${sanitize(e.ja)}</div>
-        </div>`;
+      const sDiv = document.createElement('div');
+      sDiv.className = 'def-item';
+      const target = dir === 'ja2en' ? s.meaning : d.word;
+      const exHtml = (s.examples || []).map(e => {
+        const safe = sanitize(e.en);
+        const hl = target ? safe.replace(new RegExp('\\b' + escapeRegex(target) + '\\b', 'gi'), m => `<em>${m}</em>`) : safe;
+        return `<div class="example-item"><div class="example-en">${hl}</div><div class="example-ja">${sanitize(e.ja)}</div></div>`;
       }).join('');
-
-      let meaningHtml = `<div class="def-meaning">${sanitize(s.meaning)}`;
-      if (dir === 'ja2en' && s.phonetic) {
-        meaningHtml += ` <span style="font-size:13px;color:var(--text-muted);font-weight:400;">${sanitize(s.phonetic)}</span>`;
-      }
-      if (dir === 'ja2en') {
-        meaningHtml += ` <button class="btn-sound-mini" data-speak-word="${sanitize(s.meaning)}" style="margin-left:6px;padding:3px 9px;font-size:12px;background:var(--bg);border:1px solid var(--border-strong);border-radius:20px;cursor:pointer;color:var(--text);vertical-align:middle;">🔊 発音</button>`;
-      }
-      meaningHtml += `</div>`;
-
-      senseDiv.innerHTML = `<span class="def-num">${i + 1}.</span><div class="def-body">${meaningHtml}${examplesHtml}</div>`;
-      groupDiv.appendChild(senseDiv);
+      let mh = `<div class="def-meaning">${sanitize(s.meaning)}`;
+      if (dir === 'ja2en' && s.phonetic) mh += ` <span style="font-size:13px;color:var(--text-muted);font-weight:400">${sanitize(s.phonetic)}</span>`;
+      if (dir === 'ja2en') mh += ` <button class="btn-sound-mini" data-speak="${sanitize(s.meaning)}">🔊 発音</button>`;
+      mh += `</div>`;
+      sDiv.innerHTML = `<span class="def-num">${i+1}.</span><div class="def-body">${mh}${exHtml}</div>`;
+      groupDiv.appendChild(sDiv);
     });
     defsEl.appendChild(groupDiv);
   });
 
-  // ja2en時の発音ボタンにイベントリスナーを追加
-  if (dir === 'ja2en') {
-    defsEl.querySelectorAll('[data-speak-word]').forEach(btn => {
-      btn.addEventListener('click', function() {
-        const word = btn.getAttribute('data-speak-word');
-        if (!word) return;
-        const u = new SpeechSynthesisUtterance(word);
-        u.lang = 'en-US'; u.rate = 0.85;
-        speechSynthesis.cancel();
-        speechSynthesis.speak(u);
-      });
-    });
-  }
-
-  const metaEl = document.getElementById('res-meta');
-  const synonyms = d.synonyms || [];
-  const synonymsNuance = d.synonymsNuance || '';
-  const era = d.era || '';
-
+  const synonyms = d.synonyms || [], era = d.era || '';
   if (synonyms.length > 0 || era) {
-    document.getElementById('res-synonyms-wrap').style.display = synonyms.length > 0 ? 'block' : 'none';
+    $('res-synonyms-wrap').style.display = synonyms.length > 0 ? 'block' : 'none';
     if (synonyms.length > 0) {
-      const synContainer = document.getElementById('res-synonyms');
-      synContainer.innerHTML = '';
+      const c = $('res-synonyms');
+      c.innerHTML = '';
       synonyms.forEach(s => {
-        const tag = document.createElement('span');
-        tag.className = 'synonym-tag';
-        tag.textContent = s;
-        tag.style.cursor = 'pointer';
-        tag.addEventListener('click', function() {
-          document.getElementById('search-input').value = s;
-          doSearchDirect(s);
-        });
-        synContainer.appendChild(tag);
+        const t = document.createElement('span');
+        t.className = 'synonym-tag';
+        t.textContent = s;
+        t.addEventListener('click', () => { $('search-input').value = s; updateClearBtn(); doSearchDirect(s); });
+        c.appendChild(t);
       });
-      const nuanceEl = document.getElementById('res-synonyms-nuance');
-      if (synonymsNuance) {
-        nuanceEl.textContent = synonymsNuance;
-        nuanceEl.style.display = 'block';
-      } else {
-        nuanceEl.style.display = 'none';
-      }
+      const n = $('res-synonyms-nuance');
+      if (d.synonymsNuance) { n.textContent = d.synonymsNuance; n.style.display = 'block'; }
+      else n.style.display = 'none';
     }
-    document.getElementById('res-era-wrap').style.display = era ? 'block' : 'none';
-    if (era) {
-      document.getElementById('res-era').innerHTML = `<div class="era-text">${sanitize(era)}</div>`;
-    }
-    metaEl.style.display = 'block';
+    $('res-era-wrap').style.display = era ? 'block' : 'none';
+    if (era) $('res-era').innerHTML = `<div class="era-text">${sanitize(era)}</div>`;
+    $('res-meta').style.display = 'block';
   } else {
-    metaEl.style.display = 'none';
+    $('res-meta').style.display = 'none';
   }
-
-  document.getElementById('result-area').style.display = 'block';
+  $('result-area').style.display = 'block';
 }
 
-function speakWord() {
-  if (!currentWord) return;
-  const u = new SpeechSynthesisUtterance(currentWord.word);
-  u.lang = 'en-US';
+function updateAddBtn(already) {
+  const b = $('add-btn');
+  b.disabled = already;
+  b.innerHTML = already
+    ? `<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7l4 4 6-6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg> 追加済み`
+    : `<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 2v10M2 7h10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg> 単語帳に追加`;
+}
+
+function speak(word, lang) {
+  if (!word) return;
+  const u = new SpeechSynthesisUtterance(word);
+  u.lang = lang || 'en-US';
   u.rate = 0.85;
   speechSynthesis.cancel();
   speechSynthesis.speak(u);
 }
 
+// ===== Wordbook =====
 async function addToWordbook() {
-  if (!currentWord) return;
-  const dir = currentDirection || 'en2ja';
-  const target = dir === 'ja2en' ? wordbookJa : wordbook;
-  if (target.some(w => w.word.toLowerCase() === currentWord.word.toLowerCase())) return;
-  target.unshift({ ...currentWord, learned: false, addedAt: Date.now() });
+  if (!state.currentWord) return;
+  const dir = state.currentDir || 'en2ja';
+  const target = wb(dir);
+  if (target.some(w => w.word.toLowerCase() === state.currentWord.word.toLowerCase())) return;
+  target.unshift({ ...state.currentWord, learned:false, addedAt:Date.now() });
   await saveWordbook(dir);
   updateAddBtn(true);
 }
 
-function getCurrentWordbookDirection() {
-  return localStorage.getItem(LS_WL_DIR) || 'en2ja';
+function getPrimary(w) {
+  return (w.definitions && w.definitions[0] && w.definitions[0].senses && w.definitions[0].senses[0])
+    ? w.definitions[0].senses[0].meaning
+    : (w.meaning || '');
 }
 
 function renderWordbook() {
-  const dir = getCurrentWordbookDirection();
-  const target = dir === 'ja2en' ? wordbookJa : wordbook;
-  const histTarget = dir === 'ja2en' ? searchHistoryJa : searchHistory;
-  const list = document.getElementById('wordbook-list');
-  document.getElementById('wl-count').textContent = `保存済み ${target.length} 単語`;
+  const dir = wlDir();
+  const target = wb(dir);
+  const histT = hist(dir);
+  const list = $('wordbook-list');
+  $('wl-count').textContent = `保存済み ${target.length} 単語`;
   if (target.length === 0) {
     list.innerHTML = '<div class="empty-state">単語帳はまだ空です。<br>検索して単語を追加しましょう。</div>';
     return;
   }
   list.innerHTML = '';
   target.forEach((w, i) => {
-    const div = document.createElement('div');
-    div.className = 'wl-item';
-    const key = safeKey(w.word) || '';
-    const hist = histTarget[key] || [];
-    const count = hist.length;
-    const dates = hist.slice(-3).reverse().map(formatDate);
-    const histHtml = count > 0
-      ? `<div class="wl-history">検索 <span>${count}回</span>　最終: ${dates[0]}${dates.length > 1 ? `　(${dates.slice(1).join('、')})` : ''}</div>`
+    const item = document.createElement('div');
+    item.className = 'wl-item';
+    const k = safeKey(w.word) || '';
+    const h = histT[k] || [];
+    const dates = h.slice(-3).reverse().map(formatDate);
+    const histHtml = h.length > 0
+      ? `<div class="wl-history">検索 <span>${h.length}回</span>　最終: ${dates[0]}${dates.length > 1 ? `　(${dates.slice(1).join('、')})` : ''}</div>`
       : '';
 
     const row = document.createElement('div');
     row.className = 'wl-item-row';
     row.innerHTML = `
-      <div style="flex:1;min-width:0;">
-        <div style="display:flex;align-items:center;gap:8px;">
+      <div style="flex:1;min-width:0">
+        <div style="display:flex;align-items:center;gap:8px">
           <span class="wl-word">${sanitize(w.word)}</span>
-          <span class="wl-meaning">${sanitize(getPrimaryMeaning(w))}</span>
-        </div>
-        ${histHtml}
+          <span class="wl-meaning">${sanitize(getPrimary(w))}</span>
+        </div>${histHtml}
       </div>
       <span class="badge ${w.learned ? 'badge-ok' : 'badge-new'}">${w.learned ? '習得済' : '未習得'}</span>
-      <button class="btn-remove" title="削除">×</button>
-    `;
+      <button class="btn-remove" aria-label="削除">×</button>`;
 
     const detail = document.createElement('div');
     detail.className = 'wl-detail';
+    detail.innerHTML = buildDetailHtml(w, dir);
 
-    if (w.definitions && w.definitions.length > 0) {
-      let detailHtml = `<div style="display:flex;align-items:baseline;gap:10px;margin-bottom:2px;"><div class="wl-detail-word">${sanitize(w.word)}</div>`;
-      if (w.phonetic) detailHtml += `<div class="wl-detail-phonetic" style="margin-bottom:0;">${sanitize(w.phonetic)}</div>`;
-      detailHtml += `</div>`;
-      w.definitions.forEach(group => {
-        detailHtml += `<div class="wl-detail-pos-group"><span class="wl-detail-pos">${sanitize(group.pos)}</span>`;
-        (group.senses || []).forEach((s, si) => {
-          detailHtml += `<div class="wl-detail-sense"><span class="wl-detail-num">${si + 1}.</span><div>`;
-          let meaningHtml = `<div class="wl-detail-meaning">${sanitize(s.meaning)}`;
-          if (dir === 'ja2en' && s.phonetic) {
-            meaningHtml += ` <span style="font-size:12px;color:var(--text-muted);font-weight:400;">${sanitize(s.phonetic)}</span>`;
-          }
-          if (dir === 'ja2en') {
-            meaningHtml += ` <button class="btn-sound-mini" data-speak-word="${sanitize(s.meaning)}" style="margin-left:6px;padding:2px 8px;font-size:11px;background:var(--surface);border:1px solid var(--border-strong);border-radius:20px;cursor:pointer;color:var(--text);vertical-align:middle;">🔊</button>`;
-          }
-          meaningHtml += `</div>`;
-          detailHtml += meaningHtml;
-          const highlightTarget = dir === 'ja2en' ? s.meaning : w.word;
-          (s.examples || []).forEach(ex => {
-            const safeEn = sanitize(ex.en);
-            const highlighted = highlightTarget
-              ? safeEn.replace(new RegExp('\\b' + escapeRegex(highlightTarget) + '\\b', 'gi'), m => `<em>${m}</em>`)
-              : safeEn;
-            detailHtml += `<div class="wl-detail-example">${highlighted}<div class="wl-detail-example-ja">${sanitize(ex.ja)}</div></div>`;
-          });
-          detailHtml += `</div></div>`;
-        });
-        detailHtml += `</div>`;
-      });
-      detail.innerHTML = detailHtml;
-
-      // ja2en時の発音ボタンにイベント追加
-      if (dir === 'ja2en') {
-        detail.querySelectorAll('[data-speak-word]').forEach(btn => {
-          btn.addEventListener('click', function(e) {
-            e.stopPropagation();
-            const word = btn.getAttribute('data-speak-word');
-            if (!word) return;
-            const u = new SpeechSynthesisUtterance(word);
-            u.lang = 'en-US'; u.rate = 0.85;
-            speechSynthesis.cancel();
-            speechSynthesis.speak(u);
-          });
-        });
-      }
-    } else {
-      detail.innerHTML = `<div class="wl-detail-word">${sanitize(w.word)}</div><div style="font-size:13px;color:var(--text-faint);margin-top:4px;">詳細データがありません。再度検索してください。</div>`;
-    }
-
-    if (w.synonyms && w.synonyms.length > 0) {
-      const synWrap = document.createElement('div');
-      synWrap.style.cssText = 'margin-top:10px;';
-      synWrap.innerHTML = `<div class="section-label" style="margin-bottom:6px;">類語</div>`;
-      w.synonyms.forEach(s => {
-        const tag = document.createElement('span');
-        tag.className = 'synonym-tag';
-        tag.textContent = s;
-        tag.style.cursor = 'pointer';
-        tag.addEventListener('click', function(e) {
-          e.stopPropagation();
-          document.getElementById('search-input').value = s;
-          doSearchDirect(s);
-          document.querySelectorAll('.tab[data-page]').forEach(btn => btn.classList.remove('active'));
-          document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-          document.querySelector('.tab[data-page="search"]').classList.add('active');
-          document.getElementById('page-search').classList.add('active');
-        });
-        synWrap.appendChild(tag);
-      });
-      if (w.synonymsNuance) {
-        const nuance = document.createElement('div');
-        nuance.style.cssText = 'font-size:13px;color:var(--text-muted);line-height:1.7;margin-top:8px;padding:10px 12px;background:var(--surface);border-radius:var(--radius-sm);border-left:3px solid var(--accent);';
-        nuance.textContent = w.synonymsNuance;
-        synWrap.appendChild(nuance);
-      }
-      detail.appendChild(synWrap);
-    }
-
-    if (w.era) {
-      const eraWrap = document.createElement('div');
-      eraWrap.style.cssText = 'margin-top:10px;';
-      eraWrap.innerHTML = `<div class="section-label" style="margin-bottom:6px;">使用年代</div><div class="era-text">${sanitize(w.era)}</div>`;
-      detail.appendChild(eraWrap);
-    }
-
-    // 全体の発音ボタンは英→日のみ表示（日→英は各senseに個別ボタンがある）
-    if (dir === 'en2ja') {
-      const speakBtn = document.createElement('button');
-      speakBtn.className = 'btn-sound';
-      speakBtn.style.cssText = 'margin-top:10px;font-size:13px;padding:7px 12px;';
-      speakBtn.innerHTML = `<svg width="14" height="14" viewBox="0 0 15 15" fill="none"><path d="M3.5 5.5H1.5v4h2l3.5 3V2.5L3.5 5.5z" fill="currentColor"/><path d="M10 3C11.7 4.2 13 5.9 13 7.5S11.7 10.8 10 12M8 5C9.2 5.9 10 6.6 10 7.5S9.2 9.1 8 10" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg> 発音を聞く`;
-      speakBtn.addEventListener('click', function(e) {
-        e.stopPropagation();
-        const u = new SpeechSynthesisUtterance(w.word);
-        u.lang = 'en-US'; u.rate = 0.85;
-        speechSynthesis.cancel();
-        speechSynthesis.speak(u);
-      });
-      detail.appendChild(speakBtn);
-    }
-
-    row.querySelector('.wl-word').addEventListener('click', function(e) {
+    row.querySelector('.wl-word').addEventListener('click', e => {
       e.stopPropagation();
-      const isOpen = detail.classList.contains('open');
+      const open = detail.classList.contains('open');
       document.querySelectorAll('.wl-detail.open').forEach(d => d.classList.remove('open'));
-      if (!isOpen) detail.classList.add('open');
+      if (!open) detail.classList.add('open');
     });
+    row.querySelector('.btn-remove').addEventListener('click', e => { e.stopPropagation(); removeWord(i); });
 
-    row.querySelector('.btn-remove').addEventListener('click', (function(idx) {
-      return function(e) { e.stopPropagation(); removeWord(idx); };
-    })(i));
-
-    div.appendChild(row);
-    div.appendChild(detail);
-    list.appendChild(div);
+    item.appendChild(row);
+    item.appendChild(detail);
+    list.appendChild(item);
   });
 }
 
+function buildDetailHtml(w, dir) {
+  let html = '';
+  if (w.definitions && w.definitions.length > 0) {
+    html += `<div style="display:flex;align-items:baseline;gap:10px;margin-bottom:2px"><div class="wl-detail-word">${sanitize(w.word)}</div>`;
+    if (w.phonetic) html += `<div class="wl-detail-phonetic">${sanitize(w.phonetic)}</div>`;
+    html += `</div>`;
+    w.definitions.forEach(g => {
+      html += `<div class="wl-detail-pos-group"><span class="wl-detail-pos">${sanitize(g.pos)}</span>`;
+      (g.senses || []).forEach((s, si) => {
+        html += `<div class="wl-detail-sense"><span class="wl-detail-num">${si+1}.</span><div>`;
+        html += `<div class="wl-detail-meaning">${sanitize(s.meaning)}`;
+        if (dir === 'ja2en' && s.phonetic) html += ` <span style="font-size:12px;color:var(--text-muted);font-weight:400">${sanitize(s.phonetic)}</span>`;
+        if (dir === 'ja2en') html += ` <button class="btn-sound-mini" data-speak="${sanitize(s.meaning)}" style="padding:2px 8px;font-size:11px">🔊</button>`;
+        html += `</div>`;
+        const target = dir === 'ja2en' ? s.meaning : w.word;
+        (s.examples || []).forEach(ex => {
+          const safe = sanitize(ex.en);
+          const hl = target ? safe.replace(new RegExp('\\b' + escapeRegex(target) + '\\b', 'gi'), m => `<em>${m}</em>`) : safe;
+          html += `<div class="wl-detail-example">${hl}<div class="wl-detail-example-ja">${sanitize(ex.ja)}</div></div>`;
+        });
+        html += `</div></div>`;
+      });
+      html += `</div>`;
+    });
+  } else {
+    html += `<div class="wl-detail-word">${sanitize(w.word)}</div><div style="font-size:13px;color:var(--text-faint);margin-top:4px">詳細データがありません。再度検索してください。</div>`;
+  }
+  if (w.synonyms && w.synonyms.length > 0) {
+    html += `<div style="margin-top:10px"><div class="section-label" style="margin-bottom:6px">類語</div>`;
+    w.synonyms.forEach(s => {
+      html += `<span class="synonym-tag" data-syn="${sanitize(s)}">${sanitize(s)}</span>`;
+    });
+    if (w.synonymsNuance) html += `<div class="nuance-box" style="background:var(--surface)">${sanitize(w.synonymsNuance)}</div>`;
+    html += `</div>`;
+  }
+  if (w.era) html += `<div style="margin-top:10px"><div class="section-label" style="margin-bottom:6px">使用年代</div><div class="era-text">${sanitize(w.era)}</div></div>`;
+  if (dir === 'en2ja') html += `<button class="btn-sound" data-speak-self style="margin-top:10px;font-size:13px;padding:7px 12px"><svg width="14" height="14" viewBox="0 0 15 15" fill="none"><path d="M3.5 5.5H1.5v4h2l3.5 3V2.5L3.5 5.5z" fill="currentColor"/><path d="M10 3C11.7 4.2 13 5.9 13 7.5S11.7 10.8 10 12M8 5C9.2 5.9 10 6.6 10 7.5S9.2 9.1 8 10" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg> 発音を聞く</button>`;
+  return html;
+}
+
 async function removeWord(idx) {
-  const dir = getCurrentWordbookDirection();
-  const target = dir === 'ja2en' ? wordbookJa : wordbook;
+  const dir = wlDir();
+  const target = wb(dir);
   const word = target[idx].word;
   target.splice(idx, 1);
   await saveWordbook(dir);
-  await deleteWordFromSupabase(word, dir);
-  const histTarget = dir === 'ja2en' ? searchHistoryJa : searchHistory;
-  const key = safeKey(word);
-  if (key) delete histTarget[key];
-  safeSetItem(dir === 'ja2en' ? LS_HISTORY_JA : LS_HISTORY, JSON.stringify(histTarget));
+  await deleteWordSb(word, dir);
+  const k = safeKey(word);
+  const h = hist(dir);
+  if (k) delete h[k];
+  safeSet(dir === 'ja2en' ? LS.HIST_JA : LS.HIST, JSON.stringify(h));
   renderWordbook();
 }
 
 async function clearWordbook() {
-  const dir = getCurrentWordbookDirection();
-  const target = dir === 'ja2en' ? wordbookJa : wordbook;
+  const dir = wlDir();
+  const target = wb(dir);
   if (!target.length) return;
   if (!confirm('現在表示中の単語帳をすべて削除しますか？')) return;
-  const { url } = getSupabaseConfig();
-  if (url) {
-    const userId = encodeURIComponent(getUserId());
-    try { await sbFetch(`/wordbook?user_id=eq.${userId}&direction=eq.${dir}`, { method: 'DELETE' }); } catch(e) { }
+  if (getSbConfig().url) {
+    try { await sbFetch(`/wordbook?user_id=eq.${encodeURIComponent(getUserId())}&direction=eq.${dir}`, { method:'DELETE' }); } catch(e) {}
   }
-  const histTarget = dir === 'ja2en' ? searchHistoryJa : searchHistory;
-  target.forEach(w => { const key = safeKey(w.word); if (key) delete histTarget[key]; });
+  const h = hist(dir);
+  target.forEach(w => { const k = safeKey(w.word); if (k) delete h[k]; });
   target.length = 0;
-  safeSetItem(dir === 'ja2en' ? LS_KEY_JA : LS_KEY, JSON.stringify(target));
-  safeSetItem(dir === 'ja2en' ? LS_HISTORY_JA : LS_HISTORY, JSON.stringify(histTarget));
+  safeSet(dir === 'ja2en' ? LS.KEY_JA : LS.KEY, JSON.stringify(target));
+  safeSet(dir === 'ja2en' ? LS.HIST_JA : LS.HIST, JSON.stringify(h));
   renderWordbook();
 }
 
-function getPrimaryMeaning(w) {
-  return (w.definitions && w.definitions[0] && w.definitions[0].senses && w.definitions[0].senses[0])
-    ? w.definitions[0].senses[0].meaning
-    : (w.meaning || '');
+// ===== Quiz =====
+function getWeight(word, dir) {
+  const k = safeKey(word);
+  const s = k ? stats(dir)[k] : null;
+  if (!s) return 10;
+  if (s.correct >= 10) return 1;
+  const rate = s.total > 0 ? s.correct/s.total : 0.5;
+  return Math.max(1, Math.round((1-rate)*10 + 1));
 }
-
-function getCurrentQuizDirection() {
-  return localStorage.getItem(LS_QUIZ_DIR) || 'en2ja';
+function weightedShuffle(arr, dir) {
+  const pool = [];
+  arr.forEach(w => {
+    const wt = getWeight(w.word, dir);
+    for (let i = 0; i < wt; i++) pool.push(w);
+  });
+  pool.sort(() => Math.random() - 0.5);
+  const seen = new Set(), result = [];
+  for (const w of pool) {
+    if (!seen.has(w.word)) { seen.add(w.word); result.push(w); }
+  }
+  return result;
 }
 
 function startQuiz() {
-  const dir = getCurrentQuizDirection();
-  const target = dir === 'ja2en' ? wordbookJa : wordbook;
-  const stats = dir === 'ja2en' ? quizStatsJa : quizStats;
-  const histTarget = dir === 'ja2en' ? searchHistoryJa : searchHistory;
-  const area = document.getElementById('quiz-area');
+  const dir = quizDir();
+  const target = wb(dir);
+  const area = $('quiz-area');
   if (target.length < 2) {
     area.innerHTML = '<div class="empty-state">テストには2語以上必要です。<br>まず単語を検索して追加してください。</div>';
     return;
   }
-
-  const MAX_QUIZ = 10;
   const now = Date.now();
-
+  const histT = hist(dir);
+  const stT = stats(dir);
   const scored = target.map(w => {
-    const key = safeKey(w.word) || '';
-    const s = stats[key] || { correct: 0, total: 0 };
-    const mistakes = (s.total || 0) - (s.correct || 0);
-    const hist = histTarget[key] || [];
-    const lastSearched = hist.length > 0 ? hist[hist.length - 1] : (w.addedAt || 0);
-    const daysSince = (now - lastSearched) / (1000 * 60 * 60 * 24);
-    const score = mistakes * 10 + daysSince;
-    return { w, score };
+    const k = safeKey(w.word) || '';
+    const s = stT[k] || { correct:0, total:0 };
+    const mistakes = (s.total||0) - (s.correct||0);
+    const h = histT[k] || [];
+    const last = h.length > 0 ? h[h.length-1] : (w.addedAt || 0);
+    return { w, score: mistakes*10 + (now-last)/(86400000) };
   });
-
-  scored.sort((a, b) => b.score - a.score);
-  const selected = scored.slice(0, MAX_QUIZ).map(x => x.w);
-  quizWords = weightedShuffle(selected, dir);
-  quizIndex = 0;
-  quizScore = 0;
+  scored.sort((a,b) => b.score - a.score);
+  state.quizWords = weightedShuffle(scored.slice(0,10).map(x => x.w), dir);
+  state.quizIdx = 0;
+  state.quizScore = 0;
   renderQuiz();
 }
 
 function renderQuiz() {
-  const dir = getCurrentQuizDirection();
-  const target = dir === 'ja2en' ? wordbookJa : wordbook;
-  const area = document.getElementById('quiz-area');
-  if (quizIndex >= quizWords.length) {
-    area.innerHTML = `
-      <div class="card quiz-result">
-        <div class="score">${quizScore}<span style="font-size:24px;color:var(--text-muted);">/${quizWords.length}</span></div>
-        <div class="score-label">問正解しました！</div>
-        <button class="btn-primary" id="quiz-restart-btn">もう一度テスト</button>
-      </div>`;
-    document.getElementById('quiz-restart-btn').addEventListener('click', startQuiz);
+  const dir = quizDir();
+  const target = wb(dir);
+  const area = $('quiz-area');
+  if (state.quizIdx >= state.quizWords.length) {
+    area.innerHTML = `<div class="card quiz-result"><div class="score">${state.quizScore}<span style="font-size:24px;color:var(--text-muted)">/${state.quizWords.length}</span></div><div class="score-label">問正解しました！</div><button class="btn-primary" id="quiz-restart">もう一度テスト</button></div>`;
+    $('quiz-restart').addEventListener('click', startQuiz);
     return;
   }
-  const q = quizWords[quizIndex];
-  const pct = Math.round((quizIndex / quizWords.length) * 100);
+  const q = state.quizWords[state.quizIdx];
+  const pct = Math.round(state.quizIdx / state.quizWords.length * 100);
   const wrongs = target.filter(w => w.word !== q.word).sort(() => Math.random() - 0.5).slice(0, 3);
-  const choices = [...wrongs.map(w => ({ text: getPrimaryMeaning(w), correct: false })), { text: getPrimaryMeaning(q), correct: true }]
-    .sort(() => Math.random() - 0.5);
-
-  const questionLabel = dir === 'ja2en' ? 'この単語の英訳はどれ？' : 'この単語の意味はどれ？';
-  const phoneticHtml = dir === 'en2ja' ? `<div class="quiz-phonetic">${sanitize(q.phonetic || '')}</div>` : '';
-
+  const choices = [...wrongs.map(w => ({ text:getPrimary(w), correct:false })), { text:getPrimary(q), correct:true }].sort(() => Math.random() - 0.5);
+  const phoneticHtml = dir === 'en2ja' ? `<div class="quiz-phonetic">${sanitize(q.phonetic||'')}</div>` : '';
   area.innerHTML = `
-    <div class="quiz-meta">
-      <span>${quizIndex + 1} / ${quizWords.length} 問</span>
-      <span style="color:var(--green);">正解 ${quizScore}</span>
-    </div>
+    <div class="quiz-meta"><span>${state.quizIdx+1} / ${state.quizWords.length} 問</span><span style="color:var(--green)">正解 ${state.quizScore}</span></div>
     <div class="quiz-progress-wrap"><div class="quiz-progress-bar" style="width:${pct}%"></div></div>
     <div class="card quiz-card">
-      <div class="quiz-word">${sanitize(q.word)}</div>
-      ${phoneticHtml}
-      <div style="font-size:14px;color:var(--text-faint);margin-bottom:20px;">${questionLabel}</div>
-      <div class="quiz-choices" id="quiz-choices-container"></div>
+      <div class="quiz-word">${sanitize(q.word)}</div>${phoneticHtml}
+      <div style="font-size:14px;color:var(--text-faint);margin-bottom:20px">${dir === 'ja2en' ? 'この単語の英訳はどれ？' : 'この単語の意味はどれ？'}</div>
+      <div class="quiz-choices" id="quiz-choices"></div>
     </div>
-    <button class="quiz-skip" id="quiz-skip-btn">スキップ →</button>
-  `;
-
-  choices.forEach((c, i) => {
-    const btn = document.createElement('button');
-    btn.className = 'quiz-choice';
-    btn.id = 'qc-' + i;
-    btn.textContent = c.text;
-    btn.addEventListener('click', function() { answerQuiz(c.correct, q.word, btn); });
-    document.getElementById('quiz-choices-container').appendChild(btn);
+    <button class="quiz-skip" id="quiz-skip">スキップ →</button>`;
+  const cc = $('quiz-choices');
+  choices.forEach(c => {
+    const b = document.createElement('button');
+    b.className = 'quiz-choice';
+    b.textContent = c.text;
+    b.addEventListener('click', () => answerQuiz(c.correct, q.word, b));
+    cc.appendChild(b);
   });
-
-  document.getElementById('quiz-skip-btn').addEventListener('click', nextQuiz);
+  $('quiz-skip').addEventListener('click', nextQuiz);
 }
 
 function answerQuiz(correct, wordStr, btn) {
-  const dir = getCurrentQuizDirection();
-  const target = dir === 'ja2en' ? wordbookJa : wordbook;
-  const stats = dir === 'ja2en' ? quizStatsJa : quizStats;
-  document.querySelectorAll('.quiz-choice').forEach(b => { b.disabled = true; });
+  const dir = quizDir();
+  const target = wb(dir);
+  const stT = stats(dir);
+  document.querySelectorAll('.quiz-choice').forEach(b => b.disabled = true);
   btn.classList.add(correct ? 'correct' : 'wrong');
   if (!correct) {
-    const correctMeaning = getPrimaryMeaning(target.find(w => w.word === wordStr));
-    document.querySelectorAll('.quiz-choice').forEach(b => {
-      if (b.textContent.trim() === correctMeaning) b.classList.add('correct');
-    });
+    const cm = getPrimary(target.find(w => w.word === wordStr));
+    document.querySelectorAll('.quiz-choice').forEach(b => { if (b.textContent.trim() === cm) b.classList.add('correct'); });
   } else {
-    quizScore++;
+    state.quizScore++;
   }
   const w = target.find(x => x.word === wordStr);
   if (w) { w.learned = correct; saveWordbook(dir); }
-  const key = safeKey(wordStr);
-  if (key) {
-    if (!stats[key]) stats[key] = { correct: 0, total: 0 };
-    stats[key].total++;
-    if (correct) stats[key].correct++;
-    safeSetItem(dir === 'ja2en' ? LS_STATS_JA : LS_STATS, JSON.stringify(stats));
-    saveQuizStatToSupabase(wordStr, stats[key].correct, stats[key].total, dir);
+  const k = safeKey(wordStr);
+  if (k) {
+    if (!stT[k]) stT[k] = { correct:0, total:0 };
+    stT[k].total++;
+    if (correct) stT[k].correct++;
+    safeSet(dir === 'ja2en' ? LS.STATS_JA : LS.STATS, JSON.stringify(stT));
+    saveQuizStatSb(wordStr, stT[k].correct, stT[k].total, dir);
   }
   setTimeout(nextQuiz, 1300);
 }
+const nextQuiz = () => { state.quizIdx++; renderQuiz(); };
 
-function nextQuiz() { quizIndex++; renderQuiz(); }
+// ===== Settings: Save =====
+function saveApiKey() {
+  const v = $('apikey-input').value.trim();
+  if (!v) return;
+  localStorage.setItem(LS.APIKEY, v);
+  updateApiStatus();
+  $('key-saved').style.display = 'block';
+  setTimeout(() => $('key-saved').style.display = 'none', 2000);
+}
 
-document.addEventListener('DOMContentLoaded', function() {
+async function saveSbConfig() {
+  const url = $('sb-url-input').value.trim().replace(/\/$/, '');
+  const key = $('sb-key-input').value.trim();
+  const uid = $('sb-userid-input').value.trim();
+  if (!url || !key) return;
+  if (!SB_URL_RE.test(url)) {
+    $('sb-error').textContent = 'エラー: URLはhttps://xxxx.supabase.coの形式で入力してください。';
+    $('sb-error').style.display = 'block';
+    return;
+  }
+  if (uid && !USER_ID_RE.test(uid)) {
+    $('sb-error').textContent = 'エラー: ユーザーIDは英数字・アンダースコア・ハイフンのみ、4〜64文字で入力してください。';
+    $('sb-error').style.display = 'block';
+    return;
+  }
+  if (uid) localStorage.setItem(LS.USER_ID, uid);
+  $('sb-status').textContent = '接続確認中...';
+  $('sb-saved').style.display = 'none';
+  $('sb-error').style.display = 'none';
+  try {
+    const res = await fetch(`${url}/rest/v1/wordbook?limit=1`, {
+      mode:'cors',
+      headers:{ apikey:key, Authorization:`Bearer ${key}`, 'Content-Type':'application/json' }
+    });
+    if (!res.ok) throw new Error(`接続失敗 (HTTP ${res.status})`);
+    localStorage.setItem(LS.SB_URL, url);
+    localStorage.setItem(LS.SB_KEY, key);
+    $('sb-status').textContent = '';
+    $('sb-saved').style.display = 'block';
+    updateSyncStatus();
+    showSbPanel();
+    await syncFromSb();
+    renderWordbook();
+    await fetchSbUsage();
+  } catch(e) {
+    $('sb-status').textContent = '';
+    $('sb-error').textContent = `エラー: ${e.message}`;
+    $('sb-error').style.display = 'block';
+  }
+}
+
+// ===== DB Usage =====
+function showSbPanel() {
+  const { url } = getSbConfig();
+  if (url) {
+    $('sb-usage-unconfigured').style.display = 'none';
+    $('sb-usage-configured').style.display = 'block';
+    const ref = url.replace('https://','').replace('.supabase.co','').replace(/[^a-zA-Z0-9\-]/g,'');
+    $('sb-dashboard-link').href = `https://supabase.com/dashboard/project/${ref}`;
+  } else {
+    $('sb-usage-unconfigured').style.display = 'block';
+    $('sb-usage-configured').style.display = 'none';
+  }
+}
+async function fetchSbUsage() {
+  const { url } = getSbConfig();
+  if (!url) return;
+  const uid = encodeURIComponent(getUserId());
+  ['sb-count-wordbook','sb-count-history','sb-count-stats',
+   'sb-count-wordbook-en2ja','sb-count-wordbook-ja2en',
+   'sb-count-history-en2ja','sb-count-history-ja2en',
+   'sb-count-stats-en2ja','sb-count-stats-ja2en'].forEach(id => {
+    const el = $(id);
+    if (el) el.textContent = '…';
+  });
+  $('sb-usage-error').style.display = 'none';
+  try {
+    const opts = { mode:'cors', headers:sbHeaders() };
+    const [wbRes, histRes, statRes] = await Promise.all([
+      fetch(`${url}/rest/v1/wordbook?user_id=eq.${uid}&select=word,direction`, opts),
+      fetch(`${url}/rest/v1/search_history?user_id=eq.${uid}&select=id,direction`, opts),
+      fetch(`${url}/rest/v1/quiz_stats?user_id=eq.${uid}&select=word,direction`, opts)
+    ]);
+    const [wbA, hA, sA] = await Promise.all([wbRes.json(), histRes.json(), statRes.json()]);
+    const count = a => {
+      if (!Array.isArray(a)) return { total:0, en2ja:0, ja2en:0 };
+      let en2ja = 0, ja2en = 0;
+      a.forEach(r => { if (r && r.direction === 'ja2en') ja2en++; else en2ja++; });
+      return { total:a.length, en2ja, ja2en };
+    };
+    const wbC = count(wbA), histC = count(hA), statC = count(sA);
+    $('sb-count-wordbook').textContent = wbC.total;
+    $('sb-count-wordbook-en2ja').textContent = wbC.en2ja;
+    $('sb-count-wordbook-ja2en').textContent = wbC.ja2en;
+    $('sb-count-history').textContent = histC.total;
+    $('sb-count-history-en2ja').textContent = histC.en2ja;
+    $('sb-count-history-ja2en').textContent = histC.ja2en;
+    $('sb-count-stats').textContent = statC.total;
+    $('sb-count-stats-en2ja').textContent = statC.en2ja;
+    $('sb-count-stats-ja2en').textContent = statC.ja2en;
+  } catch(e) {
+    $('sb-usage-error').textContent = '取得に失敗しました。';
+    $('sb-usage-error').style.display = 'block';
+  }
+}
+async function resetAllDb() {
+  if (!confirm('Supabase上の全データ（英→日・日→英の単語帳、検索履歴、クイズ統計）とこの端末のデータをすべて削除します。よろしいですか？')) return;
+  const { url } = getSbConfig();
+  const uid = encodeURIComponent(getUserId());
+  try {
+    if (url) {
+      await Promise.all([
+        sbFetch(`/wordbook?user_id=eq.${uid}`, { method:'DELETE' }),
+        sbFetch(`/search_history?user_id=eq.${uid}`, { method:'DELETE' }),
+        sbFetch(`/quiz_stats?user_id=eq.${uid}`, { method:'DELETE' })
+      ]);
+    }
+    state.wb.length = 0;
+    state.wbJa.length = 0;
+    state.hist = Object.create(null);
+    state.histJa = Object.create(null);
+    state.stats = Object.create(null);
+    state.statsJa = Object.create(null);
+    [LS.KEY, LS.KEY_JA].forEach(k => safeSet(k, '[]'));
+    [LS.HIST, LS.HIST_JA, LS.STATS, LS.STATS_JA].forEach(k => safeSet(k, '{}'));
+    renderWordbook();
+    await fetchSbUsage();
+    $('sb-reset-msg').style.display = 'block';
+    setTimeout(() => $('sb-reset-msg').style.display = 'none', 3000);
+  } catch(e) {
+    alert('リセット中にエラーが発生しました: ' + e.message);
+  }
+}
+
+// ===== Page navigation =====
+function showPage(name, btn) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  $('page-' + name).classList.add('active');
+  if (btn) btn.classList.add('active');
+  if (name === 'wordbook') renderWordbook();
+  else if (name === 'quiz') startQuiz();
+  else if (name === 'search') $('apikey-notice').style.display = getApiKey() ? 'none' : 'block';
+  else if (name === 'settings') {
+    $('apikey-input').value = getApiKey();
+    const { url, key } = getSbConfig();
+    $('sb-url-input').value = url;
+    $('sb-key-input').value = key;
+    $('sb-userid-input').value = getUserId();
+    showSbPanel();
+    if (url) fetchSbUsage();
+    updateStorage();
+  }
+}
+
+// ===== Direction toggles =====
+function setDirToggle(selector, dirAttr, lsKey, callback) {
+  const buttons = document.querySelectorAll(selector + ' button');
+  const current = localStorage.getItem(lsKey) || 'en2ja';
+  buttons.forEach(b => {
+    b.classList.toggle('active', b.dataset[dirAttr] === current);
+    b.addEventListener('click', () => {
+      const dir = b.dataset[dirAttr];
+      localStorage.setItem(lsKey, dir);
+      buttons.forEach(x => x.classList.toggle('active', x.dataset[dirAttr] === dir));
+      callback();
+    });
+  });
+}
+
+// ===== Search clear button =====
+function updateClearBtn() {
+  $('search-clear').classList.toggle('show', $('search-input').value.length > 0);
+}
+
+// ===== Init =====
+document.addEventListener('DOMContentLoaded', () => {
   updateApiStatus();
   updateSyncStatus();
-  updateStorageDisplay();
+  updateStorage();
 
-  document.querySelectorAll('.tab[data-page]').forEach(function(btn) {
-    btn.addEventListener('click', function() { showPage(btn.dataset.page, btn); });
+  // Tab navigation
+  document.querySelectorAll('.tab[data-page]').forEach(b =>
+    b.addEventListener('click', () => showPage(b.dataset.page, b))
+  );
+
+  // Search
+  $('search-btn').addEventListener('click', () => doSearch());
+  $('search-input').addEventListener('keyup', e => { if (e.key === 'Enter') doSearch(); });
+  $('search-input').addEventListener('input', updateClearBtn);
+  $('search-clear').addEventListener('click', () => {
+    $('search-input').value = '';
+    updateClearBtn();
+    $('search-input').focus();
   });
+  $('res-speak-btn').addEventListener('click', () => speak(state.currentWord && state.currentWord.word));
+  $('add-btn').addEventListener('click', addToWordbook);
 
-  var gotoBtn = document.querySelector('[data-goto="settings"]');
-  if (gotoBtn) gotoBtn.addEventListener('click', function() {
-    showPage('settings', null);
-  });
-
-  document.getElementById('sb-refresh-btn').addEventListener('click', fetchSbUsage);
-  document.getElementById('storage-refresh-btn').addEventListener('click', updateStorageDisplay);
-
-  // 歯車メニュー
-  const gearBtn = document.getElementById('gear-btn');
-  const gearMenu = document.getElementById('gear-menu');
-  gearBtn.addEventListener('click', function(e) {
-    e.stopPropagation();
-    gearMenu.style.display = gearMenu.style.display === 'block' ? 'none' : 'block';
-  });
-  document.addEventListener('click', function(e) {
-    if (!gearMenu.contains(e.target) && e.target !== gearBtn) {
-      gearMenu.style.display = 'none';
+  // Event delegation: speak buttons in dynamic content
+  document.body.addEventListener('click', e => {
+    const speakBtn = e.target.closest('[data-speak]');
+    if (speakBtn) { e.stopPropagation(); speak(speakBtn.dataset.speak); return; }
+    const synBtn = e.target.closest('[data-syn]');
+    if (synBtn) {
+      e.stopPropagation();
+      const s = synBtn.dataset.syn;
+      $('search-input').value = s;
+      updateClearBtn();
+      doSearchDirect(s);
+      showPage('search', document.querySelector('.tab[data-page="search"]'));
+      return;
+    }
+    const speakSelf = e.target.closest('[data-speak-self]');
+    if (speakSelf) {
+      e.stopPropagation();
+      const item = speakSelf.closest('.wl-item');
+      if (item) {
+        const word = item.querySelector('.wl-word').textContent;
+        speak(word);
+      }
     }
   });
-  document.getElementById('menu-settings').addEventListener('click', function() {
-    gearMenu.style.display = 'none';
-    showPage('settings', null);
-  });
-  document.getElementById('menu-version').addEventListener('click', function() {
-    gearMenu.style.display = 'none';
-    document.getElementById('version-modal').style.display = 'flex';
-  });
-  document.getElementById('version-close').addEventListener('click', function() {
-    document.getElementById('version-modal').style.display = 'none';
-  });
-  document.getElementById('version-modal').addEventListener('click', function(e) {
-    if (e.target === this) this.style.display = 'none';
+
+  // Wordbook & Quiz toggles
+  setDirToggle('#wl-toggle', 'wlDir', LS.WL_DIR, renderWordbook);
+  setDirToggle('#quiz-toggle', 'quizDir', LS.QUIZ_DIR, startQuiz);
+
+  // Wordbook clear
+  $('wl-clear').addEventListener('click', clearWordbook);
+
+  // Settings
+  $('save-api-btn').addEventListener('click', saveApiKey);
+  $('save-sb-btn').addEventListener('click', saveSbConfig);
+  $('reset-wl-btn').addEventListener('click', clearWordbook);
+  $('sb-refresh-btn').addEventListener('click', fetchSbUsage);
+  $('sb-reset-btn').addEventListener('click', resetAllDb);
+  $('storage-refresh-btn').addEventListener('click', updateStorage);
+
+  // User ID copy
+  $('sb-userid-copy').addEventListener('click', () => {
+    const v = $('sb-userid-input').value;
+    if (!v) return;
+    navigator.clipboard.writeText(v).then(() => {
+      const b = $('sb-userid-copy');
+      b.textContent = 'コピー済！';
+      setTimeout(() => b.textContent = 'コピー', 2000);
+    }).catch(() => $('sb-userid-input').select());
   });
 
-  // 単語帳トグル
-  document.querySelectorAll('[data-wl-dir]').forEach(btn => {
-    btn.addEventListener('click', function() {
-      const dir = btn.getAttribute('data-wl-dir');
-      localStorage.setItem(LS_WL_DIR, dir);
-      document.querySelectorAll('[data-wl-dir]').forEach(b => {
-        if (b.getAttribute('data-wl-dir') === dir) {
-          b.classList.add('active');
-          b.style.background = 'var(--accent)';
-          b.style.color = '#fff';
-        } else {
-          b.classList.remove('active');
-          b.style.background = 'transparent';
-          b.style.color = 'var(--text-muted)';
-        }
-      });
-      renderWordbook();
-    });
+  // Goto settings
+  document.querySelector('[data-goto="settings"]').addEventListener('click', () => showPage('settings', null));
+
+  // Gear menu
+  const gearBtn = $('gear-btn'), gearMenu = $('gear-menu');
+  gearBtn.addEventListener('click', e => { e.stopPropagation(); gearMenu.classList.toggle('open'); });
+  document.addEventListener('click', e => {
+    if (!gearMenu.contains(e.target) && e.target !== gearBtn) gearMenu.classList.remove('open');
+  });
+  gearMenu.querySelectorAll('button').forEach(b =>
+    b.addEventListener('click', () => {
+      gearMenu.classList.remove('open');
+      if (b.dataset.menu === 'settings') showPage('settings', null);
+      else $('version-modal').classList.add('open');
+    })
+  );
+
+  // Modal
+  document.querySelectorAll('[data-close-modal]').forEach(b =>
+    b.addEventListener('click', () => $('version-modal').classList.remove('open'))
+  );
+  $('version-modal').addEventListener('click', e => {
+    if (e.target === e.currentTarget) e.currentTarget.classList.remove('open');
   });
 
-  // クイズトグル
-  document.querySelectorAll('[data-quiz-dir]').forEach(btn => {
-    btn.addEventListener('click', function() {
-      const dir = btn.getAttribute('data-quiz-dir');
-      localStorage.setItem(LS_QUIZ_DIR, dir);
-      document.querySelectorAll('[data-quiz-dir]').forEach(b => {
-        if (b.getAttribute('data-quiz-dir') === dir) {
-          b.classList.add('active');
-          b.style.background = 'var(--accent)';
-          b.style.color = '#fff';
-        } else {
-          b.classList.remove('active');
-          b.style.background = 'transparent';
-          b.style.color = 'var(--text-muted)';
-        }
-      });
-      startQuiz();
-    });
-  });
-
-  // 起動時にトグルの状態を復元
-  const wlDir = localStorage.getItem(LS_WL_DIR) || 'en2ja';
-  document.querySelectorAll('[data-wl-dir]').forEach(b => {
-    if (b.getAttribute('data-wl-dir') === wlDir) {
-      b.classList.add('active');
-      b.style.background = 'var(--accent)';
-      b.style.color = '#fff';
-    } else {
-      b.classList.remove('active');
-      b.style.background = 'transparent';
-      b.style.color = 'var(--text-muted)';
-    }
-  });
-  const quizDir = localStorage.getItem(LS_QUIZ_DIR) || 'en2ja';
-  document.querySelectorAll('[data-quiz-dir]').forEach(b => {
-    if (b.getAttribute('data-quiz-dir') === quizDir) {
-      b.classList.add('active');
-      b.style.background = 'var(--accent)';
-      b.style.color = '#fff';
-    } else {
-      b.classList.remove('active');
-      b.style.background = 'transparent';
-      b.style.color = 'var(--text-muted)';
-    }
-  });
-  document.getElementById('sb-reset-btn').addEventListener('click', resetAllDbData);
-  document.getElementById('sb-userid-copy-btn').addEventListener('click', function() {
-    const val = document.getElementById('sb-userid-input').value;
-    if (!val) return;
-    navigator.clipboard.writeText(val).then(() => {
-      const btn = document.getElementById('sb-userid-copy-btn');
-      btn.textContent = 'コピー済！';
-      setTimeout(() => { btn.textContent = 'コピー'; }, 2000);
-    }).catch(() => {
-      document.getElementById('sb-userid-input').select();
-    });
-  });
-  document.getElementById('search-btn').addEventListener('click', function() { doSearch(); });
-  document.getElementById('search-input').addEventListener('keyup', function(e) { if (e.key === 'Enter') doSearch(); });
-
-  const searchInput = document.getElementById('search-input');
-  const searchClearBtn = document.getElementById('search-clear-btn');
-  function updateClearBtnVisibility() {
-    searchClearBtn.style.display = searchInput.value.length > 0 ? 'flex' : 'none';
-  }
-  searchInput.addEventListener('input', updateClearBtnVisibility);
-  searchClearBtn.addEventListener('click', function() {
-    searchInput.value = '';
-    updateClearBtnVisibility();
-    searchInput.focus();
-  });
-  updateClearBtnVisibility();
-  document.querySelector('[data-action="speak"]').addEventListener('click', speakWord);
-  document.querySelector('[data-action="add"]').addEventListener('click', addToWordbook);
-  document.querySelector('[data-action="clear-wl"]').addEventListener('click', clearWordbook);
-  document.querySelector('[data-action="save-api"]').addEventListener('click', saveApiKey);
-  document.querySelector('[data-action="save-sb"]').addEventListener('click', saveSupabaseConfig);
-  document.querySelector('[data-action="reset-wl"]').addEventListener('click', clearWordbook);
-
-  const savedKey = getApiKey();
-  if (!savedKey) document.getElementById('apikey-notice').style.display = 'block';
-  const { url: sbUrl } = getSupabaseConfig();
-  if (sbUrl) {
-    showSbUsagePanel();
-    syncWordbookFromSupabase();
+  // Initial load
+  if (!getApiKey()) $('apikey-notice').style.display = 'block';
+  if (getSbConfig().url) {
+    showSbPanel();
+    syncFromSb();
     fetchSbUsage();
   }
 });
