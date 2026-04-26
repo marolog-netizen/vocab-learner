@@ -252,6 +252,9 @@
     border-left: 3px solid var(--amber);
   }
 
+  .badge-en2ja { background: var(--accent-light); color: var(--accent); }
+  .badge-ja2en { background: #fce8d4; color: #8a4a00; }
+
   .search-count-badge {
     font-size: 12px; font-weight: 500;
     padding: 4px 10px;
@@ -469,6 +472,72 @@
     </div>
     <span class="app-title">Vocab Learner</span>
     <span class="api-status" id="api-status">APIキー未設定</span>
+    <div style="position:relative;">
+      <button id="gear-btn" aria-label="メニュー" style="background:none;border:none;cursor:pointer;padding:6px;display:flex;align-items:center;justify-content:center;color:var(--text-muted);border-radius:50%;">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+          <path d="M10 13.5a3.5 3.5 0 100-7 3.5 3.5 0 000 7z" stroke="currentColor" stroke-width="1.4"/>
+          <path d="M16.5 10c0-.4 0-.8-.1-1.2l1.7-1.3-1.7-2.9-2 .8c-.6-.5-1.3-.9-2-1.2L12 2H8l-.4 2.2c-.7.3-1.4.7-2 1.2l-2-.8L1.9 7.5l1.7 1.3c-.1.4-.1.8-.1 1.2s0 .8.1 1.2L1.9 12.5l1.7 2.9 2-.8c.6.5 1.3.9 2 1.2L8 18h4l.4-2.2c.7-.3 1.4-.7 2-1.2l2 .8 1.7-2.9-1.7-1.3c.1-.4.1-.8.1-1.2z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>
+        </svg>
+      </button>
+      <div id="gear-menu" style="display:none;position:absolute;top:calc(100% + 4px);right:0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);box-shadow:0 4px 16px rgba(0,0,0,0.1);min-width:160px;z-index:100;overflow:hidden;">
+        <button id="menu-settings" style="display:block;width:100%;padding:10px 14px;border:none;background:transparent;text-align:left;cursor:pointer;font-size:14px;color:var(--text);font-family:inherit;">設定</button>
+        <button id="menu-version" style="display:block;width:100%;padding:10px 14px;border:none;background:transparent;text-align:left;cursor:pointer;font-size:14px;color:var(--text);font-family:inherit;border-top:1px solid var(--border);">バージョン情報</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="version-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:1000;align-items:flex-start;justify-content:center;padding:20px;overflow-y:auto;">
+    <div style="background:var(--surface);border-radius:var(--radius);max-width:480px;width:100%;padding:24px;margin:auto;box-shadow:0 10px 40px rgba(0,0,0,0.2);">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+        <div>
+          <div style="font-family:Georgia,'Times New Roman',serif;font-size:22px;color:var(--text);">Vocab Learner</div>
+          <div style="font-size:13px;color:var(--text-muted);margin-top:2px;">Version 1.0.0</div>
+        </div>
+        <button id="version-close" aria-label="閉じる" style="background:none;border:none;cursor:pointer;font-size:22px;color:var(--text-muted);padding:4px 8px;line-height:1;">×</button>
+      </div>
+      <div style="font-size:14px;color:var(--text);line-height:1.7;">
+        <div style="font-weight:500;margin-bottom:6px;color:var(--text);">🔍 検索機能</div>
+        <ul style="margin:0 0 14px 18px;color:var(--text-muted);font-size:13px;">
+          <li>英単語・日本語の自動判別検索</li>
+          <li>スペルミス候補の表示・選択</li>
+          <li>複数の意味・品詞・例文（Cambridge Dictionary形式）</li>
+          <li>類語タグ＋ニュアンス解説</li>
+          <li>使用年代の表示</li>
+          <li>発音記号・「発音を聞く」ボタン</li>
+          <li>検索回数・履歴表示</li>
+          <li>単語帳キャッシュ利用でAPI節約</li>
+          <li>検索窓クリアボタン</li>
+        </ul>
+        <div style="font-weight:500;margin-bottom:6px;color:var(--text);">📚 単語帳機能</div>
+        <ul style="margin:0 0 14px 18px;color:var(--text-muted);font-size:13px;">
+          <li>英→日 / 日→英のトグル切替</li>
+          <li>単語タップで詳細展開（意味・例文・類語・発音）</li>
+          <li>習得済み／未習得バッジ</li>
+          <li>検索回数・最終検索日の表示</li>
+          <li>削除時に検索履歴もリセット</li>
+        </ul>
+        <div style="font-weight:500;margin-bottom:6px;color:var(--text);">🎯 テスト機能</div>
+        <ul style="margin:0 0 14px 18px;color:var(--text-muted);font-size:13px;">
+          <li>英→日 / 日→英のトグル切替</li>
+          <li>4択クイズ（最大10問）</li>
+          <li>間違いが多い・古い単語を優先出題</li>
+        </ul>
+        <div style="font-weight:500;margin-bottom:6px;color:var(--text);">⚙️ 設定・同期</div>
+        <ul style="margin:0 0 14px 18px;color:var(--text-muted);font-size:13px;">
+          <li>Anthropic APIキー管理</li>
+          <li>Supabaseによる端末間リアルタイム同期</li>
+          <li>DB使用状況（方向別内訳付き）</li>
+          <li>ローカルストレージ使用状況表示</li>
+          <li>クレジット残高確認・追加リンク</li>
+        </ul>
+        <div style="font-weight:500;margin-bottom:6px;color:var(--text);">🛡️ セキュリティ</div>
+        <ul style="margin:0 0 4px 18px;color:var(--text-muted);font-size:13px;">
+          <li>XSS対策・正規表現エスケープ・プロトタイプ汚染防止</li>
+          <li>CSP・ReDoS対策・URLバリデーション</li>
+          <li>Supabase RLS・暗号学的乱数によるユーザーID生成</li>
+        </ul>
+      </div>
+    </div>
   </div>
 
   <!-- Tab bar -->
@@ -476,7 +545,6 @@
     <button class="tab active" data-page="search">検索</button>
     <button class="tab" data-page="wordbook">単語帳</button>
     <button class="tab" data-page="quiz">テスト</button>
-    <button class="tab" data-page="settings">設定</button>
   </div>
 
   <!-- 検索ページ -->
@@ -486,7 +554,10 @@
       <button class="btn-primary" data-goto="settings">設定へ →</button>
     </div>
     <div class="search-wrap">
-      <input type="text" id="search-input" placeholder="英単語を入力..." maxlength="100" onkeydown="if(event.key==='Enter') doSearch()"/>
+      <div style="flex:1;position:relative;display:flex;">
+        <input type="text" id="search-input" placeholder="英単語または日本語を入力..." maxlength="100" style="width:100%;padding-right:36px;" onkeydown="if(event.key==='Enter') doSearch()"/>
+        <button id="search-clear-btn" type="button" aria-label="クリア" style="display:none;position:absolute;right:8px;top:50%;transform:translateY(-50%);width:22px;height:22px;border-radius:50%;border:none;background:var(--text-faint);color:#fff;cursor:pointer;padding:0;font-size:13px;line-height:1;display:none;align-items:center;justify-content:center;">×</button>
+      </div>
       <button class="btn-primary" id="search-btn">調べる</button>
     </div>
     <div id="search-error" class="error-msg" style="display:none;"></div>
@@ -499,19 +570,23 @@
     </div>
     <div id="result-area" style="display:none;">
       <div class="card">
-        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px;">
-          <div class="word-header" style="margin-bottom:0;flex:1;">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px;flex-wrap:wrap;gap:6px;">
+          <div class="word-header" style="margin-bottom:0;flex:1;min-width:0;">
             <span class="word-title" id="res-word"></span>
             <span class="word-phonetic" id="res-phonetic"></span>
             <span class="word-pos" id="res-pos"></span>
           </div>
-          <span class="search-count-badge" id="res-search-count" style="margin-left:10px;flex-shrink:0;"></span>
+          <div style="display:flex;gap:6px;flex-shrink:0;align-items:center;">
+            <span class="direction-badge" id="res-direction-badge" style="font-size:11px;padding:3px 8px;border-radius:20px;font-weight:500;"></span>
+            <span class="search-count-badge" id="res-search-count"></span>
+          </div>
         </div>
         <div id="res-definitions"></div>
         <div id="res-meta" style="display:none;">
           <div id="res-synonyms-wrap">
             <div class="section-label">類語</div>
             <div id="res-synonyms"></div>
+            <div id="res-synonyms-nuance" style="display:none;font-size:13px;color:var(--text-muted);line-height:1.7;margin-top:8px;padding:10px 12px;background:var(--bg);border-radius:var(--radius-sm);border-left:3px solid var(--accent);"></div>
           </div>
           <div id="res-era-wrap" style="margin-top:10px;">
             <div class="section-label">使用年代</div>
@@ -539,6 +614,10 @@
 
   <!-- 単語帳ページ -->
   <div id="page-wordbook" class="page">
+    <div class="dir-toggle" style="display:flex;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:4px;gap:4px;margin-bottom:16px;box-shadow:var(--shadow);">
+      <button class="dir-toggle-btn active" data-wl-dir="en2ja" style="flex:1;padding:8px 6px;border:none;border-radius:10px;font-family:inherit;font-size:13px;font-weight:500;cursor:pointer;background:var(--accent);color:#fff;">英 → 日</button>
+      <button class="dir-toggle-btn" data-wl-dir="ja2en" style="flex:1;padding:8px 6px;border:none;border-radius:10px;font-family:inherit;font-size:13px;font-weight:500;cursor:pointer;background:transparent;color:var(--text-muted);">日 → 英</button>
+    </div>
     <div class="wl-header">
       <span class="wl-count" id="wl-count">0 単語</span>
       <button class="btn-danger" data-action="clear-wl">すべて削除</button>
@@ -550,6 +629,10 @@
 
   <!-- テストページ -->
   <div id="page-quiz" class="page">
+    <div class="dir-toggle" style="display:flex;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:4px;gap:4px;margin-bottom:16px;box-shadow:var(--shadow);">
+      <button class="dir-toggle-btn active" data-quiz-dir="en2ja" style="flex:1;padding:8px 6px;border:none;border-radius:10px;font-family:inherit;font-size:13px;font-weight:500;cursor:pointer;background:var(--accent);color:#fff;">英 → 日</button>
+      <button class="dir-toggle-btn" data-quiz-dir="ja2en" style="flex:1;padding:8px 6px;border:none;border-radius:10px;font-family:inherit;font-size:13px;font-weight:500;cursor:pointer;background:transparent;color:var(--text-muted);">日 → 英</button>
+    </div>
     <div id="quiz-area"></div>
   </div>
 
@@ -596,23 +679,33 @@
         </div>
         <div id="sb-usage-unconfigured" style="font-size:13px;color:var(--text-faint);margin-bottom:10px;">Supabaseを設定すると使用状況が表示されます。</div>
         <div id="sb-usage-configured" style="display:none;">
-          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px;">
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:6px;">
             <div style="background:var(--bg);border-radius:var(--radius-sm);padding:10px;text-align:center;">
               <div style="font-size:11px;color:var(--text-faint);margin-bottom:4px;">単語帳</div>
               <div id="sb-count-wordbook" style="font-size:20px;font-weight:500;color:var(--text);">-</div>
-              <div style="font-size:11px;color:var(--text-faint);">件</div>
+              <div style="font-size:10px;color:var(--text-faint);line-height:1.4;">
+                <span style="color:var(--accent);">英→日</span>: <span id="sb-count-wordbook-en2ja">-</span><br>
+                <span style="color:#8a4a00;">日→英</span>: <span id="sb-count-wordbook-ja2en">-</span>
+              </div>
             </div>
             <div style="background:var(--bg);border-radius:var(--radius-sm);padding:10px;text-align:center;">
               <div style="font-size:11px;color:var(--text-faint);margin-bottom:4px;">検索履歴</div>
               <div id="sb-count-history" style="font-size:20px;font-weight:500;color:var(--text);">-</div>
-              <div style="font-size:11px;color:var(--text-faint);">件</div>
+              <div style="font-size:10px;color:var(--text-faint);line-height:1.4;">
+                <span style="color:var(--accent);">英→日</span>: <span id="sb-count-history-en2ja">-</span><br>
+                <span style="color:#8a4a00;">日→英</span>: <span id="sb-count-history-ja2en">-</span>
+              </div>
             </div>
             <div style="background:var(--bg);border-radius:var(--radius-sm);padding:10px;text-align:center;">
               <div style="font-size:11px;color:var(--text-faint);margin-bottom:4px;">クイズ統計</div>
               <div id="sb-count-stats" style="font-size:20px;font-weight:500;color:var(--text);">-</div>
-              <div style="font-size:11px;color:var(--text-faint);">件</div>
+              <div style="font-size:10px;color:var(--text-faint);line-height:1.4;">
+                <span style="color:var(--accent);">英→日</span>: <span id="sb-count-stats-en2ja">-</span><br>
+                <span style="color:#8a4a00;">日→英</span>: <span id="sb-count-stats-ja2en">-</span>
+              </div>
             </div>
           </div>
+          <div style="font-size:11px;color:var(--text-faint);text-align:center;margin-bottom:12px;">大きい数字は合計件数</div>
           <div id="sb-usage-error" style="display:none;font-size:12px;color:var(--red);margin-bottom:8px;"></div>
           <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
             <a id="sb-dashboard-link" href="#" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;gap:6px;padding:8px 14px;background:var(--accent-light);border:1px solid rgba(42,92,170,0.25);border-radius:var(--radius-sm);font-size:13px;font-weight:500;color:var(--accent);text-decoration:none;">
@@ -645,8 +738,32 @@
         </a>
       </div>
     </div>
+
+    <div class="card" style="margin-top:4px;">
+      <div style="font-size:15px;font-weight:500;margin-bottom:10px;color:var(--text);">単語帳データ</div>
       <button class="btn-danger" style="font-size:14px;padding:9px 14px;border:1px solid rgba(176,48,48,0.25);border-radius:var(--radius-sm);background:var(--red-light);" data-action="reset-wl">単語帳をリセット</button>
     </div>
+
+    <div class="card" style="margin-top:4px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+        <span style="font-size:15px;font-weight:500;color:var(--text);">ローカルストレージ使用状況</span>
+        <button id="storage-refresh-btn" style="font-size:12px;padding:4px 10px;border-radius:20px;border:1px solid var(--border-strong);background:var(--bg);color:var(--text-muted);cursor:pointer;">更新</button>
+      </div>
+      <p style="font-size:13px;color:var(--text-muted);line-height:1.7;margin-bottom:14px;">
+        この端末のブラウザに保存されているデータの容量を表示します。容量が上限に近づいたら、古い単語の削除をご検討ください。
+      </p>
+      <div style="background:var(--bg);border-radius:var(--radius-sm);padding:14px;margin-bottom:10px;">
+        <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px;">
+          <span style="font-size:13px;color:var(--text-muted);">使用量</span>
+          <span id="storage-usage-text" style="font-size:14px;font-weight:500;color:var(--text);">-</span>
+        </div>
+        <div style="height:8px;background:var(--border);border-radius:4px;overflow:hidden;">
+          <div id="storage-usage-bar" style="height:100%;width:0%;background:var(--accent);transition:width 0.3s, background 0.3s;border-radius:4px;"></div>
+        </div>
+        <div id="storage-usage-status" style="font-size:12px;color:var(--text-faint);margin-top:8px;line-height:1.5;">読み込み中...</div>
+      </div>
+    </div>
+
   </div>
 
 </div>
@@ -666,17 +783,103 @@ function escapeRegex(str) {
   return String(str || '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
+const STORAGE_QUOTA_LIMIT = 4 * 1024 * 1024; // 4MB（5MBブラウザの安全マージン）
+const STORAGE_WARN_THRESHOLD = 0.8; // 80%超過で警告
+let _quotaWarningShown = false;
+
+function getStorageUsage() {
+  let total = 0;
+  try {
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i);
+      if (k && k.startsWith('vocabApp_')) {
+        const v = localStorage.getItem(k);
+        total += (k.length + (v ? v.length : 0)) * 2; // UTF-16なので×2
+      }
+    }
+  } catch(e) {}
+  return total;
+}
+
+function safeSetItem(key, value) {
+  try {
+    localStorage.setItem(key, value);
+    updateStorageDisplay();
+    return true;
+  } catch(e) {
+    if (e.name === 'QuotaExceededError' || e.code === 22 || e.code === 1014) {
+      showStorageError();
+      return false;
+    }
+    throw e;
+  }
+}
+
+function formatBytes(bytes) {
+  if (bytes < 1024) return bytes + ' B';
+  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+  return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
+}
+
+function updateStorageDisplay() {
+  const usage = getStorageUsage();
+  const ratio = usage / STORAGE_QUOTA_LIMIT;
+  const pct = Math.min(100, Math.round(ratio * 100));
+  const bar = document.getElementById('storage-usage-bar');
+  const text = document.getElementById('storage-usage-text');
+  const status = document.getElementById('storage-usage-status');
+  if (!bar || !text || !status) return;
+  text.textContent = `${formatBytes(usage)} / ${formatBytes(STORAGE_QUOTA_LIMIT)} (${pct}%)`;
+  bar.style.width = pct + '%';
+  if (ratio >= 1) {
+    bar.style.background = 'var(--red)';
+    status.textContent = '⚠️ 容量が上限に達しました。古い単語を削除してください。';
+    status.style.color = 'var(--red)';
+  } else if (ratio >= STORAGE_WARN_THRESHOLD) {
+    bar.style.background = 'var(--amber)';
+    status.textContent = `⚠️ 使用量が ${pct}% に達しています。古い単語の削除をご検討ください。`;
+    status.style.color = 'var(--amber)';
+  } else {
+    bar.style.background = 'var(--accent)';
+    status.textContent = `余裕があります（残り約 ${formatBytes(STORAGE_QUOTA_LIMIT - usage)}）`;
+    status.style.color = 'var(--text-faint)';
+  }
+}
+
+function showStorageError() {
+  if (_quotaWarningShown) return;
+  _quotaWarningShown = true;
+  alert('ストレージ容量が上限に達しました。古い単語を削除してから再度お試しください。');
+  setTimeout(() => { _quotaWarningShown = false; }, 5000);
+}
+
 const LS_KEY = 'vocabApp_words';
+const LS_KEY_JA = 'vocabApp_words_ja';
 const LS_APIKEY = 'vocabApp_apikey';
 const LS_HISTORY = 'vocabApp_history';
+const LS_HISTORY_JA = 'vocabApp_history_ja';
 const LS_STATS = 'vocabApp_quizStats';
+const LS_STATS_JA = 'vocabApp_quizStats_ja';
 const LS_SB_URL = 'vocabApp_sbUrl';
 const LS_SB_KEY = 'vocabApp_sbKey';
 const LS_USER_ID = 'vocabApp_userId';
+const LS_WL_DIR = 'vocabApp_wlDirection';
+const LS_QUIZ_DIR = 'vocabApp_quizDirection';
 
 let wordbook = (() => { try { return JSON.parse(localStorage.getItem(LS_KEY) || '[]'); } catch(e) { return []; } })();
+let wordbookJa = (() => { try { return JSON.parse(localStorage.getItem(LS_KEY_JA) || '[]'); } catch(e) { return []; } })();
 let searchHistory = (() => { try { const d = JSON.parse(localStorage.getItem(LS_HISTORY) || '{}'); return Object.assign(Object.create(null), d); } catch(e) { return Object.create(null); } })();
+let searchHistoryJa = (() => { try { const d = JSON.parse(localStorage.getItem(LS_HISTORY_JA) || '{}'); return Object.assign(Object.create(null), d); } catch(e) { return Object.create(null); } })();
 let quizStats = (() => { try { const d = JSON.parse(localStorage.getItem(LS_STATS) || '{}'); return Object.assign(Object.create(null), d); } catch(e) { return Object.create(null); } })();
+let quizStatsJa = (() => { try { const d = JSON.parse(localStorage.getItem(LS_STATS_JA) || '{}'); return Object.assign(Object.create(null), d); } catch(e) { return Object.create(null); } })();
+
+function isJapanese(text) {
+  return /[ぁ-んァ-ヶー一-龯々]/.test(text);
+}
+
+function getDirection(text) {
+  return isJapanese(text) ? 'ja2en' : 'en2ja';
+}
 
 function getUserId() {
   let id = localStorage.getItem(LS_USER_ID);
@@ -713,72 +916,89 @@ async function syncWordbookFromSupabase() {
     const userId = encodeURIComponent(getUserId());
     const rows = await sbFetch(`/wordbook?user_id=eq.${userId}&order=added_at.desc`);
     if (!Array.isArray(rows)) return;
-    wordbook = rows
+    const en = [], ja = [];
+    rows
       .filter(r => r && typeof r.word === 'string' && r.word.length > 0 && r.word.length <= 100)
-      .map(r => ({
-        word: String(r.word),
-        phonetic: typeof r.phonetic === 'string' ? r.phonetic : '',
-        definitions: Array.isArray(r.definitions) ? r.definitions : [],
-        synonyms: Array.isArray(r.synonyms) ? r.synonyms : [],
-        era: typeof r.era === 'string' ? r.era : '',
-        learned: !!r.learned,
-        addedAt: r.added_at ? new Date(r.added_at).getTime() : Date.now()
-      }));
-    localStorage.setItem(LS_KEY, JSON.stringify(wordbook));
+      .forEach(r => {
+        const item = {
+          word: String(r.word),
+          phonetic: typeof r.phonetic === 'string' ? r.phonetic : '',
+          definitions: Array.isArray(r.definitions) ? r.definitions : [],
+          synonyms: Array.isArray(r.synonyms) ? r.synonyms : [],
+          synonymsNuance: typeof r.synonymsNuance === 'string' ? r.synonymsNuance : '',
+          era: typeof r.era === 'string' ? r.era : '',
+          learned: !!r.learned,
+          addedAt: r.added_at ? new Date(r.added_at).getTime() : Date.now()
+        };
+        if (r.direction === 'ja2en') ja.push(item);
+        else en.push(item);
+      });
+    wordbook = en;
+    wordbookJa = ja;
+    safeSetItem(LS_KEY, JSON.stringify(wordbook));
+    safeSetItem(LS_KEY_JA, JSON.stringify(wordbookJa));
 
     const statRows = await sbFetch(`/quiz_stats?user_id=eq.${userId}`);
     if (Array.isArray(statRows)) {
       quizStats = Object.create(null);
+      quizStatsJa = Object.create(null);
       statRows.forEach(r => {
         if (!r || typeof r.word !== 'string') return;
         const key = safeKey(r.word);
-        if (key) quizStats[key] = {
+        if (!key) return;
+        const target = r.direction === 'ja2en' ? quizStatsJa : quizStats;
+        target[key] = {
           correct: Number.isFinite(r.correct) ? r.correct : 0,
           total: Number.isFinite(r.total) ? r.total : 0
         };
       });
-      localStorage.setItem(LS_STATS, JSON.stringify(quizStats));
+      safeSetItem(LS_STATS, JSON.stringify(quizStats));
+      safeSetItem(LS_STATS_JA, JSON.stringify(quizStatsJa));
     }
   } catch(e) { }
 }
 
-async function saveWordbook() {
-  localStorage.setItem(LS_KEY, JSON.stringify(wordbook));
+async function saveWordbook(direction) {
+  const dir = direction || 'en2ja';
+  const target = dir === 'ja2en' ? wordbookJa : wordbook;
+  safeSetItem(dir === 'ja2en' ? LS_KEY_JA : LS_KEY, JSON.stringify(target));
   const { url } = getSupabaseConfig();
   if (!url) return;
-  const userId = encodeURIComponent(getUserId());
-  for (const w of wordbook) {
+  for (const w of target) {
     try {
       await sbFetch('/wordbook', {
         method: 'POST',
         headers: { 'Prefer': 'resolution=merge-duplicates' },
-        body: JSON.stringify({ user_id: getUserId(), word: w.word, phonetic: w.phonetic || '', definitions: w.definitions || [], learned: w.learned, added_at: new Date(w.addedAt).toISOString() })
+        body: JSON.stringify({ user_id: getUserId(), word: w.word, phonetic: w.phonetic || '', definitions: w.definitions || [], learned: w.learned, direction: dir, added_at: new Date(w.addedAt).toISOString() })
       });
     } catch(e) { }
   }
 }
 
-async function deleteWordFromSupabase(word) {
+async function deleteWordFromSupabase(word, direction) {
   const { url } = getSupabaseConfig();
   if (!url) return;
   const userId = encodeURIComponent(getUserId());
-  try { await sbFetch(`/wordbook?user_id=eq.${userId}&word=eq.${encodeURIComponent(word)}`, { method: 'DELETE' }); } catch(e) { }
+  const dir = direction || getDirection(word);
+  try { await sbFetch(`/wordbook?user_id=eq.${userId}&word=eq.${encodeURIComponent(word)}&direction=eq.${dir}`, { method: 'DELETE' }); } catch(e) { }
 }
 
-async function saveSearchHistoryToSupabase(word) {
+async function saveSearchHistoryToSupabase(word, direction) {
   const { url } = getSupabaseConfig();
   if (!url) return;
-  try { await sbFetch('/search_history', { method: 'POST', body: JSON.stringify({ user_id: getUserId(), word: word, searched_at: new Date().toISOString() }) }); } catch(e) { }
+  const dir = direction || getDirection(word);
+  try { await sbFetch('/search_history', { method: 'POST', body: JSON.stringify({ user_id: getUserId(), word: word, direction: dir, searched_at: new Date().toISOString() }) }); } catch(e) { }
 }
 
-async function saveQuizStatToSupabase(word, correct, total) {
+async function saveQuizStatToSupabase(word, correct, total, direction) {
   const { url } = getSupabaseConfig();
   if (!url) return;
+  const dir = direction || getDirection(word);
   try {
     await sbFetch('/quiz_stats', {
       method: 'POST',
       headers: { 'Prefer': 'resolution=merge-duplicates' },
-      body: JSON.stringify({ user_id: getUserId(), word: word, correct, total })
+      body: JSON.stringify({ user_id: getUserId(), word: word, correct, total, direction: dir })
     });
   } catch(e) { }
 }
@@ -851,20 +1071,47 @@ async function fetchSbUsage() {
   const userId = encodeURIComponent(getUserId());
   const errEl = document.getElementById('sb-usage-error');
   errEl.style.display = 'none';
-  document.getElementById('sb-count-wordbook').textContent = '…';
-  document.getElementById('sb-count-history').textContent = '…';
-  document.getElementById('sb-count-stats').textContent = '…';
+  ['sb-count-wordbook','sb-count-history','sb-count-stats',
+   'sb-count-wordbook-en2ja','sb-count-wordbook-ja2en',
+   'sb-count-history-en2ja','sb-count-history-ja2en',
+   'sb-count-stats-en2ja','sb-count-stats-ja2en'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = '…';
+  });
   try {
     const fetchOpts = { mode: 'cors', headers: sbHeaders() };
     const [wbRes, histRes, statRes] = await Promise.all([
-      fetch(`${url}/rest/v1/wordbook?user_id=eq.${userId}&select=word`, fetchOpts),
-      fetch(`${url}/rest/v1/search_history?user_id=eq.${userId}&select=id`, fetchOpts),
-      fetch(`${url}/rest/v1/quiz_stats?user_id=eq.${userId}&select=word`, fetchOpts)
+      fetch(`${url}/rest/v1/wordbook?user_id=eq.${userId}&select=word,direction`, fetchOpts),
+      fetch(`${url}/rest/v1/search_history?user_id=eq.${userId}&select=id,direction`, fetchOpts),
+      fetch(`${url}/rest/v1/quiz_stats?user_id=eq.${userId}&select=word,direction`, fetchOpts)
     ]);
     const [wb, hist, stat] = await Promise.all([wbRes.json(), histRes.json(), statRes.json()]);
-    document.getElementById('sb-count-wordbook').textContent = Array.isArray(wb) ? wb.length : '-';
-    document.getElementById('sb-count-history').textContent = Array.isArray(hist) ? hist.length : '-';
-    document.getElementById('sb-count-stats').textContent = Array.isArray(stat) ? stat.length : '-';
+
+    function countByDir(arr) {
+      if (!Array.isArray(arr)) return { total: 0, en2ja: 0, ja2en: 0 };
+      let en2ja = 0, ja2en = 0;
+      arr.forEach(r => {
+        if (r && r.direction === 'ja2en') ja2en++;
+        else en2ja++;
+      });
+      return { total: arr.length, en2ja, ja2en };
+    }
+
+    const wbC = countByDir(wb);
+    const histC = countByDir(hist);
+    const statC = countByDir(stat);
+
+    document.getElementById('sb-count-wordbook').textContent = wbC.total;
+    document.getElementById('sb-count-wordbook-en2ja').textContent = wbC.en2ja;
+    document.getElementById('sb-count-wordbook-ja2en').textContent = wbC.ja2en;
+
+    document.getElementById('sb-count-history').textContent = histC.total;
+    document.getElementById('sb-count-history-en2ja').textContent = histC.en2ja;
+    document.getElementById('sb-count-history-ja2en').textContent = histC.ja2en;
+
+    document.getElementById('sb-count-stats').textContent = statC.total;
+    document.getElementById('sb-count-stats-en2ja').textContent = statC.en2ja;
+    document.getElementById('sb-count-stats-ja2en').textContent = statC.ja2en;
   } catch(e) {
     errEl.textContent = '取得に失敗しました。';
     errEl.style.display = 'block';
@@ -872,7 +1119,7 @@ async function fetchSbUsage() {
 }
 
 async function resetAllDbData() {
-  if (!confirm('Supabase上の全データ（単語帳・検索履歴・クイズ統計）とこの端末のデータをすべて削除します。よろしいですか？')) return;
+  if (!confirm('Supabase上の全データ（英→日・日→英の単語帳、検索履歴、クイズ統計）とこの端末のデータをすべて削除します。よろしいですか？')) return;
   const { url } = getSupabaseConfig();
   const userId = encodeURIComponent(getUserId());
   try {
@@ -884,11 +1131,17 @@ async function resetAllDbData() {
       ]);
     }
     wordbook.length = 0;
+    wordbookJa.length = 0;
     searchHistory = Object.create(null);
+    searchHistoryJa = Object.create(null);
     quizStats = Object.create(null);
-    localStorage.setItem(LS_KEY, JSON.stringify(wordbook));
-    localStorage.setItem(LS_HISTORY, JSON.stringify(searchHistory));
-    localStorage.setItem(LS_STATS, JSON.stringify(quizStats));
+    quizStatsJa = Object.create(null);
+    safeSetItem(LS_KEY, JSON.stringify(wordbook));
+    safeSetItem(LS_KEY_JA, JSON.stringify(wordbookJa));
+    safeSetItem(LS_HISTORY, JSON.stringify(searchHistory));
+    safeSetItem(LS_HISTORY_JA, JSON.stringify(searchHistoryJa));
+    safeSetItem(LS_STATS, JSON.stringify(quizStats));
+    safeSetItem(LS_STATS_JA, JSON.stringify(quizStatsJa));
     renderWordbook();
     await fetchSbUsage();
     const msg = document.getElementById('sb-reset-msg');
@@ -900,7 +1153,7 @@ async function resetAllDbData() {
 }
 
 function saveStats() {
-  localStorage.setItem(LS_STATS, JSON.stringify(quizStats));
+  safeSetItem(LS_STATS, JSON.stringify(quizStats));
 }
 
 function updateSyncStatus() {
@@ -913,9 +1166,11 @@ function updateSyncStatus() {
   }
 }
 
-function getWordWeight(word) {
+function getWordWeight(word, direction) {
+  const dir = direction || 'en2ja';
   const key = safeKey(word);
-  const s = key ? quizStats[key] : null;
+  const stats = dir === 'ja2en' ? quizStatsJa : quizStats;
+  const s = key ? stats[key] : null;
   if (!s) return 10;
   const correct = s.correct || 0;
   const total = s.total || 0;
@@ -924,10 +1179,10 @@ function getWordWeight(word) {
   return Math.max(1, Math.round((1 - rate) * 10 + 1));
 }
 
-function weightedShuffle(arr) {
+function weightedShuffle(arr, direction) {
   const pool = [];
   arr.forEach(w => {
-    const weight = getWordWeight(w.word);
+    const weight = getWordWeight(w.word, direction);
     for (let i = 0; i < weight; i++) pool.push(w);
   });
   const seen = new Set();
@@ -939,27 +1194,36 @@ function weightedShuffle(arr) {
   return result;
 }
 let currentWord = null;
+let currentDirection = 'en2ja';
 let _isSearching = false;
 
-const SAFE_KEY_RE = /^[a-z0-9 '\-\.]+$/i;
+const SAFE_KEY_RE = /^[a-z0-9 '\-\.ぁ-んァ-ヶー一-龯々]+$/i;
 
 function safeKey(word) {
   const key = word.toLowerCase();
   return SAFE_KEY_RE.test(key) && key !== '__proto__' && key !== 'constructor' && key !== 'prototype' ? key : null;
 }
 
-function recordSearch(word) {
+function recordSearch(word, direction) {
+  const dir = direction || getDirection(word);
   const key = safeKey(word);
   if (!key) return;
-  if (!searchHistory[key]) searchHistory[key] = [];
-  searchHistory[key].push(Date.now());
-  localStorage.setItem(LS_HISTORY, JSON.stringify(searchHistory));
-  saveSearchHistoryToSupabase(word);
+  const hist = dir === 'ja2en' ? searchHistoryJa : searchHistory;
+  if (!hist[key]) hist[key] = [];
+  const now = Date.now();
+  // 直前2秒以内の重複記録を防止
+  if (hist[key].length > 0 && now - hist[key][hist[key].length - 1] < 2000) return;
+  hist[key].push(now);
+  safeSetItem(dir === 'ja2en' ? LS_HISTORY_JA : LS_HISTORY, JSON.stringify(hist));
+  saveSearchHistoryToSupabase(word, dir);
 }
 
-function getSearchCount(word) {
+function getSearchCount(word, direction) {
+  const dir = direction || getDirection(word);
   const key = safeKey(word);
-  return key ? (searchHistory[key] || []).length : 0;
+  if (!key) return 0;
+  const hist = dir === 'ja2en' ? searchHistoryJa : searchHistory;
+  return (hist[key] || []).length;
 }
 
 function formatDate(ts) {
@@ -997,7 +1261,7 @@ function showPage(name, btn) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   document.getElementById('page-' + name).classList.add('active');
-  btn.classList.add('active');
+  if (btn) btn.classList.add('active');
   if (name === 'wordbook') renderWordbook();
   if (name === 'quiz') startQuiz();
   if (name === 'search') {
@@ -1013,6 +1277,7 @@ function showPage(name, btn) {
     document.getElementById('sb-userid-input').value = getUserId();
     showSbUsagePanel();
     if (url) fetchSbUsage();
+    updateStorageDisplay();
   }
 }
 
@@ -1076,12 +1341,15 @@ async function doSearch(wordOverride) {
   document.getElementById('spell-suggest').style.display = 'none';
   document.getElementById('result-area').style.display = 'none';
 
-  const cached = wordbook.find(w => w.word.toLowerCase() === word.toLowerCase());
+  const direction = getDirection(word);
+  const targetBook = direction === 'ja2en' ? wordbookJa : wordbook;
+  const cached = targetBook.find(w => w.word.toLowerCase() === word.toLowerCase());
   if (cached && cached.definitions && cached.definitions.length > 0) {
     currentWord = cached;
-    recordSearch(cached.word);
-    const count = getSearchCount(cached.word);
-    renderResult(cached, count);
+    currentDirection = direction;
+    recordSearch(cached.word, direction);
+    const count = getSearchCount(cached.word, direction);
+    renderResult(cached, count, direction);
     updateAddBtn(true);
     _isSearching = false;
     return;
@@ -1091,6 +1359,12 @@ async function doSearch(wordOverride) {
   document.getElementById('search-btn').disabled = true;
 
   try {
+    if (direction === 'ja2en') {
+      // ja2en時は_isSearchingを保持したままdoSearchDirectを呼ぶ
+      await doSearchDirect(word, true);
+      return;
+    }
+
     const spellResult = await callClaude(
       `You are a spell checker for English words and phrases. Given an input, respond ONLY with a valid JSON object (no markdown, no backticks) with:
 - correct: true if the input is a valid English word or phrase (including idioms and multi-word expressions), false only if it appears to be a misspelling
@@ -1145,8 +1419,8 @@ async function doSearchDirect(word, fromSpellCheck = false) {
     document.getElementById('search-btn').disabled = true;
   }
   try {
-    const result = await callClaude(
-      `You are an English dictionary like Cambridge Dictionary. Given a word or phrase, respond ONLY with a valid JSON object (no markdown, no backticks) with these fields:
+    const direction = getDirection(word);
+    const promptEn = `You are an English dictionary like Cambridge Dictionary. Given a word or phrase, respond ONLY with a valid JSON object (no markdown, no backticks) with these fields:
 - word: the word or phrase as given
 - phonetic: IPA pronunciation string (empty string if multi-word phrase)
 - definitions: array of 1-3 definition groups ordered by most common usage first. Each group has:
@@ -1155,15 +1429,31 @@ async function doSearchDirect(word, fromSpellCheck = false) {
     - meaning: Japanese meaning (concise, within 30 characters)
     - examples: array of 1-2 objects each with "en" (natural English sentence) and "ja" (Japanese translation)
 - synonyms: array of 3-5 synonym words or phrases (English only)
+- synonymsNuance: a Japanese string explaining the subtle nuance differences between the synonyms and the original word (concise, within 200 characters). Compare each synonym briefly. Example: "resilientは精神的・身体的な強さに、toughnessは耐久性に重点を置く。adaptabilityは状況適応の意味合いが強い。"
 - era: a single Japanese string describing the historical usage period, e.g. "現代英語（1990年代〜現在）で広く使われる表現", "1920〜1950年代に多用された古風な表現", "シェイクスピア時代（16〜17世紀）の古語" etc.
-Respond with valid JSON only. No extra text.`,
-      word
-    );
+Respond with valid JSON only. No extra text.`;
+
+    const promptJa = `You are a Japanese-to-English dictionary. Given a Japanese word or phrase, respond ONLY with a valid JSON object (no markdown, no backticks) with these fields:
+- word: the Japanese word or phrase as given
+- definitions: array of 1-3 groups, each representing a different sense or usage of the Japanese word. Each group has:
+  - pos: part of speech in Japanese (名詞/動詞/形容詞/副詞/etc.)
+  - senses: array of 2-4 English equivalent words/phrases ordered by frequency, each with:
+    - meaning: English equivalent word or short phrase (e.g. "resilient", "bounce back")
+    - phonetic: IPA pronunciation of the English word/phrase (e.g. /rɪˈzɪliənt/)
+    - examples: array of 1-2 objects each with "en" (natural English sentence using the English equivalent) and "ja" (Japanese translation)
+- synonyms: array of 3-5 related English synonyms for the most common meaning
+- synonymsNuance: a Japanese string explaining the subtle nuance differences between the suggested English equivalents (within 200 characters). Compare each English word briefly. Example: "resilientは精神的な強さ、toughは身体的な耐久性、adaptableは適応力を強調する。"
+- era: a single Japanese string describing how commonly used the equivalents are in modern English (within 100 chars). Example: "いずれも現代英語で広く使われる。"
+Respond with valid JSON only. No extra text.`;
+
+    const result = await callClaude(direction === 'ja2en' ? promptJa : promptEn, word);
     currentWord = result;
-    recordSearch(result.word);
-    const count = getSearchCount(result.word);
-    renderResult(result, count);
-    const already = wordbook.some(w => w.word.toLowerCase() === result.word.toLowerCase());
+    currentDirection = direction;
+    recordSearch(result.word, direction);
+    const count = getSearchCount(result.word, direction);
+    renderResult(result, count, direction);
+    const targetBook = direction === 'ja2en' ? wordbookJa : wordbook;
+    const already = targetBook.some(w => w.word.toLowerCase() === result.word.toLowerCase());
     updateAddBtn(already);
   } catch (e) {
     document.getElementById('search-error').textContent = `エラー: ${e.message}`;
@@ -1183,7 +1473,8 @@ function updateAddBtn(already) {
     : `<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 2v10M2 7h10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg> 単語帳に追加`;
 }
 
-function renderResult(d, count) {
+function renderResult(d, count, direction) {
+  const dir = direction || 'en2ja';
   document.getElementById('res-word').textContent = d.word;
   document.getElementById('res-phonetic').textContent = d.phonetic || '';
   const posEl = document.getElementById('res-pos');
@@ -1192,35 +1483,71 @@ function renderResult(d, count) {
   badge.textContent = `${count}回目の検索`;
   badge.className = 'search-count-badge' + (count > 1 ? ' repeat' : '');
 
+  const dirBadge = document.getElementById('res-direction-badge');
+  if (dirBadge) {
+    dirBadge.textContent = dir === 'ja2en' ? '日 → 英' : '英 → 日';
+    dirBadge.className = 'direction-badge ' + (dir === 'ja2en' ? 'badge-ja2en' : 'badge-en2ja');
+  }
+
+  // 全体の発音ボタンは英→日のみ表示
+  const speakBtn = document.querySelector('[data-action="speak"]');
+  if (speakBtn) speakBtn.style.display = dir === 'ja2en' ? 'none' : '';
+
   const defsEl = document.getElementById('res-definitions');
   defsEl.innerHTML = '';
   (d.definitions || []).forEach(group => {
     const groupDiv = document.createElement('div');
     groupDiv.className = 'pos-group';
     const posLabel = `<span class="pos-label">${sanitize(group.pos)}</span>`;
-    const sensesHtml = (group.senses || []).map((s, i) => {
+    groupDiv.innerHTML = posLabel;
+    (group.senses || []).forEach((s, i) => {
+      const senseDiv = document.createElement('div');
+      senseDiv.className = 'def-item';
+
+      const highlightTarget = dir === 'ja2en' ? s.meaning : d.word;
       const examplesHtml = (s.examples || []).map(e => {
         const safeEn = sanitize(e.en);
-        const highlighted = safeEn.replace(new RegExp('\\b' + escapeRegex(d.word) + '\\b', 'gi'), m => `<em>${m}</em>`);
+        const highlighted = highlightTarget
+          ? safeEn.replace(new RegExp('\\b' + escapeRegex(highlightTarget) + '\\b', 'gi'), m => `<em>${m}</em>`)
+          : safeEn;
         return `<div class="example-item">
           <div class="example-en">${highlighted}</div>
           <div class="example-ja">${sanitize(e.ja)}</div>
         </div>`;
       }).join('');
-      return `<div class="def-item">
-        <span class="def-num">${i + 1}.</span>
-        <div class="def-body">
-          <div class="def-meaning">${sanitize(s.meaning)}</div>
-          ${examplesHtml}
-        </div>
-      </div>`;
-    }).join('');
-    groupDiv.innerHTML = posLabel + sensesHtml;
+
+      let meaningHtml = `<div class="def-meaning">${sanitize(s.meaning)}`;
+      if (dir === 'ja2en' && s.phonetic) {
+        meaningHtml += ` <span style="font-size:13px;color:var(--text-muted);font-weight:400;">${sanitize(s.phonetic)}</span>`;
+      }
+      if (dir === 'ja2en') {
+        meaningHtml += ` <button class="btn-sound-mini" data-speak-word="${sanitize(s.meaning)}" style="margin-left:6px;padding:3px 9px;font-size:12px;background:var(--bg);border:1px solid var(--border-strong);border-radius:20px;cursor:pointer;color:var(--text);vertical-align:middle;">🔊 発音</button>`;
+      }
+      meaningHtml += `</div>`;
+
+      senseDiv.innerHTML = `<span class="def-num">${i + 1}.</span><div class="def-body">${meaningHtml}${examplesHtml}</div>`;
+      groupDiv.appendChild(senseDiv);
+    });
     defsEl.appendChild(groupDiv);
   });
 
+  // ja2en時の発音ボタンにイベントリスナーを追加
+  if (dir === 'ja2en') {
+    defsEl.querySelectorAll('[data-speak-word]').forEach(btn => {
+      btn.addEventListener('click', function() {
+        const word = btn.getAttribute('data-speak-word');
+        if (!word) return;
+        const u = new SpeechSynthesisUtterance(word);
+        u.lang = 'en-US'; u.rate = 0.85;
+        speechSynthesis.cancel();
+        speechSynthesis.speak(u);
+      });
+    });
+  }
+
   const metaEl = document.getElementById('res-meta');
   const synonyms = d.synonyms || [];
+  const synonymsNuance = d.synonymsNuance || '';
   const era = d.era || '';
 
   if (synonyms.length > 0 || era) {
@@ -1239,6 +1566,13 @@ function renderResult(d, count) {
         });
         synContainer.appendChild(tag);
       });
+      const nuanceEl = document.getElementById('res-synonyms-nuance');
+      if (synonymsNuance) {
+        nuanceEl.textContent = synonymsNuance;
+        nuanceEl.style.display = 'block';
+      } else {
+        nuanceEl.style.display = 'none';
+      }
     }
     document.getElementById('res-era-wrap').style.display = era ? 'block' : 'none';
     if (era) {
@@ -1263,25 +1597,34 @@ function speakWord() {
 
 async function addToWordbook() {
   if (!currentWord) return;
-  if (wordbook.some(w => w.word.toLowerCase() === currentWord.word.toLowerCase())) return;
-  wordbook.unshift({ ...currentWord, learned: false, addedAt: Date.now() });
-  await saveWordbook();
+  const dir = currentDirection || 'en2ja';
+  const target = dir === 'ja2en' ? wordbookJa : wordbook;
+  if (target.some(w => w.word.toLowerCase() === currentWord.word.toLowerCase())) return;
+  target.unshift({ ...currentWord, learned: false, addedAt: Date.now() });
+  await saveWordbook(dir);
   updateAddBtn(true);
 }
 
+function getCurrentWordbookDirection() {
+  return localStorage.getItem(LS_WL_DIR) || 'en2ja';
+}
+
 function renderWordbook() {
+  const dir = getCurrentWordbookDirection();
+  const target = dir === 'ja2en' ? wordbookJa : wordbook;
+  const histTarget = dir === 'ja2en' ? searchHistoryJa : searchHistory;
   const list = document.getElementById('wordbook-list');
-  document.getElementById('wl-count').textContent = `保存済み ${wordbook.length} 単語`;
-  if (wordbook.length === 0) {
+  document.getElementById('wl-count').textContent = `保存済み ${target.length} 単語`;
+  if (target.length === 0) {
     list.innerHTML = '<div class="empty-state">単語帳はまだ空です。<br>検索して単語を追加しましょう。</div>';
     return;
   }
   list.innerHTML = '';
-  wordbook.forEach((w, i) => {
+  target.forEach((w, i) => {
     const div = document.createElement('div');
     div.className = 'wl-item';
     const key = safeKey(w.word) || '';
-    const hist = searchHistory[key] || [];
+    const hist = histTarget[key] || [];
     const count = hist.length;
     const dates = hist.slice(-3).reverse().map(formatDate);
     const histHtml = count > 0
@@ -1313,10 +1656,21 @@ function renderWordbook() {
         detailHtml += `<div class="wl-detail-pos-group"><span class="wl-detail-pos">${sanitize(group.pos)}</span>`;
         (group.senses || []).forEach((s, si) => {
           detailHtml += `<div class="wl-detail-sense"><span class="wl-detail-num">${si + 1}.</span><div>`;
-          detailHtml += `<div class="wl-detail-meaning">${sanitize(s.meaning)}</div>`;
+          let meaningHtml = `<div class="wl-detail-meaning">${sanitize(s.meaning)}`;
+          if (dir === 'ja2en' && s.phonetic) {
+            meaningHtml += ` <span style="font-size:12px;color:var(--text-muted);font-weight:400;">${sanitize(s.phonetic)}</span>`;
+          }
+          if (dir === 'ja2en') {
+            meaningHtml += ` <button class="btn-sound-mini" data-speak-word="${sanitize(s.meaning)}" style="margin-left:6px;padding:2px 8px;font-size:11px;background:var(--surface);border:1px solid var(--border-strong);border-radius:20px;cursor:pointer;color:var(--text);vertical-align:middle;">🔊</button>`;
+          }
+          meaningHtml += `</div>`;
+          detailHtml += meaningHtml;
+          const highlightTarget = dir === 'ja2en' ? s.meaning : w.word;
           (s.examples || []).forEach(ex => {
             const safeEn = sanitize(ex.en);
-            const highlighted = safeEn.replace(new RegExp('\\b' + escapeRegex(w.word) + '\\b', 'gi'), m => `<em>${m}</em>`);
+            const highlighted = highlightTarget
+              ? safeEn.replace(new RegExp('\\b' + escapeRegex(highlightTarget) + '\\b', 'gi'), m => `<em>${m}</em>`)
+              : safeEn;
             detailHtml += `<div class="wl-detail-example">${highlighted}<div class="wl-detail-example-ja">${sanitize(ex.ja)}</div></div>`;
           });
           detailHtml += `</div></div>`;
@@ -1324,6 +1678,21 @@ function renderWordbook() {
         detailHtml += `</div>`;
       });
       detail.innerHTML = detailHtml;
+
+      // ja2en時の発音ボタンにイベント追加
+      if (dir === 'ja2en') {
+        detail.querySelectorAll('[data-speak-word]').forEach(btn => {
+          btn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            const word = btn.getAttribute('data-speak-word');
+            if (!word) return;
+            const u = new SpeechSynthesisUtterance(word);
+            u.lang = 'en-US'; u.rate = 0.85;
+            speechSynthesis.cancel();
+            speechSynthesis.speak(u);
+          });
+        });
+      }
     } else {
       detail.innerHTML = `<div class="wl-detail-word">${sanitize(w.word)}</div><div style="font-size:13px;color:var(--text-faint);margin-top:4px;">詳細データがありません。再度検索してください。</div>`;
     }
@@ -1348,6 +1717,12 @@ function renderWordbook() {
         });
         synWrap.appendChild(tag);
       });
+      if (w.synonymsNuance) {
+        const nuance = document.createElement('div');
+        nuance.style.cssText = 'font-size:13px;color:var(--text-muted);line-height:1.7;margin-top:8px;padding:10px 12px;background:var(--surface);border-radius:var(--radius-sm);border-left:3px solid var(--accent);';
+        nuance.textContent = w.synonymsNuance;
+        synWrap.appendChild(nuance);
+      }
       detail.appendChild(synWrap);
     }
 
@@ -1358,18 +1733,21 @@ function renderWordbook() {
       detail.appendChild(eraWrap);
     }
 
-    const speakBtn = document.createElement('button');
-    speakBtn.className = 'btn-sound';
-    speakBtn.style.cssText = 'margin-top:10px;font-size:13px;padding:7px 12px;';
-    speakBtn.innerHTML = `<svg width="14" height="14" viewBox="0 0 15 15" fill="none"><path d="M3.5 5.5H1.5v4h2l3.5 3V2.5L3.5 5.5z" fill="currentColor"/><path d="M10 3C11.7 4.2 13 5.9 13 7.5S11.7 10.8 10 12M8 5C9.2 5.9 10 6.6 10 7.5S9.2 9.1 8 10" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg> 発音を聞く`;
-    speakBtn.addEventListener('click', function(e) {
-      e.stopPropagation();
-      const u = new SpeechSynthesisUtterance(w.word);
-      u.lang = 'en-US'; u.rate = 0.85;
-      speechSynthesis.cancel();
-      speechSynthesis.speak(u);
-    });
-    detail.appendChild(speakBtn);
+    // 全体の発音ボタンは英→日のみ表示（日→英は各senseに個別ボタンがある）
+    if (dir === 'en2ja') {
+      const speakBtn = document.createElement('button');
+      speakBtn.className = 'btn-sound';
+      speakBtn.style.cssText = 'margin-top:10px;font-size:13px;padding:7px 12px;';
+      speakBtn.innerHTML = `<svg width="14" height="14" viewBox="0 0 15 15" fill="none"><path d="M3.5 5.5H1.5v4h2l3.5 3V2.5L3.5 5.5z" fill="currentColor"/><path d="M10 3C11.7 4.2 13 5.9 13 7.5S11.7 10.8 10 12M8 5C9.2 5.9 10 6.6 10 7.5S9.2 9.1 8 10" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg> 発音を聞く`;
+      speakBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        const u = new SpeechSynthesisUtterance(w.word);
+        u.lang = 'en-US'; u.rate = 0.85;
+        speechSynthesis.cancel();
+        speechSynthesis.speak(u);
+      });
+      detail.appendChild(speakBtn);
+    }
 
     row.querySelector('.wl-word').addEventListener('click', function(e) {
       e.stopPropagation();
@@ -1389,28 +1767,34 @@ function renderWordbook() {
 }
 
 async function removeWord(idx) {
-  const word = wordbook[idx].word;
-  wordbook.splice(idx, 1);
-  await saveWordbook();
-  await deleteWordFromSupabase(word);
+  const dir = getCurrentWordbookDirection();
+  const target = dir === 'ja2en' ? wordbookJa : wordbook;
+  const word = target[idx].word;
+  target.splice(idx, 1);
+  await saveWordbook(dir);
+  await deleteWordFromSupabase(word, dir);
+  const histTarget = dir === 'ja2en' ? searchHistoryJa : searchHistory;
   const key = safeKey(word);
-  if (key) delete searchHistory[key];
-  localStorage.setItem(LS_HISTORY, JSON.stringify(searchHistory));
+  if (key) delete histTarget[key];
+  safeSetItem(dir === 'ja2en' ? LS_HISTORY_JA : LS_HISTORY, JSON.stringify(histTarget));
   renderWordbook();
 }
 
 async function clearWordbook() {
-  if (!wordbook.length) return;
-  if (!confirm('単語帳をすべて削除しますか？')) return;
+  const dir = getCurrentWordbookDirection();
+  const target = dir === 'ja2en' ? wordbookJa : wordbook;
+  if (!target.length) return;
+  if (!confirm('現在表示中の単語帳をすべて削除しますか？')) return;
   const { url } = getSupabaseConfig();
   if (url) {
     const userId = encodeURIComponent(getUserId());
-    try { await sbFetch(`/wordbook?user_id=eq.${userId}`, { method: 'DELETE' }); } catch(e) { }
+    try { await sbFetch(`/wordbook?user_id=eq.${userId}&direction=eq.${dir}`, { method: 'DELETE' }); } catch(e) { }
   }
-  wordbook.forEach(w => { const key = safeKey(w.word); if (key) delete searchHistory[key]; });
-  wordbook.length = 0;
-  localStorage.setItem(LS_KEY, JSON.stringify(wordbook));
-  localStorage.setItem(LS_HISTORY, JSON.stringify(searchHistory));
+  const histTarget = dir === 'ja2en' ? searchHistoryJa : searchHistory;
+  target.forEach(w => { const key = safeKey(w.word); if (key) delete histTarget[key]; });
+  target.length = 0;
+  safeSetItem(dir === 'ja2en' ? LS_KEY_JA : LS_KEY, JSON.stringify(target));
+  safeSetItem(dir === 'ja2en' ? LS_HISTORY_JA : LS_HISTORY, JSON.stringify(histTarget));
   renderWordbook();
 }
 
@@ -1420,9 +1804,17 @@ function getPrimaryMeaning(w) {
     : (w.meaning || '');
 }
 
+function getCurrentQuizDirection() {
+  return localStorage.getItem(LS_QUIZ_DIR) || 'en2ja';
+}
+
 function startQuiz() {
+  const dir = getCurrentQuizDirection();
+  const target = dir === 'ja2en' ? wordbookJa : wordbook;
+  const stats = dir === 'ja2en' ? quizStatsJa : quizStats;
+  const histTarget = dir === 'ja2en' ? searchHistoryJa : searchHistory;
   const area = document.getElementById('quiz-area');
-  if (wordbook.length < 2) {
+  if (target.length < 2) {
     area.innerHTML = '<div class="empty-state">テストには2語以上必要です。<br>まず単語を検索して追加してください。</div>';
     return;
   }
@@ -1430,11 +1822,11 @@ function startQuiz() {
   const MAX_QUIZ = 10;
   const now = Date.now();
 
-  const scored = wordbook.map(w => {
+  const scored = target.map(w => {
     const key = safeKey(w.word) || '';
-    const s = quizStats[key] || { correct: 0, total: 0 };
+    const s = stats[key] || { correct: 0, total: 0 };
     const mistakes = (s.total || 0) - (s.correct || 0);
-    const hist = searchHistory[key] || [];
+    const hist = histTarget[key] || [];
     const lastSearched = hist.length > 0 ? hist[hist.length - 1] : (w.addedAt || 0);
     const daysSince = (now - lastSearched) / (1000 * 60 * 60 * 24);
     const score = mistakes * 10 + daysSince;
@@ -1443,13 +1835,15 @@ function startQuiz() {
 
   scored.sort((a, b) => b.score - a.score);
   const selected = scored.slice(0, MAX_QUIZ).map(x => x.w);
-  quizWords = weightedShuffle(selected);
+  quizWords = weightedShuffle(selected, dir);
   quizIndex = 0;
   quizScore = 0;
   renderQuiz();
 }
 
 function renderQuiz() {
+  const dir = getCurrentQuizDirection();
+  const target = dir === 'ja2en' ? wordbookJa : wordbook;
   const area = document.getElementById('quiz-area');
   if (quizIndex >= quizWords.length) {
     area.innerHTML = `
@@ -1463,9 +1857,12 @@ function renderQuiz() {
   }
   const q = quizWords[quizIndex];
   const pct = Math.round((quizIndex / quizWords.length) * 100);
-  const wrongs = wordbook.filter(w => w.word !== q.word).sort(() => Math.random() - 0.5).slice(0, 3);
+  const wrongs = target.filter(w => w.word !== q.word).sort(() => Math.random() - 0.5).slice(0, 3);
   const choices = [...wrongs.map(w => ({ text: getPrimaryMeaning(w), correct: false })), { text: getPrimaryMeaning(q), correct: true }]
     .sort(() => Math.random() - 0.5);
+
+  const questionLabel = dir === 'ja2en' ? 'この単語の英訳はどれ？' : 'この単語の意味はどれ？';
+  const phoneticHtml = dir === 'en2ja' ? `<div class="quiz-phonetic">${sanitize(q.phonetic || '')}</div>` : '';
 
   area.innerHTML = `
     <div class="quiz-meta">
@@ -1475,8 +1872,8 @@ function renderQuiz() {
     <div class="quiz-progress-wrap"><div class="quiz-progress-bar" style="width:${pct}%"></div></div>
     <div class="card quiz-card">
       <div class="quiz-word">${sanitize(q.word)}</div>
-      <div class="quiz-phonetic">${sanitize(q.phonetic || '')}</div>
-      <div style="font-size:14px;color:var(--text-faint);margin-bottom:20px;">この単語の意味はどれ？</div>
+      ${phoneticHtml}
+      <div style="font-size:14px;color:var(--text-faint);margin-bottom:20px;">${questionLabel}</div>
       <div class="quiz-choices" id="quiz-choices-container"></div>
     </div>
     <button class="quiz-skip" id="quiz-skip-btn">スキップ →</button>
@@ -1495,25 +1892,28 @@ function renderQuiz() {
 }
 
 function answerQuiz(correct, wordStr, btn) {
+  const dir = getCurrentQuizDirection();
+  const target = dir === 'ja2en' ? wordbookJa : wordbook;
+  const stats = dir === 'ja2en' ? quizStatsJa : quizStats;
   document.querySelectorAll('.quiz-choice').forEach(b => { b.disabled = true; });
   btn.classList.add(correct ? 'correct' : 'wrong');
   if (!correct) {
-    const correctMeaning = getPrimaryMeaning(wordbook.find(w => w.word === wordStr));
+    const correctMeaning = getPrimaryMeaning(target.find(w => w.word === wordStr));
     document.querySelectorAll('.quiz-choice').forEach(b => {
       if (b.textContent.trim() === correctMeaning) b.classList.add('correct');
     });
   } else {
     quizScore++;
   }
-  const w = wordbook.find(x => x.word === wordStr);
-  if (w) { w.learned = correct; saveWordbook(); }
+  const w = target.find(x => x.word === wordStr);
+  if (w) { w.learned = correct; saveWordbook(dir); }
   const key = safeKey(wordStr);
   if (key) {
-    if (!quizStats[key]) quizStats[key] = { correct: 0, total: 0 };
-    quizStats[key].total++;
-    if (correct) quizStats[key].correct++;
-    saveStats();
-    saveQuizStatToSupabase(wordStr, quizStats[key].correct, quizStats[key].total);
+    if (!stats[key]) stats[key] = { correct: 0, total: 0 };
+    stats[key].total++;
+    if (correct) stats[key].correct++;
+    safeSetItem(dir === 'ja2en' ? LS_STATS_JA : LS_STATS, JSON.stringify(stats));
+    saveQuizStatToSupabase(wordStr, stats[key].correct, stats[key].total, dir);
   }
   setTimeout(nextQuiz, 1300);
 }
@@ -1523,6 +1923,7 @@ function nextQuiz() { quizIndex++; renderQuiz(); }
 document.addEventListener('DOMContentLoaded', function() {
   updateApiStatus();
   updateSyncStatus();
+  updateStorageDisplay();
 
   document.querySelectorAll('.tab[data-page]').forEach(function(btn) {
     btn.addEventListener('click', function() { showPage(btn.dataset.page, btn); });
@@ -1530,10 +1931,104 @@ document.addEventListener('DOMContentLoaded', function() {
 
   var gotoBtn = document.querySelector('[data-goto="settings"]');
   if (gotoBtn) gotoBtn.addEventListener('click', function() {
-    showPage('settings', document.querySelector('.tab[data-page="settings"]'));
+    showPage('settings', null);
   });
 
   document.getElementById('sb-refresh-btn').addEventListener('click', fetchSbUsage);
+  document.getElementById('storage-refresh-btn').addEventListener('click', updateStorageDisplay);
+
+  // 歯車メニュー
+  const gearBtn = document.getElementById('gear-btn');
+  const gearMenu = document.getElementById('gear-menu');
+  gearBtn.addEventListener('click', function(e) {
+    e.stopPropagation();
+    gearMenu.style.display = gearMenu.style.display === 'block' ? 'none' : 'block';
+  });
+  document.addEventListener('click', function(e) {
+    if (!gearMenu.contains(e.target) && e.target !== gearBtn) {
+      gearMenu.style.display = 'none';
+    }
+  });
+  document.getElementById('menu-settings').addEventListener('click', function() {
+    gearMenu.style.display = 'none';
+    showPage('settings', null);
+  });
+  document.getElementById('menu-version').addEventListener('click', function() {
+    gearMenu.style.display = 'none';
+    document.getElementById('version-modal').style.display = 'flex';
+  });
+  document.getElementById('version-close').addEventListener('click', function() {
+    document.getElementById('version-modal').style.display = 'none';
+  });
+  document.getElementById('version-modal').addEventListener('click', function(e) {
+    if (e.target === this) this.style.display = 'none';
+  });
+
+  // 単語帳トグル
+  document.querySelectorAll('[data-wl-dir]').forEach(btn => {
+    btn.addEventListener('click', function() {
+      const dir = btn.getAttribute('data-wl-dir');
+      localStorage.setItem(LS_WL_DIR, dir);
+      document.querySelectorAll('[data-wl-dir]').forEach(b => {
+        if (b.getAttribute('data-wl-dir') === dir) {
+          b.classList.add('active');
+          b.style.background = 'var(--accent)';
+          b.style.color = '#fff';
+        } else {
+          b.classList.remove('active');
+          b.style.background = 'transparent';
+          b.style.color = 'var(--text-muted)';
+        }
+      });
+      renderWordbook();
+    });
+  });
+
+  // クイズトグル
+  document.querySelectorAll('[data-quiz-dir]').forEach(btn => {
+    btn.addEventListener('click', function() {
+      const dir = btn.getAttribute('data-quiz-dir');
+      localStorage.setItem(LS_QUIZ_DIR, dir);
+      document.querySelectorAll('[data-quiz-dir]').forEach(b => {
+        if (b.getAttribute('data-quiz-dir') === dir) {
+          b.classList.add('active');
+          b.style.background = 'var(--accent)';
+          b.style.color = '#fff';
+        } else {
+          b.classList.remove('active');
+          b.style.background = 'transparent';
+          b.style.color = 'var(--text-muted)';
+        }
+      });
+      startQuiz();
+    });
+  });
+
+  // 起動時にトグルの状態を復元
+  const wlDir = localStorage.getItem(LS_WL_DIR) || 'en2ja';
+  document.querySelectorAll('[data-wl-dir]').forEach(b => {
+    if (b.getAttribute('data-wl-dir') === wlDir) {
+      b.classList.add('active');
+      b.style.background = 'var(--accent)';
+      b.style.color = '#fff';
+    } else {
+      b.classList.remove('active');
+      b.style.background = 'transparent';
+      b.style.color = 'var(--text-muted)';
+    }
+  });
+  const quizDir = localStorage.getItem(LS_QUIZ_DIR) || 'en2ja';
+  document.querySelectorAll('[data-quiz-dir]').forEach(b => {
+    if (b.getAttribute('data-quiz-dir') === quizDir) {
+      b.classList.add('active');
+      b.style.background = 'var(--accent)';
+      b.style.color = '#fff';
+    } else {
+      b.classList.remove('active');
+      b.style.background = 'transparent';
+      b.style.color = 'var(--text-muted)';
+    }
+  });
   document.getElementById('sb-reset-btn').addEventListener('click', resetAllDbData);
   document.getElementById('sb-userid-copy-btn').addEventListener('click', function() {
     const val = document.getElementById('sb-userid-input').value;
@@ -1548,6 +2043,19 @@ document.addEventListener('DOMContentLoaded', function() {
   });
   document.getElementById('search-btn').addEventListener('click', function() { doSearch(); });
   document.getElementById('search-input').addEventListener('keyup', function(e) { if (e.key === 'Enter') doSearch(); });
+
+  const searchInput = document.getElementById('search-input');
+  const searchClearBtn = document.getElementById('search-clear-btn');
+  function updateClearBtnVisibility() {
+    searchClearBtn.style.display = searchInput.value.length > 0 ? 'flex' : 'none';
+  }
+  searchInput.addEventListener('input', updateClearBtnVisibility);
+  searchClearBtn.addEventListener('click', function() {
+    searchInput.value = '';
+    updateClearBtnVisibility();
+    searchInput.focus();
+  });
+  updateClearBtnVisibility();
   document.querySelector('[data-action="speak"]').addEventListener('click', speakWord);
   document.querySelector('[data-action="add"]').addEventListener('click', addToWordbook);
   document.querySelector('[data-action="clear-wl"]').addEventListener('click', clearWordbook);
