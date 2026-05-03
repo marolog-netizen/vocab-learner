@@ -556,8 +556,12 @@ input,textarea,button{font-family:inherit}
     </div>
     <div class="wl-header">
       <span class="wl-count" id="wl-count">0 単語</span>
-      <button class="btn-danger" id="wl-clear">すべて削除</button>
+      <div style="display:flex;gap:6px;align-items:center">
+        <button class="refresh-btn" id="wl-sync-btn">🔄 同期</button>
+        <button class="btn-danger" id="wl-clear">すべて削除</button>
+      </div>
     </div>
+    <div id="wl-sync-msg" style="display:none;font-size:12px;text-align:center;padding:8px 10px;border-radius:var(--radius-sm);margin-bottom:8px"></div>
     <div class="card" id="wordbook-list">
       <div class="empty-state">単語帳はまだ空です。<br>検索して単語を追加しましょう。</div>
     </div>
@@ -1647,6 +1651,44 @@ async function clearWordbook() {
   safeSet(dir === 'ja2en' ? LS.KEY_JA : LS.KEY, JSON.stringify(target));
   safeSet(dir === 'ja2en' ? LS.HIST_JA : LS.HIST, JSON.stringify(h));
   renderWordbook();
+}
+
+// 単語帳をSupabaseから手動で同期する
+async function syncWordbookManually() {
+  const msg = $('wl-sync-msg');
+  const btn = $('wl-sync-btn');
+  if (!getSbConfig().url) {
+    msg.textContent = '⚠️ Supabaseが設定されていません。設定タブから接続してください。';
+    msg.style.background = 'var(--amber-light)';
+    msg.style.color = 'var(--amber)';
+    msg.style.display = 'block';
+    setTimeout(() => msg.style.display = 'none', 3500);
+    return;
+  }
+  btn.disabled = true;
+  btn.textContent = '⏳ 同期中...';
+  msg.textContent = 'Supabaseから単語帳を取得中...';
+  msg.style.background = 'var(--accent-light)';
+  msg.style.color = 'var(--accent)';
+  msg.style.display = 'block';
+  try {
+    await syncFromSb();
+    migrateToSrs();
+    renderWordbook();
+    const dir = wlDir();
+    msg.textContent = `✓ 同期完了（${wb(dir).length} 単語を読み込みました）`;
+    msg.style.background = 'var(--green-light)';
+    msg.style.color = 'var(--green)';
+    setTimeout(() => msg.style.display = 'none', 3000);
+  } catch(e) {
+    msg.textContent = `エラー: ${e.message || '同期に失敗しました'}`;
+    msg.style.background = 'var(--red-light)';
+    msg.style.color = 'var(--red)';
+    setTimeout(() => msg.style.display = 'none', 4000);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '🔄 同期';
+  }
 }
 
 // ===== Quiz =====
@@ -2917,6 +2959,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Wordbook clear
   $('wl-clear').addEventListener('click', clearWordbook);
+  $('wl-sync-btn').addEventListener('click', syncWordbookManually);
 
   // Settings
   $('save-api-btn').addEventListener('click', saveApiKey);
