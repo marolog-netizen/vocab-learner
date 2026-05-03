@@ -2881,10 +2881,18 @@ document.addEventListener('DOMContentLoaded', () => {
     const speakSelf = e.target.closest('[data-speak-self]');
     if (speakSelf) {
       e.stopPropagation();
-      const item = speakSelf.closest('.wl-item');
-      if (item) {
-        const word = item.querySelector('.wl-word').textContent;
+      // 通常の単語帳の場合
+      const wlItem = speakSelf.closest('.wl-item');
+      if (wlItem) {
+        const word = wlItem.querySelector('.wl-word').textContent;
         speak(word);
+        return;
+      }
+      // 進捗モーダル内の展開詳細の場合
+      const progressDetail = speakSelf.closest('.progress-word-detail');
+      if (progressDetail) {
+        const word = progressDetail.dataset.detailFor;
+        if (word) speak(word);
       }
     }
   });
