@@ -955,7 +955,7 @@ async function syncFromSb() {
         phonetic: typeof r.phonetic === 'string' ? r.phonetic : '',
         definitions: Array.isArray(r.definitions) ? r.definitions : [],
         synonyms: Array.isArray(r.synonyms) ? r.synonyms : [],
-        synonymsNuance: typeof r.synonymsNuance === 'string' ? r.synonymsNuance : '',
+        synonymsNuance: typeof r.synonymsnuance === 'string' ? r.synonymsnuance : '',
         antonyms: Array.isArray(r.antonyms) ? r.antonyms : [],
         derivatives: Array.isArray(r.derivatives) ? r.derivatives : [],
         era: typeof r.era === 'string' ? r.era : '',
@@ -1006,7 +1006,7 @@ async function saveWordbook(dir) {
       await sbFetch('/wordbook', {
         method:'POST',
         headers:{ Prefer:'resolution=merge-duplicates' },
-        body: JSON.stringify({ user_id:getUserId(), word:w.word, phonetic:w.phonetic||'', definitions:w.definitions||[], synonyms:w.synonyms||[], synonymsNuance:w.synonymsNuance||'', antonyms:w.antonyms||[], derivatives:w.derivatives||[], era:w.era||'', learned:w.learned, direction:dir, added_at:new Date(w.addedAt).toISOString(), srs: w.srs || initSrs() })
+        body: JSON.stringify({ user_id:getUserId(), word:w.word, phonetic:w.phonetic||'', definitions:w.definitions||[], synonyms:w.synonyms||[], synonymsnuance:w.synonymsNuance||'', antonyms:w.antonyms||[], derivatives:w.derivatives||[], era:w.era||'', learned:w.learned, direction:dir, added_at:new Date(w.addedAt).toISOString(), srs: w.srs || initSrs() })
       });
     } catch(e) {}
   }
