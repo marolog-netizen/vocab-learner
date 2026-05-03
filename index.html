@@ -86,6 +86,13 @@ body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:-appl
 .example-ja{font-size:13px;color:var(--text-muted);margin-top:2px}
 .section-label{font-size:12px;color:var(--text-faint);font-weight:500;margin-top:14px;margin-bottom:8px}
 .synonym-tag{display:inline-block;font-size:13px;padding:4px 10px;background:var(--bg);border:1px solid var(--border-strong);border-radius:20px;color:var(--text);margin:0 4px 4px 0;cursor:pointer}
+.antonym-tag{display:inline-block;font-size:13px;padding:4px 10px;background:#fce8d4;border:1px solid rgba(122,82,0,.25);border-radius:20px;color:#8a4a00;margin:0 4px 4px 0;cursor:pointer}
+.deriv-pos-row{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px;margin-bottom:6px;font-size:13px;line-height:1.7}
+.deriv-pos-label{display:inline-block;font-size:11px;padding:2px 7px;background:var(--accent-light);color:var(--accent);border-radius:4px;font-weight:500;flex-shrink:0}
+.deriv-word{cursor:pointer;color:var(--text);border-bottom:1px dotted var(--text-faint);padding-bottom:1px}
+.deriv-word:hover{color:var(--accent);border-bottom-color:var(--accent)}
+.deriv-meaning{color:var(--text-muted);font-size:12px}
+.deriv-not-available{color:var(--text-faint);font-size:12px;font-style:italic}
 .nuance-box{font-size:13px;color:var(--text-muted);line-height:1.7;margin-top:8px;padding:10px 12px;background:var(--bg);border-radius:var(--radius-sm);border-left:3px solid var(--accent)}
 .era-text{font-size:13px;color:var(--text-muted);line-height:1.6}
 .action-row{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}
@@ -216,8 +223,12 @@ input,textarea,button{font-family:inherit}
 .progress-period-section .indicator{width:10px;height:10px;border-radius:2px;flex-shrink:0}
 .progress-period-section .label{font-size:13px;font-weight:500;color:var(--accent);flex:1}
 .progress-period-section .count{font-size:11px;color:var(--text-muted)}
-.progress-word-item{padding:10px 12px;border-radius:var(--radius-sm);cursor:pointer;background:var(--bg);margin-bottom:6px;border-left:3px solid var(--accent)}
+.progress-word-item{padding:10px 12px;border-radius:var(--radius-sm);cursor:pointer;background:var(--bg);border-left:3px solid var(--accent)}
 .progress-word-item:hover{background:var(--accent-light)}
+.progress-word-item.active{background:var(--accent-light);border-left-color:var(--accent)}
+.progress-word-wrap{margin-bottom:6px}
+.progress-word-detail{display:none;padding:12px 14px;background:var(--surface);border:1px solid var(--border);border-top:none;border-radius:0 0 var(--radius-sm) var(--radius-sm);margin-top:-6px}
+.progress-word-detail.open{display:block;margin-bottom:6px}
 .progress-word-item.s2{border-left-color:#85B7EB}
 .progress-word-item .row1{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:2px}
 .progress-word-item .word{font-family:Georgia,'Times New Roman',serif;font-size:16px;font-weight:500}
@@ -512,6 +523,14 @@ input,textarea,button{font-family:inherit}
           <div id="res-synonyms"></div>
           <div id="res-synonyms-nuance" class="nuance-box" style="display:none"></div>
         </div>
+        <div id="res-antonyms-wrap" style="margin-top:10px;display:none">
+          <div class="section-label">反対語</div>
+          <div id="res-antonyms"></div>
+        </div>
+        <div id="res-derivatives-wrap" style="margin-top:10px;display:none">
+          <div class="section-label">派生語</div>
+          <div id="res-derivatives"></div>
+        </div>
         <div id="res-era-wrap" style="margin-top:10px">
           <div class="section-label">使用年代</div>
           <div id="res-era"></div>
@@ -765,7 +784,7 @@ input,textarea,button{font-family:inherit}
       <button class="modal-close" data-close-modal aria-label="閉じる" style="flex-shrink:0">×</button>
     </div>
     <div id="progress-modal-body" style="overflow-y:auto;flex:1"></div>
-    <div style="padding:10px 14px;border-top:1px solid var(--border);font-size:11px;color:var(--text-faint);text-align:center;flex-shrink:0">💡 単語をタップすると単語帳の該当ページが開きます</div>
+    <div style="padding:10px 14px;border-top:1px solid var(--border);font-size:11px;color:var(--text-faint);text-align:center;flex-shrink:0">💡 単語をタップすると詳細を表示・もう一度タップで閉じます</div>
   </div>
 </div>
 
@@ -937,6 +956,8 @@ async function syncFromSb() {
         definitions: Array.isArray(r.definitions) ? r.definitions : [],
         synonyms: Array.isArray(r.synonyms) ? r.synonyms : [],
         synonymsNuance: typeof r.synonymsNuance === 'string' ? r.synonymsNuance : '',
+        antonyms: Array.isArray(r.antonyms) ? r.antonyms : [],
+        derivatives: Array.isArray(r.derivatives) ? r.derivatives : [],
         era: typeof r.era === 'string' ? r.era : '',
         learned: !!r.learned,
         addedAt: r.added_at ? new Date(r.added_at).getTime() : Date.now(),
@@ -985,7 +1006,7 @@ async function saveWordbook(dir) {
       await sbFetch('/wordbook', {
         method:'POST',
         headers:{ Prefer:'resolution=merge-duplicates' },
-        body: JSON.stringify({ user_id:getUserId(), word:w.word, phonetic:w.phonetic||'', definitions:w.definitions||[], learned:w.learned, direction:dir, added_at:new Date(w.addedAt).toISOString(), srs: w.srs || initSrs() })
+        body: JSON.stringify({ user_id:getUserId(), word:w.word, phonetic:w.phonetic||'', definitions:w.definitions||[], synonyms:w.synonyms||[], synonymsNuance:w.synonymsNuance||'', antonyms:w.antonyms||[], derivatives:w.derivatives||[], era:w.era||'', learned:w.learned, direction:dir, added_at:new Date(w.addedAt).toISOString(), srs: w.srs || initSrs() })
       });
     } catch(e) {}
   }
@@ -1110,7 +1131,7 @@ async function callClaude(systemPrompt, userContent) {
       },
       body: JSON.stringify({
         model:'claude-haiku-4-5-20251001',
-        max_tokens:1000,
+        max_tokens:1500,
         system:systemPrompt,
         messages:[{ role:'user', content:userContent }]
       })
@@ -1147,6 +1168,10 @@ const PROMPT_EN = `You are an English dictionary like Cambridge Dictionary. Give
     - examples: array of 1-2 objects each with "en" (natural English sentence) and "ja" (Japanese translation)
 - synonyms: array of 3-5 synonym words or phrases (English only)
 - synonymsNuance: a Japanese string explaining the subtle nuance differences between the synonyms and the original word (concise, within 200 characters).
+- antonyms: array of 0-5 antonym (opposite meaning) words or phrases (English only). If no clear antonym exists, return an empty array.
+- derivatives: array of derivative word groups by part of speech. Each group has:
+  - pos: part of speech in Japanese (名詞/動詞/形容詞/副詞/etc.)
+  - words: array of objects each with "word" (English derivative word) and "meaning" (concise Japanese meaning, within 20 characters). Include the original word itself in its part of speech if applicable. Limit to 1-4 words per part of speech.
 - era: a single Japanese string describing the historical usage period.
 Respond with valid JSON only. No extra text.`;
 
@@ -1160,6 +1185,10 @@ const PROMPT_JA = `You are a Japanese-to-English dictionary. Given a Japanese wo
     - examples: array of 1-2 objects each with "en" (natural English sentence using the English equivalent) and "ja" (Japanese translation)
 - synonyms: array of 3-5 related English synonyms for the most common meaning
 - synonymsNuance: a Japanese string explaining the subtle nuance differences between the suggested English equivalents (within 200 characters).
+- antonyms: array of 0-5 antonym (opposite meaning) English words for the most common meaning. If no clear antonym exists, return an empty array.
+- derivatives: array of derivative English word groups by part of speech (related words derived from the same root as the most common English equivalent). Each group has:
+  - pos: part of speech in Japanese (名詞/動詞/形容詞/副詞/etc.)
+  - words: array of objects each with "word" (English derivative word) and "meaning" (concise Japanese meaning, within 20 characters). Limit to 1-4 words per part of speech.
 - era: a single Japanese string describing how commonly used the equivalents are in modern English (within 100 chars).
 Respond with valid JSON only. No extra text.`;
 
@@ -1315,7 +1344,12 @@ function renderResult(d, count, dir) {
   });
 
   const synonyms = d.synonyms || [], era = d.era || '';
-  if (synonyms.length > 0 || era) {
+  const antonyms = Array.isArray(d.antonyms) ? d.antonyms : [];
+  const derivatives = Array.isArray(d.derivatives) ? d.derivatives : [];
+  const hasAnyMeta = synonyms.length > 0 || antonyms.length > 0 || derivatives.length > 0 || era;
+
+  if (hasAnyMeta) {
+    // 類語
     $('res-synonyms-wrap').style.display = synonyms.length > 0 ? 'block' : 'none';
     if (synonyms.length > 0) {
       const c = $('res-synonyms');
@@ -1331,6 +1365,54 @@ function renderResult(d, count, dir) {
       if (d.synonymsNuance) { n.textContent = d.synonymsNuance; n.style.display = 'block'; }
       else n.style.display = 'none';
     }
+
+    // 反対語
+    const antEl = $('res-antonyms');
+    $('res-antonyms-wrap').style.display = 'block';
+    antEl.innerHTML = '';
+    if (antonyms.length > 0) {
+      antonyms.forEach(a => {
+        const t = document.createElement('span');
+        t.className = 'antonym-tag';
+        t.textContent = a;
+        t.addEventListener('click', () => { $('search-input').value = a; updateClearBtn(); doSearchDirect(a); });
+        antEl.appendChild(t);
+      });
+    } else {
+      antEl.innerHTML = `<span class="deriv-not-available">該当なし</span>`;
+    }
+
+    // 派生語
+    $('res-derivatives-wrap').style.display = derivatives.length > 0 ? 'block' : 'none';
+    if (derivatives.length > 0) {
+      const dEl = $('res-derivatives');
+      dEl.innerHTML = '';
+      derivatives.forEach(g => {
+        if (!g || !Array.isArray(g.words) || g.words.length === 0) return;
+        const row = document.createElement('div');
+        row.className = 'deriv-pos-row';
+        let html = `<span class="deriv-pos-label">${sanitize(g.pos || '')}</span>`;
+        const items = [];
+        g.words.forEach(w => {
+          if (!w || !w.word) return;
+          items.push(`<span class="deriv-word" data-deriv="${sanitize(w.word)}">${sanitize(w.word)}</span><span class="deriv-meaning"> (${sanitize(w.meaning || '')})</span>`);
+        });
+        html += items.join('<span style="color:var(--text-faint)">、</span>');
+        row.innerHTML = html;
+        dEl.appendChild(row);
+      });
+      // 派生語のクリックで再検索
+      dEl.querySelectorAll('[data-deriv]').forEach(el => {
+        el.addEventListener('click', () => {
+          const w = el.dataset.deriv;
+          $('search-input').value = w;
+          updateClearBtn();
+          doSearchDirect(w);
+        });
+      });
+    }
+
+    // 使用年代
     $('res-era-wrap').style.display = era ? 'block' : 'none';
     if (era) $('res-era').innerHTML = `<div class="era-text">${sanitize(era)}</div>`;
     $('res-meta').style.display = 'block';
@@ -1481,6 +1563,36 @@ function buildDetailHtml(w, dir) {
       html += `<span class="synonym-tag" data-syn="${sanitize(s)}">${sanitize(s)}</span>`;
     });
     if (w.synonymsNuance) html += `<div class="nuance-box" style="background:var(--surface)">${sanitize(w.synonymsNuance)}</div>`;
+    html += `</div>`;
+  }
+  // 反対語
+  const wAntonyms = Array.isArray(w.antonyms) ? w.antonyms : null;
+  if (wAntonyms !== null) {
+    html += `<div style="margin-top:10px"><div class="section-label" style="margin-bottom:6px">反対語</div>`;
+    if (wAntonyms.length > 0) {
+      wAntonyms.forEach(a => {
+        html += `<span class="antonym-tag" data-syn="${sanitize(a)}">${sanitize(a)}</span>`;
+      });
+    } else {
+      html += `<span class="deriv-not-available">該当なし</span>`;
+    }
+    html += `</div>`;
+  }
+  // 派生語
+  const wDerivs = Array.isArray(w.derivatives) ? w.derivatives : [];
+  if (wDerivs.length > 0) {
+    html += `<div style="margin-top:10px"><div class="section-label" style="margin-bottom:6px">派生語</div>`;
+    wDerivs.forEach(g => {
+      if (!g || !Array.isArray(g.words) || g.words.length === 0) return;
+      html += `<div class="deriv-pos-row"><span class="deriv-pos-label">${sanitize(g.pos || '')}</span>`;
+      const items = [];
+      g.words.forEach(dw => {
+        if (!dw || !dw.word) return;
+        items.push(`<span class="deriv-word" data-syn="${sanitize(dw.word)}">${sanitize(dw.word)}</span><span class="deriv-meaning"> (${sanitize(dw.meaning || '')})</span>`);
+      });
+      html += items.join('<span style="color:var(--text-faint)">、</span>');
+      html += `</div>`;
+    });
     html += `</div>`;
   }
   if (w.era) html += `<div style="margin-top:10px"><div class="section-label" style="margin-bottom:6px">使用年代</div><div class="era-text">${sanitize(w.era)}</div></div>`;
@@ -2488,13 +2600,17 @@ function showProgressModal(bucket) {
   body.innerHTML = html;
   $('progress-modal').classList.add('open');
 
-  // 単語アイテムのクリック → 単語帳の該当ページへジャンプ
-  body.querySelectorAll('.progress-word-item').forEach(el => {
-    el.addEventListener('click', () => {
-      const word = el.dataset.word;
-      jumpToWordbookEntry(word);
+  // 単語タップ時の展開トグル処理を共通化
+  const attachWordClickHandler = (root) => {
+    root.querySelectorAll('.progress-word-item').forEach(el => {
+      el.addEventListener('click', () => {
+        const word = el.dataset.word;
+        toggleProgressWordDetail(body, word, el);
+      });
     });
-  });
+  };
+  attachWordClickHandler(body);
+
   // 「さらに N 単語」ボタンのクリック
   body.querySelectorAll('.progress-show-more').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -2503,11 +2619,41 @@ function showProgressModal(bucket) {
       const container = body.querySelector(`[data-section="${section}"]`);
       container.innerHTML = renderProgressWordList(allWords, section, allWords.length);
       // 再度クリックリスナーを設定
-      container.querySelectorAll('.progress-word-item').forEach(el => {
-        el.addEventListener('click', () => jumpToWordbookEntry(el.dataset.word));
-      });
+      attachWordClickHandler(container);
     });
   });
+}
+
+// 単語の詳細展開をトグル
+function toggleProgressWordDetail(body, wordStr, itemEl) {
+  const detailEl = body.querySelector(`[data-detail-for="${cssEscape(wordStr)}"]`);
+  if (!detailEl) return;
+  const isOpen = detailEl.classList.contains('open');
+
+  // 全ての詳細を閉じる + 全ての単語アイテムのactive状態を解除
+  body.querySelectorAll('.progress-word-detail.open').forEach(d => {
+    d.classList.remove('open');
+    d.innerHTML = '';
+  });
+  body.querySelectorAll('.progress-word-item.active').forEach(i => i.classList.remove('active'));
+
+  if (!isOpen) {
+    // 該当単語を取得
+    const w = state.wb.find(x => x.word === wordStr) || state.wbJa.find(x => x.word === wordStr);
+    if (!w) return;
+    const dir = state.wb.includes(w) ? 'en2ja' : 'ja2en';
+    detailEl.innerHTML = buildDetailHtml(w, dir);
+    detailEl.classList.add('open');
+    itemEl.classList.add('active');
+    // スクロール調整：単語アイテムが見えるようにする
+    setTimeout(() => itemEl.scrollIntoView({ behavior:'smooth', block:'nearest' }), 50);
+  }
+}
+
+// CSS.escape のフォールバック（古いブラウザ対応）
+function cssEscape(s) {
+  if (window.CSS && CSS.escape) return CSS.escape(s);
+  return String(s).replace(/[^a-zA-Z0-9_-]/g, c => '\\' + c);
 }
 
 function renderProgressWordList(words, section, maxShow) {
@@ -2520,9 +2666,12 @@ function renderProgressWordList(words, section, maxShow) {
     const strength = getMemoryStrength(srs);
     const reachedAt = section === 's3' ? srs.firstReachedAt3 : srs.firstReachedAt2;
     const dateStr = reachedAt ? formatDate(reachedAt) : '-';
+    html += `<div class="progress-word-wrap">`;
     html += `<div class="progress-word-item ${itemClass}" data-word="${sanitize(w.word)}">`;
     html += `<div class="row1"><span class="word">${sanitize(w.word)}</span><span class="strength">${strength.stars}</span></div>`;
     html += `<div class="row2"><span class="meaning">${sanitize(getPrimary(w))}</span><span class="date">${sanitize(dateStr)} 達成</span></div>`;
+    html += `</div>`;
+    html += `<div class="progress-word-detail" data-detail-for="${sanitize(w.word)}"></div>`;
     html += `</div>`;
   });
   if (!showAll) {
