@@ -948,6 +948,13 @@ const formatDate = ts => {
   return `${d.getFullYear()}/${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')}`;
 };
 
+// 2つの値の小さい方を返す（null/undefinedを除外）
+function minDefined(a, b) {
+  if (a == null) return b;
+  if (b == null) return a;
+  return Math.min(a, b);
+}
+
 // ===== Supabase =====
 function sbHeaders() {
   const { key } = getSbConfig();
@@ -965,8 +972,53 @@ async function syncFromSb() {
     const uid = encodeURIComponent(getUserId());
     const rows = await sbFetch(`/wordbook?user_id=eq.${uid}&order=added_at.desc`);
     if (!Array.isArray(rows)) return;
+    // ローカルの単語マップを作成（SRSマージ用）
+    const localMap = new Map();
+    [...state.wb, ...state.wbJa].forEach(w => {
+      const dir = state.wb.includes(w) ? 'en2ja' : 'ja2en';
+      localMap.set(w.word.toLowerCase() + '|' + dir, w);
+    });
     const en = [], ja = [];
     rows.filter(r => r && typeof r.word === 'string' && r.word.length > 0 && r.word.length <= 100).forEach(r => {
+      const dir = r.direction === 'ja2en' ? 'ja2en' : 'en2ja';
+      const remoteSrs = (r.srs && typeof r.srs === 'object') ? {
+        interval: Number.isFinite(r.srs.interval) ? r.srs.interval : 0,
+        easeFactor: Number.isFinite(r.srs.easeFactor) ? r.srs.easeFactor : 2.5,
+        repetitions: Number.isFinite(r.srs.repetitions) ? r.srs.repetitions : 0,
+        dueDate: Number.isFinite(r.srs.dueDate) ? r.srs.dueDate : Date.now(),
+        lapses: Number.isFinite(r.srs.lapses) ? r.srs.lapses : 0,
+        lastReviewedAt: Number.isFinite(r.srs.lastReviewedAt) ? r.srs.lastReviewedAt : null,
+        totalReviews: Number.isFinite(r.srs.totalReviews) ? r.srs.totalReviews : 0,
+        firstReachedAt2: Number.isFinite(r.srs.firstReachedAt2) ? r.srs.firstReachedAt2 : null,
+        firstReachedAt3: Number.isFinite(r.srs.firstReachedAt3) ? r.srs.firstReachedAt3 : null
+      } : initSrs();
+
+      // ローカルにも同じ単語がある場合、SRSをマージ（より進んだ方を採用）
+      const localKey = String(r.word).toLowerCase() + '|' + dir;
+      const localWord = localMap.get(localKey);
+      let mergedSrs = remoteSrs;
+      if (localWord && localWord.srs) {
+        const localSrs = localWord.srs;
+        const localTime = localSrs.lastReviewedAt || 0;
+        const remoteTime = remoteSrs.lastReviewedAt || 0;
+        // より新しいlastReviewedAtを持つ方を基本として採用
+        const baseSrs = (localTime > remoteTime) ? localSrs : remoteSrs;
+        mergedSrs = {
+          interval: baseSrs.interval || 0,
+          easeFactor: baseSrs.easeFactor || 2.5,
+          repetitions: baseSrs.repetitions || 0,
+          dueDate: baseSrs.dueDate || Date.now(),
+          // 累計系は最大値を採用
+          lapses: Math.max(localSrs.lapses || 0, remoteSrs.lapses || 0),
+          totalReviews: Math.max(localSrs.totalReviews || 0, remoteSrs.totalReviews || 0),
+          // 最終レビュー日時は新しい方
+          lastReviewedAt: Math.max(localTime, remoteTime) || null,
+          // 初回到達日時は古い方を保持（初めて到達した日を残す）
+          firstReachedAt2: minDefined(localSrs.firstReachedAt2, remoteSrs.firstReachedAt2),
+          firstReachedAt3: minDefined(localSrs.firstReachedAt3, remoteSrs.firstReachedAt3)
+        };
+      }
+
       const item = {
         word: String(r.word),
         phonetic: typeof r.phonetic === 'string' ? r.phonetic : '',
@@ -978,19 +1030,9 @@ async function syncFromSb() {
         era: typeof r.era === 'string' ? r.era : '',
         learned: !!r.learned,
         addedAt: r.added_at ? new Date(r.added_at).getTime() : Date.now(),
-        srs: (r.srs && typeof r.srs === 'object') ? {
-          interval: Number.isFinite(r.srs.interval) ? r.srs.interval : 0,
-          easeFactor: Number.isFinite(r.srs.easeFactor) ? r.srs.easeFactor : 2.5,
-          repetitions: Number.isFinite(r.srs.repetitions) ? r.srs.repetitions : 0,
-          dueDate: Number.isFinite(r.srs.dueDate) ? r.srs.dueDate : Date.now(),
-          lapses: Number.isFinite(r.srs.lapses) ? r.srs.lapses : 0,
-          lastReviewedAt: Number.isFinite(r.srs.lastReviewedAt) ? r.srs.lastReviewedAt : null,
-          totalReviews: Number.isFinite(r.srs.totalReviews) ? r.srs.totalReviews : 0,
-          firstReachedAt2: Number.isFinite(r.srs.firstReachedAt2) ? r.srs.firstReachedAt2 : null,
-          firstReachedAt3: Number.isFinite(r.srs.firstReachedAt3) ? r.srs.firstReachedAt3 : null
-        } : initSrs()
+        srs: mergedSrs
       };
-      (r.direction === 'ja2en' ? ja : en).push(item);
+      (dir === 'ja2en' ? ja : en).push(item);
     });
     state.wb = en;
     state.wbJa = ja;
@@ -999,15 +1041,35 @@ async function syncFromSb() {
 
     const statRows = await sbFetch(`/quiz_stats?user_id=eq.${uid}`);
     if (Array.isArray(statRows)) {
-      state.stats = Object.create(null);
-      state.statsJa = Object.create(null);
+      // クイズ統計：ローカルとリモートの最大値マージ（複数端末でテスト分が累積する）
+      const mergedStats = Object.create(null);
+      const mergedStatsJa = Object.create(null);
+      // まずローカルの値を引き継ぐ
+      Object.keys(state.stats || {}).forEach(k => {
+        const v = state.stats[k];
+        mergedStats[k] = { correct: v.correct || 0, total: v.total || 0 };
+      });
+      Object.keys(state.statsJa || {}).forEach(k => {
+        const v = state.statsJa[k];
+        mergedStatsJa[k] = { correct: v.correct || 0, total: v.total || 0 };
+      });
+      // リモートの値とマージ（最大値方式）
       statRows.forEach(r => {
         if (!r || typeof r.word !== 'string') return;
         const k = safeKey(r.word);
         if (!k) return;
-        const t = r.direction === 'ja2en' ? state.statsJa : state.stats;
-        t[k] = { correct: Number.isFinite(r.correct) ? r.correct : 0, total: Number.isFinite(r.total) ? r.total : 0 };
+        const t = r.direction === 'ja2en' ? mergedStatsJa : mergedStats;
+        const remoteCorrect = Number.isFinite(r.correct) ? r.correct : 0;
+        const remoteTotal = Number.isFinite(r.total) ? r.total : 0;
+        if (!t[k]) {
+          t[k] = { correct: remoteCorrect, total: remoteTotal };
+        } else {
+          t[k].correct = Math.max(t[k].correct, remoteCorrect);
+          t[k].total = Math.max(t[k].total, remoteTotal);
+        }
       });
+      state.stats = mergedStats;
+      state.statsJa = mergedStatsJa;
       safeSet(LS.STATS, JSON.stringify(state.stats));
       safeSet(LS.STATS_JA, JSON.stringify(state.statsJa));
     }
@@ -1724,19 +1786,31 @@ async function syncWordbookManually() {
   }
   btn.disabled = true;
   btn.textContent = '⏳ 同期中...';
-  msg.textContent = 'Supabaseから単語帳を取得中...';
+  msg.textContent = 'Supabaseから単語帳と学習データを取得中...';
   msg.style.background = 'var(--accent-light)';
   msg.style.color = 'var(--accent)';
   msg.style.display = 'block';
   try {
+    msg.textContent = '⏳ ローカルデータをアップロード中...';
+    // 1. 先にローカルのデータをSupabaseに送信（後勝ちにならないよう、自分の更新を反映）
+    await uploadLocalDataToSb();
+    msg.textContent = '⏳ Supabaseから最新データを取得中...';
+    // 2. 単語帳・クイズ統計をSupabaseから取得（マージ方式）
     await syncFromSb();
+    // 3. 学習統計（累計学習日数・連続日数等）をSupabaseからマージ
+    await mergeLearningStats();
+    // 4. 統合後、最新の状態を再度Supabaseに保存（マージ結果を全端末で共有）
+    msg.textContent = '⏳ 統合データを保存中...';
+    await uploadLocalDataToSb();
+    // 5. SRS移行処理
     migrateToSrs();
+    // 6. 単語帳の再描画
     renderWordbook();
     const dir = wlDir();
-    msg.textContent = `✓ 同期完了（${wb(dir).length} 単語を読み込みました）`;
+    msg.textContent = `✓ 同期完了（${wb(dir).length} 単語・全学習データを統合しました）`;
     msg.style.background = 'var(--green-light)';
     msg.style.color = 'var(--green)';
-    setTimeout(() => msg.style.display = 'none', 3000);
+    setTimeout(() => msg.style.display = 'none', 3500);
   } catch(e) {
     msg.textContent = `エラー: ${e.message || '同期に失敗しました'}`;
     msg.style.background = 'var(--red-light)';
@@ -1746,6 +1820,38 @@ async function syncWordbookManually() {
     btn.disabled = false;
     btn.textContent = '🔄 同期';
   }
+}
+
+// ローカルの全データをSupabaseに送信（単語帳・クイズ統計・学習統計）
+async function uploadLocalDataToSb() {
+  if (!getSbConfig().url) return;
+  // 単語帳（en2ja・ja2en）
+  await saveWordbook('en2ja');
+  await saveWordbook('ja2en');
+  // クイズ統計：単語帳の各単語に対応する統計を送信
+  const uid = getUserId();
+  const sendStats = async (dir) => {
+    const t = dir === 'ja2en' ? state.statsJa : state.stats;
+    const target = wb(dir);
+    // 単語帳の各単語に対して、対応する統計があれば送信
+    for (const w of target) {
+      const k = safeKey(w.word);
+      if (!k) continue;
+      const s = t[k];
+      if (!s) continue;
+      try {
+        await sbFetch('/quiz_stats', {
+          method:'POST',
+          headers:{ Prefer:'resolution=merge-duplicates' },
+          body: JSON.stringify({ user_id:uid, word:w.word, correct:s.correct||0, total:s.total||0, direction:dir })
+        });
+      } catch(e) {}
+    }
+  };
+  await sendStats('en2ja');
+  await sendStats('ja2en');
+  // 学習統計
+  await saveLearningStatsSb(getLearningStats());
 }
 
 // ===== Quiz =====
