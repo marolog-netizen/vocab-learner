@@ -127,9 +127,34 @@ body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:-appl
 .quiz-choice.correct{background:var(--green-light);border-color:var(--green);color:var(--green)}
 .quiz-choice.wrong{background:var(--red-light);border-color:var(--red);color:var(--red)}
 .quiz-skip{margin-top:14px;background:transparent;border:none;color:var(--text-muted);font-size:13px;cursor:pointer;padding:8px;font-family:inherit}
+.quiz-mode-card{cursor:pointer;text-align:center;padding:24px 20px;transition:transform .15s,border-color .15s}
+.quiz-mode-card:hover{transform:translateY(-2px);border-color:var(--accent)}
+.quiz-mode-icon{font-size:36px;margin-bottom:8px}
+.quiz-mode-title{font-family:Georgia,'Times New Roman',serif;font-size:20px;color:var(--text);margin-bottom:4px}
+.quiz-mode-desc{font-size:13px;color:var(--text-muted);line-height:1.6}
+.quiz-back-btn{display:inline-flex;align-items:center;gap:6px;background:transparent;border:none;color:var(--text-muted);font-size:13px;cursor:pointer;padding:6px 12px;font-family:inherit;margin-bottom:8px}
+.quiz-back-btn:hover{color:var(--text)}
+.quiz-sentence{font-size:18px;color:var(--text);line-height:1.7;margin-bottom:18px;font-family:Georgia,'Times New Roman',serif}
+.quiz-sentence .blank{display:inline-block;min-width:60px;border-bottom:2px solid var(--accent);padding:0 6px;color:var(--text-faint)}
+.quiz-sentence-ja{font-size:13px;color:var(--text-muted);margin-bottom:10px}
 .quiz-result{text-align:center;padding:32px 20px}
 .quiz-result .score{font-family:Georgia,'Times New Roman',serif;font-size:48px;color:var(--accent);margin-bottom:6px}
 .quiz-result .score-label{color:var(--text-muted);margin-bottom:18px}
+.quiz-feedback{margin-top:14px;padding:12px 14px;border-radius:var(--radius-sm);text-align:left;font-size:14px;line-height:1.6}
+.quiz-feedback.correct{background:var(--green-light);color:var(--green);border:1px solid rgba(26,122,74,.25)}
+.quiz-feedback.wrong{background:var(--red-light);color:var(--red);border:1px solid rgba(176,48,48,.25)}
+.quiz-feedback-title{font-weight:500;margin-bottom:6px;font-size:15px}
+.quiz-feedback-detail{font-size:13px;color:var(--text);margin-top:8px;padding-top:8px;border-top:1px solid rgba(0,0,0,.08);line-height:1.7}
+.quiz-feedback-detail .label{color:var(--text-muted);font-size:11px;display:block;margin-bottom:2px;font-weight:500}
+.quiz-feedback-detail em{background:#fff3a8;font-style:normal;padding:0 2px;border-radius:2px}
+.quiz-next-btn{margin-top:14px;width:100%;padding:12px;background:var(--accent);color:#fff;border:none;border-radius:var(--radius-sm);font-family:inherit;font-size:14px;font-weight:500;cursor:pointer}
+.review-list{margin-top:16px;text-align:left}
+.review-item{background:var(--bg);border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:10px;border-left:3px solid var(--red)}
+.review-word{font-family:Georgia,'Times New Roman',serif;font-size:18px;color:var(--text);margin-bottom:2px}
+.review-meaning{font-size:13px;color:var(--text-muted);margin-bottom:6px}
+.review-example{font-size:12px;color:var(--text);line-height:1.6;margin-top:4px}
+.review-example em{background:#fff3a8;font-style:normal;padding:0 2px;border-radius:2px}
+.review-example-ja{font-size:12px;color:var(--text-muted)}
 .apikey-notice{padding:14px;background:var(--amber-light);border:1px solid rgba(122,82,0,.2);border-radius:var(--radius-sm);margin-bottom:16px;color:var(--amber);font-size:13px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
 .apikey-notice button{background:var(--accent);color:#fff;border:none;padding:7px 14px;border-radius:8px;font-family:inherit;font-size:12px;font-weight:500;cursor:pointer}
 input,textarea,button{font-family:inherit}
@@ -172,12 +197,14 @@ input,textarea,button{font-family:inherit}
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
         <div>
           <div style="font-family:Georgia,'Times New Roman',serif;font-size:22px;color:var(--text)">Vocab Learner</div>
-          <div style="font-size:13px;color:var(--text-muted);margin-top:2px">Version 1.0.0</div>
-          <div style="font-size:12px;color:var(--text-faint);margin-top:2px">リリース: 2026-04-26 14:19 (JST)</div>
+          <div style="font-size:13px;color:var(--text-muted);margin-top:2px">Version 2.0.0</div>
+          <div style="font-size:12px;color:var(--text-faint);margin-top:2px">リリース: 2026-05-03 11:55 (JST)</div>
         </div>
         <button class="modal-close" data-close-modal aria-label="閉じる">×</button>
       </div>
       <div style="font-size:14px;line-height:1.7">
+        <div style="font-size:12px;font-weight:500;color:var(--text-muted);margin-bottom:10px">最新版の全機能</div>
+
         <div style="font-weight:500;margin-bottom:6px">🔍 検索機能</div>
         <ul style="margin:0 0 14px 18px;color:var(--text-muted);font-size:13px">
           <li>英単語・日本語の自動判別検索</li>
@@ -190,6 +217,7 @@ input,textarea,button{font-family:inherit}
           <li>単語帳キャッシュ利用でAPI節約</li>
           <li>検索窓クリアボタン</li>
         </ul>
+
         <div style="font-weight:500;margin-bottom:6px">📚 単語帳機能</div>
         <ul style="margin:0 0 14px 18px;color:var(--text-muted);font-size:13px">
           <li>英→日 / 日→英のトグル切替</li>
@@ -198,12 +226,19 @@ input,textarea,button{font-family:inherit}
           <li>検索回数・最終検索日の表示</li>
           <li>削除時に検索履歴もリセット</li>
         </ul>
+
         <div style="font-weight:500;margin-bottom:6px">🎯 テスト機能</div>
         <ul style="margin:0 0 14px 18px;color:var(--text-muted);font-size:13px">
           <li>英→日 / 日→英のトグル切替</li>
-          <li>4択クイズ（最大10問）</li>
+          <li>📝 単語テスト（4択クイズ・最大10問）</li>
+          <li>📖 文章テスト（例文の空欄に入る単語を4択で選ぶ）</li>
+          <li>各問題で正解/不正解を即時フィードバック表示</li>
+          <li>不正解時は意味・例文を表示して学習効果UP</li>
+          <li>「次へ」ボタンで自分のペースで進められる</li>
+          <li>完了後に間違えた単語の一覧を表示・復習可能</li>
           <li>間違いが多い・古い単語を優先出題</li>
         </ul>
+
         <div style="font-weight:500;margin-bottom:6px">⚙️ 設定・同期</div>
         <ul style="margin:0 0 14px 18px;color:var(--text-muted);font-size:13px">
           <li>Anthropic APIキー管理</li>
@@ -212,12 +247,93 @@ input,textarea,button{font-family:inherit}
           <li>ローカルストレージ使用状況表示</li>
           <li>クレジット残高確認・追加リンク</li>
         </ul>
+
         <div style="font-weight:500;margin-bottom:6px">🛡️ セキュリティ</div>
-        <ul style="margin:0 0 4px 18px;color:var(--text-muted);font-size:13px">
+        <ul style="margin:0 0 14px 18px;color:var(--text-muted);font-size:13px">
           <li>XSS対策・正規表現エスケープ・プロトタイプ汚染防止</li>
           <li>CSP・ReDoS対策・URLバリデーション</li>
           <li>Supabase RLS・暗号学的乱数によるユーザーID生成</li>
         </ul>
+
+        <details style="margin-top:14px;background:var(--bg);border-radius:var(--radius-sm);border:1px solid var(--border)">
+          <summary style="cursor:pointer;padding:10px 14px;font-size:13px;font-weight:500;color:var(--text-muted);user-select:none">📜 バージョン履歴</summary>
+          <div style="padding:8px 14px 14px;border-top:1px solid var(--border)">
+
+            <details style="margin-top:8px;background:var(--surface);border-radius:var(--radius-sm);border:1px solid var(--border)">
+              <summary style="cursor:pointer;padding:9px 12px;font-size:13px;font-weight:500;color:var(--text);user-select:none">
+                Version 2.0.0 <span style="font-size:11px;color:var(--text-faint);font-weight:400;margin-left:6px">2026-05-03 11:55 (JST)</span>
+              </summary>
+              <div style="padding:10px 14px;border-top:1px solid var(--border)">
+                <div style="font-size:12px;color:var(--green);font-weight:500;margin-bottom:8px">✨ 追加・強化された機能</div>
+                <div style="font-weight:500;margin-bottom:4px;font-size:13px">🎯 テスト機能の大幅強化</div>
+                <ul style="margin:0 0 4px 18px;color:var(--text-muted);font-size:12px">
+                  <li><b style="color:var(--text)">📖 文章テストを新規追加</b>（例文の空欄に入る単語を4択で選ぶ）</li>
+                  <li><b style="color:var(--text)">テスト形式の選択画面</b>を追加（単語テスト / 文章テスト）</li>
+                  <li><b style="color:var(--text)">即時フィードバック表示</b>（正解/不正解をその場で確認）</li>
+                  <li><b style="color:var(--text)">不正解時は意味・例文を表示</b>して学習効果をUP</li>
+                  <li><b style="color:var(--text)">「次へ」ボタン</b>でユーザーのペースで進められる（自動進行を廃止）</li>
+                  <li><b style="color:var(--text)">完了後の復習機能</b>：間違えた単語の一覧表示・もう一度テスト可能</li>
+                  <li>結果画面に「テスト選択に戻る」ボタンを追加</li>
+                </ul>
+              </div>
+            </details>
+
+            <details style="margin-top:8px;background:var(--surface);border-radius:var(--radius-sm);border:1px solid var(--border)">
+              <summary style="cursor:pointer;padding:9px 12px;font-size:13px;font-weight:500;color:var(--text);user-select:none">
+                Version 1.0.0 <span style="font-size:11px;color:var(--text-faint);font-weight:400;margin-left:6px">2026-04-26 14:19 (JST)</span>
+              </summary>
+              <div style="padding:10px 14px;border-top:1px solid var(--border)">
+                <div style="font-size:12px;color:var(--accent);font-weight:500;margin-bottom:8px">🚀 初回リリース</div>
+
+                <div style="font-weight:500;margin-bottom:4px;font-size:13px">🔍 検索機能</div>
+                <ul style="margin:0 0 8px 18px;color:var(--text-muted);font-size:12px">
+                  <li>英単語・日本語の自動判別検索</li>
+                  <li>スペルミス候補の表示・選択</li>
+                  <li>複数の意味・品詞・例文（Cambridge Dictionary形式）</li>
+                  <li>類語タグ＋ニュアンス解説</li>
+                  <li>使用年代の表示</li>
+                  <li>発音記号・「発音を聞く」ボタン</li>
+                  <li>検索回数・履歴表示</li>
+                  <li>単語帳キャッシュ利用でAPI節約</li>
+                  <li>検索窓クリアボタン</li>
+                </ul>
+
+                <div style="font-weight:500;margin-bottom:4px;font-size:13px">📚 単語帳機能</div>
+                <ul style="margin:0 0 8px 18px;color:var(--text-muted);font-size:12px">
+                  <li>英→日 / 日→英のトグル切替</li>
+                  <li>単語タップで詳細展開（意味・例文・類語・発音）</li>
+                  <li>習得済み／未習得バッジ</li>
+                  <li>検索回数・最終検索日の表示</li>
+                  <li>削除時に検索履歴もリセット</li>
+                </ul>
+
+                <div style="font-weight:500;margin-bottom:4px;font-size:13px">🎯 テスト機能（基本）</div>
+                <ul style="margin:0 0 8px 18px;color:var(--text-muted);font-size:12px">
+                  <li>英→日 / 日→英のトグル切替</li>
+                  <li>4択クイズ（最大10問）</li>
+                  <li>間違いが多い・古い単語を優先出題</li>
+                </ul>
+
+                <div style="font-weight:500;margin-bottom:4px;font-size:13px">⚙️ 設定・同期</div>
+                <ul style="margin:0 0 8px 18px;color:var(--text-muted);font-size:12px">
+                  <li>Anthropic APIキー管理</li>
+                  <li>Supabaseによる端末間リアルタイム同期</li>
+                  <li>DB使用状況（方向別内訳付き）</li>
+                  <li>ローカルストレージ使用状況表示</li>
+                  <li>クレジット残高確認・追加リンク</li>
+                </ul>
+
+                <div style="font-weight:500;margin-bottom:4px;font-size:13px">🛡️ セキュリティ</div>
+                <ul style="margin:0 0 4px 18px;color:var(--text-muted);font-size:12px">
+                  <li>XSS対策・正規表現エスケープ・プロトタイプ汚染防止</li>
+                  <li>CSP・ReDoS対策・URLバリデーション</li>
+                  <li>Supabase RLS・暗号学的乱数によるユーザーID生成</li>
+                </ul>
+              </div>
+            </details>
+
+          </div>
+        </details>
       </div>
     </div>
   </div>
@@ -302,6 +418,18 @@ input,textarea,button{font-family:inherit}
     <div class="dir-toggle" id="quiz-toggle">
       <button data-quiz-dir="en2ja" class="active">英 → 日</button>
       <button data-quiz-dir="ja2en">日 → 英</button>
+    </div>
+    <div id="quiz-mode-select">
+      <div class="card quiz-mode-card" data-mode="word">
+        <div class="quiz-mode-icon">📝</div>
+        <div class="quiz-mode-title">単語テスト</div>
+        <div class="quiz-mode-desc" id="quiz-mode-desc-word">単語の意味を4択で答える</div>
+      </div>
+      <div class="card quiz-mode-card" data-mode="sentence">
+        <div class="quiz-mode-icon">📖</div>
+        <div class="quiz-mode-title">文章テスト</div>
+        <div class="quiz-mode-desc" id="quiz-mode-desc-sentence">例文の空欄を4択で埋める</div>
+      </div>
     </div>
     <div id="quiz-area"></div>
   </div>
@@ -467,7 +595,7 @@ const state = {
   currentDir: 'en2ja',
   searching: false,
   quotaShown: false,
-  quizWords: [], quizIdx: 0, quizScore: 0
+  quizWords: [], quizIdx: 0, quizScore: 0, quizWrong: [], quizMode: 'word'
 };
 
 const wb = dir => dir === 'ja2en' ? state.wbJa : state.wb;
@@ -1094,29 +1222,122 @@ function weightedShuffle(arr, dir) {
   return result;
 }
 
-function startQuiz() {
+function showQuizModeSelect() {
+  $('quiz-mode-select').style.display = 'block';
+  $('quiz-area').style.display = 'none';
+  $('quiz-area').innerHTML = '';
+  $('quiz-toggle').style.display = 'flex';
+  // 方向に応じて文章テストの説明を変更
   const dir = quizDir();
-  const target = wb(dir);
-  const area = $('quiz-area');
-  if (target.length < 2) {
-    area.innerHTML = '<div class="empty-state">テストには2語以上必要です。<br>まず単語を検索して追加してください。</div>';
-    return;
+  $('quiz-mode-desc-word').textContent = dir === 'ja2en' ? '日本語の単語の英訳を4択で選ぶ' : '英単語の意味を4択で答える';
+  $('quiz-mode-desc-sentence').textContent = dir === 'ja2en' ? '日本語例文の空欄に入る英単語を4択で選ぶ' : '英文の空欄に入る単語を4択で選ぶ';
+}
+
+// 文章テストで使える単語のフィルタリング（例文付きの単語のみ）
+function hasUsableSentence(w, dir) {
+  if (!w.definitions) return false;
+  for (const g of w.definitions) {
+    if (!g.senses) continue;
+    for (const s of g.senses) {
+      if (!s.examples) continue;
+      for (const ex of s.examples) {
+        // 単語が例文に含まれているか確認
+        if (dir === 'ja2en') {
+          // 日→英：英文中にmeaningがあり、対応する日本語訳もある
+          if (s.meaning && ex.en && ex.ja && new RegExp('\\b' + escapeRegex(s.meaning) + '\\b', 'i').test(ex.en)) return true;
+        } else {
+          // 英→日：英文中にwordがある
+          if (ex.en && new RegExp('\\b' + escapeRegex(w.word) + '\\b', 'i').test(ex.en)) return true;
+        }
+      }
+    }
   }
-  const now = Date.now();
-  const histT = hist(dir);
-  const stT = stats(dir);
-  const scored = target.map(w => {
-    const k = safeKey(w.word) || '';
-    const s = stT[k] || { correct:0, total:0 };
-    const mistakes = (s.total||0) - (s.correct||0);
-    const h = histT[k] || [];
-    const last = h.length > 0 ? h[h.length-1] : (w.addedAt || 0);
-    return { w, score: mistakes*10 + (now-last)/(86400000) };
-  });
-  scored.sort((a,b) => b.score - a.score);
-  state.quizWords = weightedShuffle(scored.slice(0,10).map(x => x.w), dir);
+  return false;
+}
+
+// 文章テスト用の問題データ生成（単語からランダムに使える例文を1つ選ぶ）
+function buildSentenceQuestion(w, dir) {
+  const candidates = [];
+  for (const g of w.definitions || []) {
+    for (const s of g.senses || []) {
+      for (const ex of s.examples || []) {
+        if (dir === 'ja2en') {
+          if (s.meaning && ex.en && ex.ja && new RegExp('\\b' + escapeRegex(s.meaning) + '\\b', 'i').test(ex.en)) {
+            candidates.push({ ex, blankWord: s.meaning, meaning: s.meaning });
+          }
+        } else {
+          if (ex.en && new RegExp('\\b' + escapeRegex(w.word) + '\\b', 'i').test(ex.en)) {
+            candidates.push({ ex, blankWord: w.word, meaning: s.meaning });
+          }
+        }
+      }
+    }
+  }
+  if (candidates.length === 0) return null;
+  return candidates[Math.floor(Math.random() * candidates.length)];
+}
+
+function startQuiz(reviewWords) {
+  const dir = quizDir();
+  const mode = state.quizMode;
+  const allWords = wb(dir);
+  const area = $('quiz-area');
+  $('quiz-mode-select').style.display = 'none';
+  $('quiz-area').style.display = 'block';
+  $('quiz-toggle').style.display = 'none';
+
+  if (mode === 'sentence') {
+    const usable = (reviewWords || allWords).filter(w => hasUsableSentence(w, dir));
+    if (usable.length < 2) {
+      area.innerHTML = '<div class="empty-state">文章テストには例文付きの単語が2語以上必要です。<br>新しい単語を検索して追加してください。</div><button class="quiz-back-btn" id="quiz-back-btn">← テスト選択に戻る</button>';
+      $('quiz-back-btn').addEventListener('click', showQuizModeSelect);
+      return;
+    }
+    if (reviewWords) {
+      state.quizWords = [...usable];
+    } else {
+      const now = Date.now();
+      const histT = hist(dir);
+      const stT = stats(dir);
+      const scored = usable.map(w => {
+        const k = safeKey(w.word) || '';
+        const s = stT[k] || { correct:0, total:0 };
+        const mistakes = (s.total||0) - (s.correct||0);
+        const h = histT[k] || [];
+        const last = h.length > 0 ? h[h.length-1] : (w.addedAt || 0);
+        return { w, score: mistakes*10 + (now-last)/(86400000) };
+      });
+      scored.sort((a,b) => b.score - a.score);
+      state.quizWords = weightedShuffle(scored.slice(0,10).map(x => x.w), dir);
+    }
+  } else {
+    // 単語テスト
+    if ((reviewWords || allWords).length < 2) {
+      area.innerHTML = '<div class="empty-state">テストには2語以上必要です。<br>まず単語を検索して追加してください。</div><button class="quiz-back-btn" id="quiz-back-btn">← テスト選択に戻る</button>';
+      $('quiz-back-btn').addEventListener('click', showQuizModeSelect);
+      return;
+    }
+    if (reviewWords) {
+      state.quizWords = [...reviewWords];
+    } else {
+      const now = Date.now();
+      const histT = hist(dir);
+      const stT = stats(dir);
+      const scored = allWords.map(w => {
+        const k = safeKey(w.word) || '';
+        const s = stT[k] || { correct:0, total:0 };
+        const mistakes = (s.total||0) - (s.correct||0);
+        const h = histT[k] || [];
+        const last = h.length > 0 ? h[h.length-1] : (w.addedAt || 0);
+        return { w, score: mistakes*10 + (now-last)/(86400000) };
+      });
+      scored.sort((a,b) => b.score - a.score);
+      state.quizWords = weightedShuffle(scored.slice(0,10).map(x => x.w), dir);
+    }
+  }
   state.quizIdx = 0;
   state.quizScore = 0;
+  state.quizWrong = [];
   renderQuiz();
 }
 
@@ -1125,14 +1346,24 @@ function renderQuiz() {
   const target = wb(dir);
   const area = $('quiz-area');
   if (state.quizIdx >= state.quizWords.length) {
-    area.innerHTML = `<div class="card quiz-result"><div class="score">${state.quizScore}<span style="font-size:24px;color:var(--text-muted)">/${state.quizWords.length}</span></div><div class="score-label">問正解しました！</div><button class="btn-primary" id="quiz-restart">もう一度テスト</button></div>`;
-    $('quiz-restart').addEventListener('click', startQuiz);
+    renderQuizResult();
     return;
   }
   const q = state.quizWords[state.quizIdx];
   const pct = Math.round(state.quizIdx / state.quizWords.length * 100);
-  const wrongs = target.filter(w => w.word !== q.word).sort(() => Math.random() - 0.5).slice(0, 3);
-  const choices = [...wrongs.map(w => ({ text:getPrimary(w), correct:false })), { text:getPrimary(q), correct:true }].sort(() => Math.random() - 0.5);
+
+  if (state.quizMode === 'sentence') {
+    renderSentenceQuiz(q, pct, dir, target);
+  } else {
+    renderWordQuiz(q, pct, dir, target);
+  }
+}
+
+function renderWordQuiz(q, pct, dir, target) {
+  const area = $('quiz-area');
+  const pool = target.length >= 4 ? target : state.quizWords;
+  const wrongs = pool.filter(w => w.word !== q.word).sort(() => Math.random() - 0.5).slice(0, 3);
+  const choices = [...wrongs.map(w => ({ text:getPrimary(w), correct:false, word:w.word })), { text:getPrimary(q), correct:true, word:q.word }].sort(() => Math.random() - 0.5);
   const phoneticHtml = dir === 'en2ja' ? `<div class="quiz-phonetic">${sanitize(q.phonetic||'')}</div>` : '';
   area.innerHTML = `
     <div class="quiz-meta"><span>${state.quizIdx+1} / ${state.quizWords.length} 問</span><span style="color:var(--green)">正解 ${state.quizScore}</span></div>
@@ -1141,43 +1372,166 @@ function renderQuiz() {
       <div class="quiz-word">${sanitize(q.word)}</div>${phoneticHtml}
       <div style="font-size:14px;color:var(--text-faint);margin-bottom:20px">${dir === 'ja2en' ? 'この単語の英訳はどれ？' : 'この単語の意味はどれ？'}</div>
       <div class="quiz-choices" id="quiz-choices"></div>
+      <div id="quiz-feedback"></div>
     </div>
     <button class="quiz-skip" id="quiz-skip">スキップ →</button>`;
+  buildChoices(choices, q);
+  $('quiz-skip').addEventListener('click', () => { state.quizWrong.push(q); nextQuiz(); });
+}
+
+function renderSentenceQuiz(q, pct, dir, target) {
+  const area = $('quiz-area');
+  const sq = buildSentenceQuestion(q, dir);
+  if (!sq) {
+    // 例文がない場合はスキップ
+    state.quizIdx++;
+    renderQuiz();
+    return;
+  }
+  // 例文中の対象単語を空欄に置換
+  const safeEn = sanitize(sq.ex.en);
+  const blanked = safeEn.replace(new RegExp('\\b' + escapeRegex(sq.blankWord) + '\\b', 'gi'), '<span class="blank">_____</span>');
+  // 不正解選択肢：他の単語から取得
+  const pool = target.filter(w => w.word !== q.word);
+  const wrongCandidates = [];
+  for (const w of pool.sort(() => Math.random() - 0.5)) {
+    if (wrongCandidates.length >= 3) break;
+    const text = dir === 'ja2en' ? getPrimary(w) : w.word;
+    if (text && text !== sq.blankWord) wrongCandidates.push(text);
+  }
+  // 不足時は重複しないダミーを使わず、足りない分は無視（candidatesが少ない場合は2-3択に）
+  while (wrongCandidates.length < 3) {
+    // 単語帳が小さい場合はreviewWordsから補填
+    const more = state.quizWords.filter(w => w.word !== q.word).map(w => dir === 'ja2en' ? getPrimary(w) : w.word).filter(t => t && t !== sq.blankWord && !wrongCandidates.includes(t));
+    if (more.length === 0) break;
+    wrongCandidates.push(more[0]);
+  }
+  const choices = [
+    ...wrongCandidates.slice(0, 3).map(t => ({ text:t, correct:false })),
+    { text: sq.blankWord, correct:true }
+  ].sort(() => Math.random() - 0.5);
+  area.innerHTML = `
+    <div class="quiz-meta"><span>${state.quizIdx+1} / ${state.quizWords.length} 問</span><span style="color:var(--green)">正解 ${state.quizScore}</span></div>
+    <div class="quiz-progress-wrap"><div class="quiz-progress-bar" style="width:${pct}%"></div></div>
+    <div class="card quiz-card" style="text-align:left;padding:24px">
+      <div style="font-size:14px;color:var(--text-faint);margin-bottom:14px;text-align:center">空欄に入る単語を選んでください</div>
+      <div class="quiz-sentence-ja">${sanitize(sq.ex.ja)}</div>
+      <div class="quiz-sentence">${blanked}</div>
+      <div class="quiz-choices" id="quiz-choices"></div>
+      <div id="quiz-feedback"></div>
+    </div>
+    <button class="quiz-skip" id="quiz-skip">スキップ →</button>`;
+  buildChoices(choices, q, sq);
+  $('quiz-skip').addEventListener('click', () => { state.quizWrong.push(q); nextQuiz(); });
+}
+
+function buildChoices(choices, q, sq) {
   const cc = $('quiz-choices');
+  cc.innerHTML = '';
   choices.forEach(c => {
     const b = document.createElement('button');
     b.className = 'quiz-choice';
     b.textContent = c.text;
-    b.addEventListener('click', () => answerQuiz(c.correct, q.word, b));
+    b.addEventListener('click', () => answerQuiz(c.correct, q, b, sq));
     cc.appendChild(b);
   });
-  $('quiz-skip').addEventListener('click', nextQuiz);
 }
 
-function answerQuiz(correct, wordStr, btn) {
+function answerQuiz(correct, q, btn, sq) {
   const dir = quizDir();
   const target = wb(dir);
   const stT = stats(dir);
   document.querySelectorAll('.quiz-choice').forEach(b => b.disabled = true);
   btn.classList.add(correct ? 'correct' : 'wrong');
   if (!correct) {
-    const cm = getPrimary(target.find(w => w.word === wordStr));
-    document.querySelectorAll('.quiz-choice').forEach(b => { if (b.textContent.trim() === cm) b.classList.add('correct'); });
+    const correctText = sq ? sq.blankWord : getPrimary(target.find(w => w.word === q.word) || q);
+    document.querySelectorAll('.quiz-choice').forEach(b => { if (b.textContent.trim() === correctText) b.classList.add('correct'); });
+    state.quizWrong.push(q);
   } else {
     state.quizScore++;
   }
-  const w = target.find(x => x.word === wordStr);
+  // フィードバック表示
+  const fb = $('quiz-feedback');
+  let html = `<div class="quiz-feedback ${correct ? 'correct' : 'wrong'}">`;
+  html += `<div class="quiz-feedback-title">${correct ? '✓ 正解！' : '✗ 不正解'}</div>`;
+  if (!correct) {
+    const fullWord = target.find(w => w.word === q.word) || q;
+    html += `<div class="quiz-feedback-detail">`;
+    if (sq) {
+      // 文章テスト：正解の単語と意味を表示
+      html += `<span class="label">正解の単語</span>${sanitize(sq.blankWord)}`;
+      if (sq.meaning && sq.meaning !== sq.blankWord) {
+        html += ` <span style="color:var(--text-muted);font-size:12px">（${sanitize(sq.meaning)}）</span>`;
+      }
+    } else {
+      // 単語テスト：正解の意味と例文を表示
+      const correctMeaning = getPrimary(fullWord);
+      html += `<span class="label">正解</span>${sanitize(correctMeaning)}`;
+      const firstSense = fullWord.definitions && fullWord.definitions[0] && fullWord.definitions[0].senses && fullWord.definitions[0].senses[0];
+      if (firstSense && firstSense.examples && firstSense.examples[0]) {
+        const ex = firstSense.examples[0];
+        const target2 = dir === 'ja2en' ? correctMeaning : q.word;
+        const safe = sanitize(ex.en);
+        const hl = target2 ? safe.replace(new RegExp('\\b' + escapeRegex(target2) + '\\b', 'gi'), m => `<em>${m}</em>`) : safe;
+        html += `<div style="margin-top:8px"><span class="label">例文</span>${hl}<div style="color:var(--text-muted);margin-top:2px">${sanitize(ex.ja)}</div></div>`;
+      }
+    }
+    html += `</div>`;
+  }
+  html += `<button class="quiz-next-btn" id="quiz-next-btn">${state.quizIdx + 1 >= state.quizWords.length ? '結果を見る →' : '次の問題へ →'}</button>`;
+  html += `</div>`;
+  fb.innerHTML = html;
+  $('quiz-next-btn').addEventListener('click', nextQuiz);
+  fb.scrollIntoView({ behavior:'smooth', block:'nearest' });
+
+  const w = target.find(x => x.word === q.word);
   if (w) { w.learned = correct; saveWordbook(dir); }
-  const k = safeKey(wordStr);
+  const k = safeKey(q.word);
   if (k) {
     if (!stT[k]) stT[k] = { correct:0, total:0 };
     stT[k].total++;
     if (correct) stT[k].correct++;
     safeSet(dir === 'ja2en' ? LS.STATS_JA : LS.STATS, JSON.stringify(stT));
-    saveQuizStatSb(wordStr, stT[k].correct, stT[k].total, dir);
+    saveQuizStatSb(q.word, stT[k].correct, stT[k].total, dir);
   }
-  setTimeout(nextQuiz, 1300);
 }
+
+function renderQuizResult() {
+  const dir = quizDir();
+  const area = $('quiz-area');
+  const total = state.quizWords.length;
+  const wrong = state.quizWrong;
+  let html = `<div class="card quiz-result"><div class="score">${state.quizScore}<span style="font-size:24px;color:var(--text-muted)">/${total}</span></div><div class="score-label">問正解しました！</div>`;
+  if (wrong.length > 0) {
+    html += `<div style="font-size:14px;color:var(--text);margin-top:8px;margin-bottom:4px;font-weight:500">📝 復習したい単語（${wrong.length}語）</div>`;
+    html += `<div class="review-list">`;
+    wrong.forEach(w => {
+      const fullWord = wb(dir).find(x => x.word === w.word) || w;
+      const meaning = getPrimary(fullWord);
+      html += `<div class="review-item"><div class="review-word">${sanitize(fullWord.word)}</div><div class="review-meaning">${sanitize(meaning)}</div>`;
+      const firstSense = fullWord.definitions && fullWord.definitions[0] && fullWord.definitions[0].senses && fullWord.definitions[0].senses[0];
+      if (firstSense && firstSense.examples && firstSense.examples[0]) {
+        const ex = firstSense.examples[0];
+        const target2 = dir === 'ja2en' ? meaning : fullWord.word;
+        const safe = sanitize(ex.en);
+        const hl = target2 ? safe.replace(new RegExp('\\b' + escapeRegex(target2) + '\\b', 'gi'), m => `<em>${m}</em>`) : safe;
+        html += `<div class="review-example">${hl}<div class="review-example-ja">${sanitize(ex.ja)}</div></div>`;
+      }
+      html += `</div>`;
+    });
+    html += `</div>`;
+    html += `<button class="btn-primary" id="quiz-review-btn" style="margin-bottom:8px;width:100%">間違えた単語をもう一度テスト</button>`;
+  }
+  html += `<button class="btn-primary" id="quiz-restart" style="${wrong.length > 0 ? 'background:var(--bg);color:var(--text);border:1px solid var(--border-strong);width:100%;margin-bottom:8px' : 'margin-bottom:8px;width:100%'}">${wrong.length > 0 ? '新しいテストを始める' : 'もう一度テスト'}</button>`;
+  html += `<button class="quiz-back-btn" id="quiz-back-btn">← テスト選択に戻る</button></div>`;
+  area.innerHTML = html;
+  $('quiz-restart').addEventListener('click', () => startQuiz());
+  if (wrong.length > 0) {
+    $('quiz-review-btn').addEventListener('click', () => startQuiz(wrong));
+  }
+  $('quiz-back-btn').addEventListener('click', showQuizModeSelect);
+}
+
 const nextQuiz = () => { state.quizIdx++; renderQuiz(); };
 
 // ===== Settings: Save =====
@@ -1321,7 +1675,7 @@ function showPage(name, btn) {
   $('page-' + name).classList.add('active');
   if (btn) btn.classList.add('active');
   if (name === 'wordbook') renderWordbook();
-  else if (name === 'quiz') startQuiz();
+  else if (name === 'quiz') showQuizModeSelect();
   else if (name === 'search') $('apikey-notice').style.display = getApiKey() ? 'none' : 'block';
   else if (name === 'settings') {
     $('apikey-input').value = getApiKey();
@@ -1405,7 +1759,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Wordbook & Quiz toggles
   setDirToggle('#wl-toggle', 'wlDir', LS.WL_DIR, renderWordbook);
-  setDirToggle('#quiz-toggle', 'quizDir', LS.QUIZ_DIR, startQuiz);
+  setDirToggle('#quiz-toggle', 'quizDir', LS.QUIZ_DIR, showQuizModeSelect);
+
+  // テストモード選択
+  document.querySelectorAll('.quiz-mode-card').forEach(card => {
+    card.addEventListener('click', () => {
+      state.quizMode = card.dataset.mode;
+      startQuiz();
+    });
+  });
 
   // Wordbook clear
   $('wl-clear').addEventListener('click', clearWordbook);
