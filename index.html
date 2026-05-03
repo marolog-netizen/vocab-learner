@@ -687,6 +687,19 @@ input,textarea,button{font-family:inherit}
     </div>
 
     <div class="card">
+      <div style="font-size:15px;font-weight:500;margin-bottom:6px">アプリの更新</div>
+      <p style="font-size:13px;color:var(--text-muted);line-height:1.7;margin:0 0 14px">
+        新しいバージョンが反映されない時は、こちらでキャッシュをクリアして再読み込みしてください。<br>
+        <span style="color:var(--text-faint);font-size:12px">※ 単語帳データなどには影響しません</span>
+      </p>
+      <button class="btn-primary" id="reload-app-btn">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="vertical-align:-2px;margin-right:4px"><path d="M2 7a5 5 0 1 1 1.5 3.5M2 11V7h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+        最新版に更新する
+      </button>
+      <div id="reload-msg" style="display:none;font-size:12px;margin-top:10px;padding:8px 10px;border-radius:var(--radius-sm)"></div>
+    </div>
+
+    <div class="card">
       <div style="font-size:15px;font-weight:500;margin-bottom:10px">単語帳データ</div>
       <button class="btn-danger" id="reset-wl-btn">単語帳をリセット</button>
     </div>
@@ -1651,6 +1664,50 @@ async function clearWordbook() {
   safeSet(dir === 'ja2en' ? LS.KEY_JA : LS.KEY, JSON.stringify(target));
   safeSet(dir === 'ja2en' ? LS.HIST_JA : LS.HIST, JSON.stringify(h));
   renderWordbook();
+}
+
+// 単語帳をSupabaseから手動で同期する
+// アプリのキャッシュをクリアして再読み込み
+async function reloadAppCache() {
+  const btn = $('reload-app-btn');
+  const msg = $('reload-msg');
+  if (!confirm('アプリを最新版に更新します。\n単語帳データなどは保持されます。続行しますか？')) return;
+  btn.disabled = true;
+  msg.textContent = '⏳ キャッシュをクリア中...';
+  msg.style.background = 'var(--accent-light)';
+  msg.style.color = 'var(--accent)';
+  msg.style.display = 'block';
+  try {
+    // Service Workerを解除
+    if ('serviceWorker' in navigator) {
+      const regs = await navigator.serviceWorker.getRegistrations();
+      for (const r of regs) {
+        try { await r.unregister(); } catch(e) {}
+      }
+    }
+    // Cache Storageをクリア
+    if ('caches' in window) {
+      const keys = await caches.keys();
+      for (const k of keys) {
+        try { await caches.delete(k); } catch(e) {}
+      }
+    }
+    msg.textContent = '✓ クリア完了。再読み込みします...';
+    msg.style.background = 'var(--green-light)';
+    msg.style.color = 'var(--green)';
+    // 少し待ってから強制リロード（クエリパラメータでキャッシュバスト）
+    setTimeout(() => {
+      const url = new URL(location.href);
+      url.searchParams.set('_t', Date.now().toString());
+      location.replace(url.toString());
+    }, 800);
+  } catch(e) {
+    msg.textContent = `エラー: ${e.message || 'キャッシュクリアに失敗しました'}`;
+    msg.style.background = 'var(--red-light)';
+    msg.style.color = 'var(--red)';
+    btn.disabled = false;
+    setTimeout(() => msg.style.display = 'none', 4000);
+  }
 }
 
 // 単語帳をSupabaseから手動で同期する
@@ -2965,6 +3022,7 @@ document.addEventListener('DOMContentLoaded', () => {
   $('save-api-btn').addEventListener('click', saveApiKey);
   $('save-sb-btn').addEventListener('click', saveSbConfig);
   $('reset-wl-btn').addEventListener('click', clearWordbook);
+  $('reload-app-btn').addEventListener('click', reloadAppCache);
   $('sb-refresh-btn').addEventListener('click', fetchSbUsage);
   $('sb-reset-btn').addEventListener('click', resetAllDb);
   $('storage-refresh-btn').addEventListener('click', updateStorage);
