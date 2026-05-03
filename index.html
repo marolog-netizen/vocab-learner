@@ -1615,7 +1615,7 @@ function buildDetailHtml(w, dir) {
     </div>
   </div>`;
 
-  if (dir === 'en2ja') html += `<button class="btn-sound" data-speak-self style="margin-top:10px;font-size:13px;padding:7px 12px"><svg width="14" height="14" viewBox="0 0 15 15" fill="none"><path d="M3.5 5.5H1.5v4h2l3.5 3V2.5L3.5 5.5z" fill="currentColor"/><path d="M10 3C11.7 4.2 13 5.9 13 7.5S11.7 10.8 10 12M8 5C9.2 5.9 10 6.6 10 7.5S9.2 9.1 8 10" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg> 発音を聞く</button>`;
+  if (dir === 'en2ja') html += `<button class="btn-sound" data-speak="${sanitize(w.word)}" style="margin-top:10px;font-size:13px;padding:7px 12px"><svg width="14" height="14" viewBox="0 0 15 15" fill="none"><path d="M3.5 5.5H1.5v4h2l3.5 3V2.5L3.5 5.5z" fill="currentColor"/><path d="M10 3C11.7 4.2 13 5.9 13 7.5S11.7 10.8 10 12M8 5C9.2 5.9 10 6.6 10 7.5S9.2 9.1 8 10" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg> 発音を聞く</button>`;
   return html;
 }
 
