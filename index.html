@@ -1157,10 +1157,18 @@ async function saveLearningStatsSb(stats) {
 }
 
 // 学習統計のマージ：Supabase側と端末側を統合（B案：合計を取る）
+// 学習統計のマージ：Supabase側と端末側を統合（B案：合計を取る）
+// 双方向同期：リモートとローカルをマージして、両方に最新の統合結果を保存
 async function mergeLearningStats() {
   const remote = await fetchLearningStatsSb();
-  if (!remote) return;
   const local = getLearningStats();
+  // リモートが取得できない場合（未保存等）はローカルをアップロード
+  if (!remote) {
+    if (getSbConfig().url && (local.totalReviews > 0 || local.totalDays > 0)) {
+      await saveLearningStatsSb(local);
+    }
+    return;
+  }
   // マージロジック：累計系は最大値、日付は新しい方
   const merged = {
     totalReviews: Math.max(remote.totalReviews, local.totalReviews),
@@ -1182,7 +1190,10 @@ async function mergeLearningStats() {
     merged.lastStudyDate = local.lastStudyDate || remote.lastStudyDate;
     merged.streak = Math.max(local.streak, remote.streak);
   }
+  // ローカルに保存
   safeSet(LS.LEARNING_STATS, JSON.stringify(merged));
+  // 統合結果をSupabaseにも保存（他端末でも最新値を取得できるよう）
+  await saveLearningStatsSb(merged);
 }
 
 // ===== UI: Status =====
@@ -1846,8 +1857,7 @@ async function uploadLocalDataToSb() {
   };
   await sendStats('en2ja');
   await sendStats('ja2en');
-  // 学習統計
-  await saveLearningStatsSb(getLearningStats());
+  // 学習統計（learning_stats）の同期は mergeLearningStats() で双方向マージするため、ここでは送信しない
 }
 
 // ===== Quiz =====
