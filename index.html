@@ -618,7 +618,13 @@ input,textarea,button{font-family:inherit}
     <div id="quiz-area"></div>
   </div>
 
-  <div id="page-settings" class="page">
+  <div class="modal" id="settings-modal">
+    <div class="modal-content" style="padding:0;max-height:92vh;display:flex;flex-direction:column">
+      <div style="padding:14px 16px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-shrink:0">
+        <span style="font-size:16px;font-weight:500">⚙️ 設定</span>
+        <button class="modal-close" data-close-modal aria-label="閉じる">×</button>
+      </div>
+      <div style="overflow-y:auto;flex:1;padding:14px">
     <div class="card">
       <div style="font-size:15px;font-weight:500;margin-bottom:6px">Anthropic（APIキー & 残高）</div>
       <p style="font-size:13px;color:var(--text-muted);line-height:1.7;margin:0 0 14px">
@@ -726,6 +732,8 @@ input,textarea,button{font-family:inherit}
           <div id="storage-usage-bar" style="height:100%;width:0%;background:var(--accent);transition:width .3s,background .3s;border-radius:4px"></div>
         </div>
         <div id="storage-usage-status" style="font-size:12px;color:var(--text-faint);margin-top:8px;line-height:1.5">読み込み中...</div>
+      </div>
+    </div>
       </div>
     </div>
   </div>
@@ -3065,16 +3073,19 @@ function showPage(name, btn) {
   if (name === 'wordbook') renderWordbook();
   else if (name === 'quiz') showQuizModeSelect();
   else if (name === 'search') $('apikey-notice').style.display = getApiKey() ? 'none' : 'block';
-  else if (name === 'settings') {
-    $('apikey-input').value = getApiKey();
-    const { url, key } = getSbConfig();
-    $('sb-url-input').value = url;
-    $('sb-key-input').value = key;
-    $('sb-userid-input').value = getUserId();
-    showSbPanel();
-    if (url) fetchSbUsage();
-    updateStorage();
-  }
+}
+
+// 設定モーダルを開く（中身を初期化）
+function openSettingsModal() {
+  $('apikey-input').value = getApiKey();
+  const { url, key } = getSbConfig();
+  $('sb-url-input').value = url;
+  $('sb-key-input').value = key;
+  $('sb-userid-input').value = getUserId();
+  showSbPanel();
+  if (url) fetchSbUsage();
+  updateStorage();
+  $('settings-modal').classList.add('open');
 }
 
 // ===== Direction toggles =====
@@ -3235,7 +3246,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // Goto settings
-  document.querySelector('[data-goto="settings"]').addEventListener('click', () => showPage('settings', null));
+  document.querySelector('[data-goto="settings"]').addEventListener('click', openSettingsModal);
 
   // Gear menu
   const gearBtn = $('gear-btn'), gearMenu = $('gear-menu');
@@ -3247,7 +3258,7 @@ document.addEventListener('DOMContentLoaded', () => {
     b.addEventListener('click', () => {
       gearMenu.classList.remove('open');
       const m = b.dataset.menu;
-      if (m === 'settings') showPage('settings', null);
+      if (m === 'settings') openSettingsModal();
       else if (m === 'version') $('version-modal').classList.add('open');
     })
   );
