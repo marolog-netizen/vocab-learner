@@ -1069,12 +1069,16 @@ async function syncFromSb() {
     }
   } catch(e) {}
 }
-async function saveWordbook(dir) {
+async function saveWordbook(dir, specificWord) {
   dir = dir || 'en2ja';
   const target = wb(dir);
   safeSet(dir === 'ja2en' ? LS.KEY_JA : LS.KEY, JSON.stringify(target));
   if (!getSbConfig().url) return;
-  for (const w of target) {
+  // specificWordが指定されている場合はその単語だけ送信
+  const toSend = specificWord
+    ? target.filter(w => w.word === specificWord)
+    : target;
+  for (const w of toSend) {
     try {
       await sbFetch('/wordbook', {
         method:'POST',
@@ -1529,8 +1533,9 @@ async function addToWordbook() {
   const dir = state.currentDir || 'en2ja';
   const target = wb(dir);
   if (target.some(w => w.word.toLowerCase() === state.currentWord.word.toLowerCase())) return;
-  target.unshift({ ...state.currentWord, learned:false, addedAt:Date.now(), srs:initSrs() });
-  await saveWordbook(dir);
+  const newWord = { ...state.currentWord, learned:false, addedAt:Date.now(), srs:initSrs() };
+  target.unshift(newWord);
+  await saveWordbook(dir, newWord.word);
   updateAddBtn(true);
 }
 
@@ -1708,7 +1713,8 @@ async function removeWord(idx) {
   const target = wb(dir);
   const word = target[idx].word;
   target.splice(idx, 1);
-  await saveWordbook(dir);
+  // localStorageのみ更新（Supabaseはこの後deleteWordSbで削除する）
+  safeSet(dir === 'ja2en' ? LS.KEY_JA : LS.KEY, JSON.stringify(target));
   await deleteWordSb(word, dir);
   const k = safeKey(word);
   const h = hist(dir);
@@ -1796,12 +1802,12 @@ async function syncWordbookManually() {
   }
   btn.disabled = true;
   btn.classList.add('syncing');
-  showToast('⏳ ローカルデータをアップロード中...', 'info');
+  showToast('⏳ Supabaseから最新データを取得中...', 'info');
   try {
-    await uploadLocalDataToSb();
-    showToast('⏳ Supabaseから最新データを取得中...', 'info');
+    // 1. 最初にSupabaseから取得して、ローカルとマージ（破壊的な上書きを避ける）
     await syncFromSb();
     await mergeLearningStats();
+    // 2. マージ後の最新データをSupabaseに送信（マージ結果を全端末で共有）
     showToast('⏳ 統合データを保存中...', 'info');
     await uploadLocalDataToSb();
     migrateToSrs();
@@ -1929,7 +1935,7 @@ function applySrs(word, rating, dir) {
   if (newStrength >= 3 && !word.srs.firstReachedAt3) {
     word.srs.firstReachedAt3 = now;
   }
-  saveWordbook(dir);
+  saveWordbook(dir, word.word);
 }
 
 // プレビュー：「次回まで何日後か」を表示用に取得
@@ -2462,7 +2468,7 @@ function answerQuiz(correct, q, btn, sq) {
   }
   fb.scrollIntoView({ behavior:'smooth', block:'nearest' });
 
-  if (fullW) { fullW.learned = correct; saveWordbook(dir); }
+  if (fullW) { fullW.learned = correct; saveWordbook(dir, fullW.word); }
   const k = safeKey(q.word);
   if (k) {
     if (!stT[k]) stT[k] = { correct:0, total:0 };
