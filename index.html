@@ -34,6 +34,10 @@ body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:-appl
 .header-sync-btn:hover{background:var(--bg);color:var(--accent)}
 .header-sync-btn:disabled{opacity:.5;cursor:not-allowed}
 .header-sync-btn.syncing svg{animation:spin 1s linear infinite}
+.icon-refresh-btn{background:none;border:1px solid var(--border);cursor:pointer;padding:6px;display:inline-flex;align-items:center;justify-content:center;color:var(--text-muted);border-radius:50%;width:30px;height:30px;flex-shrink:0;transition:all .15s}
+.icon-refresh-btn:hover{background:var(--bg);color:var(--accent);border-color:var(--accent)}
+.icon-refresh-btn:disabled{opacity:.5;cursor:not-allowed}
+.icon-refresh-btn.syncing svg{animation:spin 1s linear infinite}
 .gear-menu{display:none;position:absolute;top:calc(100% + 4px);right:0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);box-shadow:0 4px 16px rgba(0,0,0,.1);min-width:200px;z-index:100;overflow:hidden}
 .gear-menu button{white-space:nowrap}
 .gear-menu.open{display:block}
@@ -687,7 +691,9 @@ input,textarea,button{font-family:inherit}
       <div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--border)">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
           <span style="font-size:13px;font-weight:500">DB使用状況</span>
-          <button id="sb-refresh-btn" class="refresh-btn">更新</button>
+          <button id="sb-refresh-btn" class="icon-refresh-btn" aria-label="更新" title="DB使用状況を更新">
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M2 8a6 6 0 0 1 10.5-3.95M2 4v3.5h3.5M14 8a6 6 0 0 1-10.5 3.95M14 12V8.5h-3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
         </div>
         <div id="sb-usage-unconfigured" style="font-size:13px;color:var(--text-faint);margin-bottom:10px">Supabaseを設定すると使用状況が表示されます。</div>
         <div id="sb-usage-configured" style="display:none">
@@ -728,7 +734,9 @@ input,textarea,button{font-family:inherit}
     <div class="card">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
         <span style="font-size:15px;font-weight:500">ローカルストレージ使用状況</span>
-        <button id="storage-refresh-btn" class="refresh-btn">更新</button>
+        <button id="storage-refresh-btn" class="icon-refresh-btn" aria-label="更新" title="ローカルストレージ使用状況を更新">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M2 8a6 6 0 0 1 10.5-3.95M2 4v3.5h3.5M14 8a6 6 0 0 1-10.5 3.95M14 12V8.5h-3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
       </div>
       <p style="font-size:13px;color:var(--text-muted);line-height:1.7;margin:0 0 14px">
         この端末のブラウザに保存されているデータの容量を表示します。容量が上限に近づいたら、古い単語の削除をご検討ください。
@@ -758,7 +766,9 @@ input,textarea,button{font-family:inherit}
     <div class="card">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
         <span style="font-size:15px;font-weight:500">📈 学習統計</span>
-        <button id="learning-refresh-btn" class="refresh-btn">更新</button>
+        <button id="learning-refresh-btn" class="icon-refresh-btn" aria-label="更新" title="学習統計を更新">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M2 8a6 6 0 0 1 10.5-3.95M2 4v3.5h3.5M14 8a6 6 0 0 1-10.5 3.95M14 12V8.5h-3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
       </div>
       <div class="learning-grid">
         <div class="learning-cell">
@@ -3245,7 +3255,7 @@ document.addEventListener('DOMContentLoaded', () => {
   $('learning-refresh-btn').addEventListener('click', async () => {
     const btn = $('learning-refresh-btn');
     btn.disabled = true;
-    btn.textContent = '⏳';
+    btn.classList.add('syncing');
     try {
       if (getSbConfig().url) {
         await syncFromSb();
@@ -3255,7 +3265,7 @@ document.addEventListener('DOMContentLoaded', () => {
     } catch(e) {
     } finally {
       btn.disabled = false;
-      btn.textContent = '更新';
+      btn.classList.remove('syncing');
     }
   });
 
