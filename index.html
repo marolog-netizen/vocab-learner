@@ -957,7 +957,14 @@ function sbHeaders() {
 async function sbFetch(path, opts = {}) {
   const { url } = getSbConfig();
   if (!url) return null;
-  const res = await fetch(`${url}/rest/v1${path}`, { mode:'cors', ...opts, headers:{ ...sbHeaders(), ...(opts.headers||{}) } });
+  // URLを安全に構築（iOSのfetchが厳しいので明示的にエンコード）
+  const fullUrl = `${url}/rest/v1${path}`;
+  let res;
+  try {
+    res = await fetch(fullUrl, { mode:'cors', ...opts, headers:{ ...sbHeaders(), ...(opts.headers||{}) } });
+  } catch(networkErr) {
+    throw new Error(`ネットワークエラー: ${networkErr.message || networkErr.name || 'unknown'}`);
+  }
   if (!res.ok) {
     let detail = '';
     try { detail = await res.text(); } catch(e) {}
