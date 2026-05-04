@@ -807,16 +807,16 @@ input,textarea,button{font-family:inherit}
       </div>
 
       <div id="progress-period-select" style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap">
-        <button class="period-btn" data-period="past2m">過去2ヶ月</button>
-        <button class="period-btn active" data-period="past6m">過去6ヶ月</button>
+        <button class="period-btn active" data-period="past2m">過去2ヶ月</button>
+        <button class="period-btn" data-period="past6m">過去6ヶ月</button>
         <button class="period-btn" data-period="past1y">過去1年</button>
         <button class="period-btn" data-period="all">全期間</button>
       </div>
 
       <div class="dir-toggle" id="progress-mode-toggle" style="margin-bottom:14px">
-        <button data-mode="2only" style="font-size:11px">学習中のみ</button>
+        <button data-mode="2only" class="active" style="font-size:11px">学習中のみ</button>
         <button data-mode="3only" style="font-size:11px">定着中以上</button>
-        <button data-mode="both" class="active" style="font-size:11px">両方</button>
+        <button data-mode="both" style="font-size:11px">両方</button>
       </div>
 
       <div style="font-size:11px;color:var(--text-faint);margin-bottom:10px;line-height:1.5">バーをタップで該当期間の単語一覧を表示</div>
@@ -2723,7 +2723,7 @@ function renderLearningStats() {
 }
 
 // 進捗レポートの状態
-const progressState = { unit:'week', period:'past6m', mode:'both' };
+const progressState = { unit:'week', period:'past2m', mode:'2only' };
 
 function renderProgressReport() {
   const buckets = aggregateProgress(getDateBuckets(progressState.unit, progressState.period));
@@ -2840,11 +2840,15 @@ function drawProgressChart(buckets) {
       svg += `<circle cx="${p.x}" cy="${p.y}" r="2.5" fill="#0F6E56"/>`;
     });
   }
-  // X軸ラベル
+  // X軸ラベル：右端（今日）から逆算して等間隔で表示（重なり防止）
+  // ラベル数の上限を画面幅から決定（最大8個）
+  const maxLabels = Math.min(8, n);
+  const step = Math.max(1, Math.ceil(n / maxLabels));
   buckets.forEach((b, i) => {
     const x = padL + barGap + i * (barW + barGap) + barW / 2;
-    // ラベル過密対策：n>10ならスキップ
-    if (n > 10 && i % Math.ceil(n / 8) !== 0 && i !== n - 1) return;
+    // 右端（n-1=今日）から step ごとに表示するインデックスかチェック
+    const distFromEnd = n - 1 - i;
+    if (distFromEnd % step !== 0) return;
     svg += `<text x="${x}" y="${H - padB + 14}" text-anchor="middle" font-size="9" fill="var(--text-muted)">${sanitize(b.label)}</text>`;
   });
   // 空データ警告
