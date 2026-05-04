@@ -958,7 +958,12 @@ async function sbFetch(path, opts = {}) {
   const { url } = getSbConfig();
   if (!url) return null;
   const res = await fetch(`${url}/rest/v1${path}`, { mode:'cors', ...opts, headers:{ ...sbHeaders(), ...(opts.headers||{}) } });
-  if (!res.ok) throw new Error(`データベース操作に失敗しました (HTTP ${res.status})`);
+  if (!res.ok) {
+    let detail = '';
+    try { detail = await res.text(); } catch(e) {}
+    const truncated = detail ? ` ${detail.slice(0, 200)}` : '';
+    throw new Error(`データベース操作に失敗しました (HTTP ${res.status})${truncated}`);
+  }
   return res.status === 204 ? null : res.json();
 }
 async function syncFromSb() {
@@ -1093,7 +1098,7 @@ async function saveWordbook(dir, specificWord) {
         toast.style.background = 'var(--red-light)';
         toast.style.color = 'var(--red)';
         toast.style.display = 'block';
-        setTimeout(() => { toast.style.display = 'none'; }, 5000);
+        setTimeout(() => { toast.style.display = 'none'; }, 15000);
       }
     }
   }
