@@ -148,11 +148,11 @@ body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:-appl
 .quiz-choice.correct{background:var(--green-light);border-color:var(--green);color:var(--green)}
 .quiz-choice.wrong{background:var(--red-light);border-color:var(--red);color:var(--red)}
 .quiz-skip{margin-top:14px;background:transparent;border:none;color:var(--text-muted);font-size:13px;cursor:pointer;padding:8px;font-family:inherit}
-.quiz-mode-card{cursor:pointer;padding:18px 20px;transition:transform .15s,border-color .15s;display:flex;align-items:center;gap:16px}
+.quiz-mode-card{cursor:pointer;padding:23px 20px;transition:transform .15s,border-color .15s;display:flex;align-items:center;gap:16px}
 .quiz-mode-card:hover{transform:translateY(-2px);border-color:var(--accent)}
 .quiz-mode-icon{font-size:32px;flex-shrink:0;line-height:1}
 .quiz-mode-text{flex:1;min-width:0}
-.quiz-mode-title{font-family:Georgia,'Times New Roman',serif;font-size:18px;color:var(--text);margin-bottom:2px}
+.quiz-mode-title{font-family:Georgia,'Times New Roman',serif;font-size:18px;font-weight:700;color:var(--text);margin-bottom:2px}
 .quiz-mode-desc{font-size:13px;color:var(--text-muted);line-height:1.5}
 .due-review-card{background:linear-gradient(135deg,var(--accent-light) 0%,#fff 100%);border:1px solid var(--accent);display:flex;align-items:center;gap:14px;padding:16px 18px}
 .learning-stats-btn{width:100%;display:flex;align-items:center;gap:10px;padding:14px 18px;margin-bottom:12px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);font-family:inherit;font-size:14px;font-weight:500;color:var(--text);cursor:pointer;transition:all .15s;box-shadow:var(--shadow)}
@@ -867,6 +867,17 @@ const safeKey = w => {
 };
 const parseJSON = (v, fallback) => { try { return JSON.parse(v); } catch(e) { return fallback; } };
 const toNullProto = obj => Object.assign(Object.create(null), obj || {});
+
+// Fisher-Yatesアルゴリズムによる正しいランダムシャッフル
+// （Array.sort(() => Math.random() - 0.5) はバイアスがあり、位置が偏る欠点がある）
+function fisherYates(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
 
 // ===== State =====
 const state = {
@@ -2384,8 +2395,8 @@ function renderWordQuiz(q, pct, dir, target) {
   // 選択肢プール：常に単語帳全体を使う（復習時は復習対象が1語でも、他から選択肢を補える）
   const allWords = wb(dir);
   const pool = allWords.length >= 4 ? allWords : (target.length >= 4 ? target : state.quizWords);
-  const wrongs = pool.filter(w => w.word !== q.word).sort(() => Math.random() - 0.5).slice(0, 3);
-  const choices = [...wrongs.map(w => ({ text:getPrimary(w), correct:false, word:w.word })), { text:getPrimary(q), correct:true, word:q.word }].sort(() => Math.random() - 0.5);
+  const wrongs = fisherYates(pool.filter(w => w.word !== q.word)).slice(0, 3);
+  const choices = fisherYates([...wrongs.map(w => ({ text:getPrimary(w), correct:false, word:w.word })), { text:getPrimary(q), correct:true, word:q.word }]);
   const phoneticHtml = dir === 'en2ja' ? `<div class="quiz-phonetic">${sanitize(q.phonetic||'')}</div>` : '';
   area.innerHTML = `
     <div class="quiz-meta"><span>${state.quizIdx+1} / ${state.quizWords.length} 問</span><span style="color:var(--green)">正解 ${state.quizScore}</span></div>
@@ -2417,7 +2428,7 @@ function renderSentenceQuiz(q, pct, dir, target) {
   const allWordsForQuiz = wb(dir);
   const pool = (allWordsForQuiz.length > target.length ? allWordsForQuiz : target).filter(w => w.word !== q.word);
   const wrongCandidates = [];
-  for (const w of pool.sort(() => Math.random() - 0.5)) {
+  for (const w of fisherYates(pool)) {
     if (wrongCandidates.length >= 3) break;
     const text = dir === 'ja2en' ? getPrimary(w) : w.word;
     if (text && text !== sq.blankWord) wrongCandidates.push(text);
@@ -2429,10 +2440,10 @@ function renderSentenceQuiz(q, pct, dir, target) {
     if (more.length === 0) break;
     wrongCandidates.push(more[0]);
   }
-  const choices = [
+  const choices = fisherYates([
     ...wrongCandidates.slice(0, 3).map(t => ({ text:t, correct:false })),
     { text: sq.blankWord, correct:true }
-  ].sort(() => Math.random() - 0.5);
+  ]);
   area.innerHTML = `
     <div class="quiz-meta"><span>${state.quizIdx+1} / ${state.quizWords.length} 問</span><span style="color:var(--green)">正解 ${state.quizScore}</span></div>
     <div class="quiz-progress-wrap"><div class="quiz-progress-bar" style="width:${pct}%"></div></div>
