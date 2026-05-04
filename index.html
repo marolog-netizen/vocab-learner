@@ -286,12 +286,13 @@ input,textarea,button{font-family:inherit}
   <div id="sync-toast" style="display:none;position:fixed;left:50%;top:60px;transform:translateX(-50%);max-width:90%;width:auto;padding:10px 16px;border-radius:var(--radius-sm);font-size:13px;z-index:2000;box-shadow:0 4px 12px rgba(0,0,0,.15);text-align:center"></div>
 
   <div class="modal" id="srs-help-modal">
-    <div class="modal-content">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
-        <div style="font-family:Georgia,'Times New Roman',serif;font-size:22px;color:var(--text)">📚 記憶定着の仕組み</div>
+    <div class="modal-content" style="padding:0;max-height:92vh;display:flex;flex-direction:column">
+      <div style="padding:14px 16px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-shrink:0">
+        <span style="font-size:16px;font-weight:500">📚 SM-2について</span>
         <button class="modal-close" data-close-modal aria-label="閉じる">×</button>
       </div>
-      <div style="font-size:14px;line-height:1.7">
+      <div style="overflow-y:auto;flex:1;padding:14px">
+        <div style="font-size:14px;line-height:1.7">
         <p style="margin:0 0 14px;color:var(--text)">Vocab Learnerは「<b>間隔反復（Spaced Repetition）</b>」という科学的な学習法を採用しています。19世紀のドイツの心理学者エビングハウスが発見した「忘却曲線」に基づいて、忘れそうなタイミングで復習することで効率的に長期記憶へ定着させます。</p>
 
         <div style="font-weight:500;margin-bottom:8px;font-size:14px">🎯 評価ボタンの使い方</div>
@@ -341,18 +342,15 @@ input,textarea,button{font-family:inherit}
         <div style="background:var(--accent-light);border-radius:var(--radius-sm);padding:12px 14px;border-left:3px solid var(--accent)">
           <div style="font-size:13px;color:var(--text);line-height:1.7">💡 <b>ポイント</b>：毎日少しずつでも継続することが大切です。「今日の復習」が表示されたら、忘れる前に思い出すチャンスです！</div>
         </div>
+        </div>
       </div>
     </div>
   </div>
 
   <div class="modal" id="version-modal">
-    <div class="modal-content">
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px;gap:8px">
-        <div>
-          <div style="font-family:Georgia,'Times New Roman',serif;font-size:22px;color:var(--text)">Vocab Learner</div>
-          <div style="font-size:13px;color:var(--text-muted);margin-top:2px">Version 2.0.0</div>
-          <div style="font-size:12px;color:var(--text-faint);margin-top:2px">リリース: 2026-05-03 11:55 (JST)</div>
-        </div>
+    <div class="modal-content" style="padding:0;max-height:92vh;display:flex;flex-direction:column">
+      <div style="padding:14px 16px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-shrink:0;gap:8px">
+        <span style="font-size:16px;font-weight:500">ℹ️ バージョン情報</span>
         <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
           <button id="reload-app-btn" class="refresh-btn" style="white-space:nowrap;font-size:12px;padding:6px 10px" title="キャッシュクリアして最新版に更新">
             <svg width="12" height="12" viewBox="0 0 14 14" fill="none" style="vertical-align:-2px;margin-right:3px"><path d="M2 7a5 5 0 1 1 1.5 3.5M2 11V7h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
@@ -361,8 +359,14 @@ input,textarea,button{font-family:inherit}
           <button class="modal-close" data-close-modal aria-label="閉じる">×</button>
         </div>
       </div>
-      <div id="reload-msg" style="display:none;font-size:12px;margin-bottom:12px;padding:8px 10px;border-radius:var(--radius-sm)"></div>
-      <div style="font-size:14px;line-height:1.7">
+      <div style="overflow-y:auto;flex:1;padding:14px">
+        <div style="margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid var(--border)">
+          <div style="font-family:Georgia,'Times New Roman',serif;font-size:22px;color:var(--text)">Vocab Learner</div>
+          <div style="font-size:13px;color:var(--text-muted);margin-top:2px">Version 2.0.0</div>
+          <div style="font-size:12px;color:var(--text-faint);margin-top:2px">リリース: 2026-05-03 11:55 (JST)</div>
+        </div>
+        <div id="reload-msg" style="display:none;font-size:12px;margin-bottom:12px;padding:8px 10px;border-radius:var(--radius-sm)"></div>
+        <div style="font-size:14px;line-height:1.7">
         <div style="font-size:12px;font-weight:500;color:var(--text-muted);margin-bottom:10px">最新版の全機能</div>
 
         <div style="font-weight:500;margin-bottom:6px">🔍 検索機能</div>
@@ -494,6 +498,7 @@ input,textarea,button{font-family:inherit}
 
           </div>
         </details>
+        </div>
       </div>
     </div>
   </div>
