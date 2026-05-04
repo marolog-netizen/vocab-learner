@@ -143,9 +143,9 @@ body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:-appl
 .quiz-meta{display:flex;justify-content:space-between;font-size:13px;color:var(--text-muted);margin-bottom:6px;padding:0 4px}
 .quiz-progress-wrap{height:4px;background:var(--border);border-radius:2px;overflow:hidden;margin-bottom:10px}
 .quiz-progress-bar{height:100%;background:var(--accent);transition:width .3s}
-.quiz-card{text-align:center;padding:20px 18px;position:relative}
-.quiz-word{font-family:Georgia,'Times New Roman',serif;font-size:28px;color:var(--text);margin-bottom:4px}
-.quiz-phonetic{font-size:13px;color:var(--text-muted);margin-bottom:4px}
+.quiz-card{text-align:center;padding:20px 18px 36px;position:relative}
+.quiz-word{font-family:Georgia,'Times New Roman',serif;font-size:28px;color:var(--text);margin-bottom:0;line-height:1.1}
+.quiz-phonetic{font-size:13px;color:var(--text-muted);margin-top:2px;margin-bottom:4px}
 .quiz-choices{display:flex;flex-direction:column;gap:8px;margin-top:6px}
 .quiz-choice{padding:12px 14px;border:1px solid var(--border-strong);border-radius:var(--radius-sm);background:var(--surface);font-family:inherit;font-size:14px;cursor:pointer;text-align:left;color:var(--text);transition:all .15s}
 .quiz-choice:hover:not(:disabled){border-color:var(--accent);background:var(--accent-light)}
@@ -177,8 +177,8 @@ body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:-appl
 .quiz-result{text-align:center;padding:32px 20px}
 .quiz-result .score{font-family:Georgia,'Times New Roman',serif;font-size:48px;color:var(--accent);margin-bottom:6px}
 .quiz-result .score-label{color:var(--text-muted);margin-bottom:18px}
-.quiz-feedback{margin-top:14px;padding:12px 14px;border-radius:var(--radius-sm);text-align:left;font-size:14px;line-height:1.6}
-.quiz-feedback.correct{background:var(--green-light);color:var(--green);border:1px solid rgba(26,122,74,.25)}
+.quiz-feedback{margin-top:10px;padding:10px 12px;border-radius:var(--radius-sm);text-align:left;font-size:14px;line-height:1.6}
+.quiz-feedback.correct{background:transparent;padding:0;margin-top:0}
 .quiz-feedback.wrong{background:var(--red-light);color:var(--red);border:1px solid rgba(176,48,48,.25)}
 .quiz-feedback-title{font-weight:500;margin-bottom:6px;font-size:15px}
 .quiz-feedback-detail{font-size:13px;color:var(--text);margin-top:8px;padding-top:8px;border-top:1px solid rgba(0,0,0,.08);line-height:1.7}
@@ -2500,7 +2500,10 @@ function answerQuiz(correct, q, btn, sq) {
   // フィードバック表示
   const fb = $('quiz-feedback');
   let html = `<div class="quiz-feedback ${correct ? 'correct' : 'wrong'}">`;
-  html += `<div class="quiz-feedback-title">${correct ? '✓ 正解！' : '✗ 不正解'}</div>`;
+  // 不正解時のみ「✗ 不正解」を表示（正解時は理解度ラベルと統合するので不要）
+  if (!correct) {
+    html += `<div class="quiz-feedback-title">✗ 不正解</div>`;
+  }
   if (!correct) {
     const fullWord = target.find(w => w.word === q.word) || q;
     html += `<div class="quiz-feedback-detail">`;
@@ -2529,8 +2532,8 @@ function answerQuiz(correct, q, btn, sq) {
   const fullW = target.find(x => x.word === q.word) || q;
   ensureSrs(fullW);
   if (correct) {
-    html += `<div class="srs-rating-section">
-      <div class="srs-rating-label">この単語の理解度は？</div>
+    html += `<div class="srs-rating-section srs-rating-section-correct">
+      <div class="srs-rating-label"><span style="color:var(--green);font-weight:500">✓ 正解！</span>　この単語の理解度は？</div>
       <div class="srs-rating-grid">
         <button class="srs-rating-btn" data-rating="again">
           <span class="icon">😅</span>
