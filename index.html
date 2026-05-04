@@ -1085,7 +1085,7 @@ async function saveWordbook(dir, specificWord) {
     : target;
   for (const w of toSend) {
     try {
-      await sbFetch('/wordbook?on_conflict=user_id,word,direction', {
+      await sbFetch('/wordbook?on_conflict=user_id%2Cword%2Cdirection', {
         method:'POST',
         headers:{ Prefer:'resolution=merge-duplicates' },
         body: JSON.stringify({ user_id:getUserId(), word:w.word, phonetic:w.phonetic||'', definitions:w.definitions||[], synonyms:w.synonyms||[], synonymsnuance:w.synonymsNuance||'', antonyms:w.antonyms||[], derivatives:w.derivatives||[], era:w.era||'', learned:w.learned, direction:dir, added_at:new Date(w.addedAt).toISOString(), srs: w.srs || initSrs() })
@@ -1118,7 +1118,7 @@ async function saveQuizStatSb(word, correct, total, dir) {
   if (!getSbConfig().url) return;
   dir = dir || getDirection(word);
   try {
-    await sbFetch('/quiz_stats?on_conflict=user_id,word,direction', {
+    await sbFetch('/quiz_stats?on_conflict=user_id%2Cword%2Cdirection', {
       method:'POST',
       headers:{ Prefer:'resolution=merge-duplicates' },
       body: JSON.stringify({ user_id:getUserId(), word, correct, total, direction:dir })
@@ -1862,7 +1862,7 @@ async function uploadLocalDataToSb() {
       const s = t[k];
       if (!s) continue;
       try {
-        await sbFetch('/quiz_stats?on_conflict=user_id,word,direction', {
+        await sbFetch('/quiz_stats?on_conflict=user_id%2Cword%2Cdirection', {
           method:'POST',
           headers:{ Prefer:'resolution=merge-duplicates' },
           body: JSON.stringify({ user_id:uid, word:w.word, correct:s.correct||0, total:s.total||0, direction:dir })
