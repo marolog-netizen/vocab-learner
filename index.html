@@ -151,6 +151,8 @@ body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:-appl
 .quiz-mode-card{cursor:pointer;text-align:center;padding:24px 20px;transition:transform .15s,border-color .15s}
 .quiz-mode-card:hover{transform:translateY(-2px);border-color:var(--accent)}
 .due-review-card{background:linear-gradient(135deg,var(--accent-light) 0%,#fff 100%);border:1px solid var(--accent);display:flex;align-items:center;gap:14px;padding:16px 18px}
+.learning-stats-btn{width:100%;display:flex;align-items:center;gap:10px;padding:14px 18px;margin-bottom:12px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-md);font-family:inherit;font-size:14px;font-weight:500;color:var(--text);cursor:pointer;transition:all .15s}
+.learning-stats-btn:hover{border-color:var(--accent);background:var(--accent-light);color:var(--accent)}
 .due-review-icon{font-size:32px;flex-shrink:0}
 .due-review-content{flex:1;min-width:0}
 .due-review-title{font-size:15px;font-weight:600;color:var(--accent);margin-bottom:2px}
@@ -276,7 +278,6 @@ input,textarea,button{font-family:inherit}
       </button>
       <div class="gear-menu" id="gear-menu">
         <button data-menu="settings">⚙️ 設定</button>
-        <button data-menu="learning-stats">📈 学習統計＆レポート</button>
         <button data-menu="srs-help">📚 SM-2について</button>
         <button data-menu="version">ℹ️ バージョン情報</button>
       </div>
@@ -588,6 +589,11 @@ input,textarea,button{font-family:inherit}
       <button data-quiz-dir="ja2en">日 → 英</button>
     </div>
     <div id="quiz-mode-select">
+      <button class="learning-stats-btn" id="open-learning-stats-btn">
+        <span style="font-size:18px">📈</span>
+        <span>学習統計＆レポート</span>
+        <span style="margin-left:auto;color:var(--text-faint);font-size:13px">→</span>
+      </button>
       <div id="due-review-card" class="card due-review-card" style="display:none">
         <div class="due-review-icon">🔔</div>
         <div class="due-review-content">
@@ -722,7 +728,13 @@ input,textarea,button{font-family:inherit}
     </div>
   </div>
 
-  <div id="page-learning-stats" class="page">
+  <div class="modal" id="learning-stats-modal">
+    <div class="modal-content" style="padding:0;max-height:92vh;display:flex;flex-direction:column">
+      <div style="padding:14px 16px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-shrink:0">
+        <span style="font-size:16px;font-weight:500">📈 学習統計＆レポート</span>
+        <button class="modal-close" data-close-modal aria-label="閉じる">×</button>
+      </div>
+      <div style="overflow-y:auto;flex:1;padding:14px">
     <div class="card">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
         <span style="font-size:15px;font-weight:500">📈 学習統計</span>
@@ -784,6 +796,8 @@ input,textarea,button{font-family:inherit}
       <div id="progress-legend" style="display:flex;justify-content:center;gap:14px;font-size:11px;color:var(--text-muted);margin-top:6px;flex-wrap:wrap"></div>
 
       <div id="progress-summary" style="margin-top:12px;padding-top:10px;border-top:1px solid var(--border);font-size:12px;display:flex;flex-direction:column;gap:4px"></div>
+    </div>
+      </div>
     </div>
   </div>
 </div>
@@ -1845,9 +1859,9 @@ async function syncWordbookManually() {
     await uploadLocalDataToSb();
     migrateToSrs();
     renderWordbook();
-    // 学習統計＆レポートページが表示されている場合は再描画
-    const lsPage = $('page-learning-stats');
-    if (lsPage && lsPage.classList.contains('active')) {
+    // 学習統計＆レポートモーダルが表示されている場合は再描画
+    const lsModal = $('learning-stats-modal');
+    if (lsModal && lsModal.classList.contains('open')) {
       renderLearningStats();
     }
     const dir = wlDir();
@@ -3059,9 +3073,6 @@ function showPage(name, btn) {
     if (url) fetchSbUsage();
     updateStorage();
   }
-  else if (name === 'learning-stats') {
-    renderLearningStats();
-  }
 }
 
 // ===== Direction toggles =====
@@ -3235,11 +3246,16 @@ document.addEventListener('DOMContentLoaded', () => {
       gearMenu.classList.remove('open');
       const m = b.dataset.menu;
       if (m === 'settings') showPage('settings', null);
-      else if (m === 'learning-stats') showPage('learning-stats', null);
       else if (m === 'srs-help') $('srs-help-modal').classList.add('open');
       else if (m === 'version') $('version-modal').classList.add('open');
     })
   );
+
+  // テストタブの「学習統計＆レポート」ボタン
+  $('open-learning-stats-btn').addEventListener('click', () => {
+    renderLearningStats();
+    $('learning-stats-modal').classList.add('open');
+  });
 
   // Modal close（複数モーダル対応）
   document.querySelectorAll('[data-close-modal]').forEach(b =>
