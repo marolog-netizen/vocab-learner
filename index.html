@@ -140,18 +140,18 @@ body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:-appl
 .srs-label{color:var(--text-muted);font-size:12px;flex-shrink:0;margin-right:10px}
 .srs-value{color:var(--text);font-weight:500;text-align:right}
 .srs-stars{font-size:13px;letter-spacing:1px}
-.quiz-meta{display:flex;justify-content:space-between;font-size:13px;color:var(--text-muted);margin-bottom:8px;padding:0 4px}
-.quiz-progress-wrap{height:4px;background:var(--border);border-radius:2px;overflow:hidden;margin-bottom:16px}
+.quiz-meta{display:flex;justify-content:space-between;font-size:13px;color:var(--text-muted);margin-bottom:6px;padding:0 4px}
+.quiz-progress-wrap{height:4px;background:var(--border);border-radius:2px;overflow:hidden;margin-bottom:10px}
 .quiz-progress-bar{height:100%;background:var(--accent);transition:width .3s}
-.quiz-card{text-align:center;padding:32px 20px}
-.quiz-word{font-family:Georgia,'Times New Roman',serif;font-size:32px;color:var(--text);margin-bottom:6px}
-.quiz-phonetic{font-size:14px;color:var(--text-muted);margin-bottom:6px}
-.quiz-choices{display:flex;flex-direction:column;gap:10px;margin-top:8px}
-.quiz-choice{padding:14px 16px;border:1px solid var(--border-strong);border-radius:var(--radius-sm);background:var(--surface);font-family:inherit;font-size:14px;cursor:pointer;text-align:left;color:var(--text);transition:all .15s}
+.quiz-card{text-align:center;padding:20px 18px;position:relative}
+.quiz-word{font-family:Georgia,'Times New Roman',serif;font-size:28px;color:var(--text);margin-bottom:4px}
+.quiz-phonetic{font-size:13px;color:var(--text-muted);margin-bottom:4px}
+.quiz-choices{display:flex;flex-direction:column;gap:8px;margin-top:6px}
+.quiz-choice{padding:12px 14px;border:1px solid var(--border-strong);border-radius:var(--radius-sm);background:var(--surface);font-family:inherit;font-size:14px;cursor:pointer;text-align:left;color:var(--text);transition:all .15s}
 .quiz-choice:hover:not(:disabled){border-color:var(--accent);background:var(--accent-light)}
 .quiz-choice.correct{background:var(--green-light);border-color:var(--green);color:var(--green)}
 .quiz-choice.wrong{background:var(--red-light);border-color:var(--red);color:var(--red)}
-.quiz-skip{margin-top:14px;background:transparent;border:none;color:var(--text-muted);font-size:13px;cursor:pointer;padding:8px;font-family:inherit}
+.quiz-skip{position:absolute;right:12px;bottom:10px;background:transparent;border:none;color:var(--text-muted);font-size:12px;cursor:pointer;padding:4px 6px;font-family:inherit}
 .quiz-mode-card{cursor:pointer;padding:23px 20px;transition:transform .15s,border-color .15s;display:flex;align-items:center;gap:16px}
 .quiz-mode-card:hover{transform:translateY(-2px);border-color:var(--accent)}
 .quiz-mode-icon{font-size:32px;flex-shrink:0;line-height:1}
@@ -171,9 +171,9 @@ body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:-appl
 @media(max-width:480px){.due-review-card{flex-wrap:wrap}.due-review-btn{width:100%;margin-top:4px}}
 .quiz-back-btn{display:inline-flex;align-items:center;gap:6px;background:transparent;border:none;color:var(--text-muted);font-size:13px;cursor:pointer;padding:6px 12px;font-family:inherit;margin-bottom:8px}
 .quiz-back-btn:hover{color:var(--text)}
-.quiz-sentence{font-size:18px;color:var(--text);line-height:1.7;margin-bottom:18px;font-family:Georgia,'Times New Roman',serif}
+.quiz-sentence{font-size:17px;color:var(--text);line-height:1.6;margin-bottom:12px;font-family:Georgia,'Times New Roman',serif}
 .quiz-sentence .blank{display:inline-block;min-width:60px;border-bottom:2px solid var(--accent);padding:0 6px;color:var(--text-faint)}
-.quiz-sentence-ja{font-size:13px;color:var(--text-muted);margin-bottom:10px}
+.quiz-sentence-ja{font-size:13px;color:var(--text-muted);margin-bottom:8px}
 .quiz-result{text-align:center;padding:32px 20px}
 .quiz-result .score{font-family:Georgia,'Times New Roman',serif;font-size:48px;color:var(--accent);margin-bottom:6px}
 .quiz-result .score-label{color:var(--text-muted);margin-bottom:18px}
@@ -185,15 +185,15 @@ body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:-appl
 .quiz-feedback-detail .label{color:var(--text-muted);font-size:11px;display:block;margin-bottom:2px;font-weight:500}
 .quiz-feedback-detail em{background:#fff3a8;font-style:normal;padding:0 2px;border-radius:2px}
 .quiz-next-btn{margin-top:14px;width:100%;padding:12px;background:var(--accent);color:#fff;border:none;border-radius:var(--radius-sm);font-family:inherit;font-size:14px;font-weight:500;cursor:pointer}
-.srs-rating-section{margin-top:14px;padding-top:14px;border-top:1px solid var(--border)}
-.srs-rating-label{font-size:13px;color:var(--text-muted);text-align:center;margin-bottom:10px}
-.srs-rating-grid{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:6px}
-.srs-rating-btn{display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:10px 6px;border:1px solid var(--border-strong);border-radius:var(--radius-sm);background:var(--surface);cursor:pointer;font-family:inherit;color:var(--text);transition:all .15s;min-height:115px;text-align:center}
+.srs-rating-section{margin-top:10px;padding-top:10px;border-top:1px solid var(--border)}
+.srs-rating-label{font-size:12px;color:var(--text-muted);text-align:center;margin-bottom:8px}
+.srs-rating-grid{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:5px}
+.srs-rating-btn{display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:8px 4px;border:1px solid var(--border-strong);border-radius:var(--radius-sm);background:var(--surface);cursor:pointer;font-family:inherit;color:var(--text);transition:all .15s;min-height:95px;text-align:center}
 .srs-rating-btn:hover{border-color:var(--accent);background:var(--accent-light)}
-.srs-rating-btn .icon{font-size:22px;margin-bottom:4px;line-height:1}
-.srs-rating-btn .label{font-size:13px;font-weight:500;margin-bottom:4px;line-height:1.2}
-.srs-rating-btn .desc{font-size:10px;color:var(--text-faint);line-height:1.3;margin-bottom:6px;flex:1;display:flex;align-items:center;text-align:center}
-.srs-rating-btn .next{font-size:11px;color:var(--accent);font-weight:500;margin-top:auto}
+.srs-rating-btn .icon{font-size:20px;margin-bottom:3px;line-height:1}
+.srs-rating-btn .label{font-size:12px;font-weight:500;margin-bottom:3px;line-height:1.2}
+.srs-rating-btn .desc{font-size:9px;color:var(--text-faint);line-height:1.3;margin-bottom:4px;flex:1;display:flex;align-items:center;text-align:center}
+.srs-rating-btn .next{font-size:10px;color:var(--accent);font-weight:500;margin-top:auto}
 .srs-rating-btn[data-rating="again"]:hover{border-color:var(--red);background:var(--red-light)}
 .srs-rating-btn[data-rating="again"]:hover .next{color:var(--red)}
 .srs-rating-btn[data-rating="hard"]:hover{border-color:var(--amber);background:var(--amber-light)}
@@ -2413,11 +2413,11 @@ function renderWordQuiz(q, pct, dir, target) {
     <div class="quiz-progress-wrap"><div class="quiz-progress-bar" style="width:${pct}%"></div></div>
     <div class="card quiz-card">
       <div class="quiz-word">${sanitize(q.word)}</div>${phoneticHtml}
-      <div style="font-size:14px;color:var(--text-faint);margin-bottom:20px">${dir === 'ja2en' ? 'この単語の英訳はどれ？' : 'この単語の意味はどれ？'}</div>
+      <div style="font-size:14px;color:var(--text-faint);margin-bottom:14px">${dir === 'ja2en' ? 'この単語の英訳はどれ？' : 'この単語の意味はどれ？'}</div>
       <div class="quiz-choices" id="quiz-choices"></div>
       <div id="quiz-feedback"></div>
-    </div>
-    <button class="quiz-skip" id="quiz-skip">スキップ →</button>`;
+      <button class="quiz-skip" id="quiz-skip">スキップ →</button>
+    </div>`;
   buildChoices(choices, q);
   $('quiz-skip').addEventListener('click', () => { state.quizWrong.push(q); const fw = wb(quizDir()).find(x => x.word === q.word) || q; ensureSrs(fw); applySrs(fw, 'again', quizDir()); nextQuiz(); });
 }
@@ -2457,14 +2457,14 @@ function renderSentenceQuiz(q, pct, dir, target) {
   area.innerHTML = `
     <div class="quiz-meta"><span>${state.quizIdx+1} / ${state.quizWords.length} 問</span><span style="color:var(--green)">正解 ${state.quizScore}</span></div>
     <div class="quiz-progress-wrap"><div class="quiz-progress-bar" style="width:${pct}%"></div></div>
-    <div class="card quiz-card" style="text-align:left;padding:24px">
-      <div style="font-size:14px;color:var(--text-faint);margin-bottom:14px;text-align:center">空欄に入る単語を選んでください</div>
+    <div class="card quiz-card" style="text-align:left;padding:18px">
+      <div style="font-size:14px;color:var(--text-faint);margin-bottom:10px;text-align:center">空欄に入る単語を選んでください</div>
       <div class="quiz-sentence-ja">${sanitize(sq.ex.ja)}</div>
       <div class="quiz-sentence">${blanked}</div>
       <div class="quiz-choices" id="quiz-choices"></div>
       <div id="quiz-feedback"></div>
-    </div>
-    <button class="quiz-skip" id="quiz-skip">スキップ →</button>`;
+      <button class="quiz-skip" id="quiz-skip">スキップ →</button>
+    </div>`;
   buildChoices(choices, q, sq);
   $('quiz-skip').addEventListener('click', () => { state.quizWrong.push(q); const fw = wb(quizDir()).find(x => x.word === q.word) || q; ensureSrs(fw); applySrs(fw, 'again', quizDir()); nextQuiz(); });
 }
@@ -2486,6 +2486,9 @@ function answerQuiz(correct, q, btn, sq) {
   const target = wb(dir);
   const stT = stats(dir);
   document.querySelectorAll('.quiz-choice').forEach(b => b.disabled = true);
+  // 回答後はスキップボタン不要なので非表示
+  const skipBtn = $('quiz-skip');
+  if (skipBtn) skipBtn.style.display = 'none';
   btn.classList.add(correct ? 'correct' : 'wrong');
   if (!correct) {
     const correctText = sq ? sq.blankWord : getPrimary(target.find(w => w.word === q.word) || q);
@@ -3249,9 +3252,21 @@ document.addEventListener('DOMContentLoaded', () => {
   $('save-api-btn').addEventListener('click', saveApiKey);
   $('save-sb-btn').addEventListener('click', saveSbConfig);
   $('reload-app-btn').addEventListener('click', reloadAppCache);
-  $('sb-refresh-btn').addEventListener('click', fetchSbUsage);
+  $('sb-refresh-btn').addEventListener('click', async () => {
+    const btn = $('sb-refresh-btn');
+    btn.disabled = true;
+    btn.classList.add('syncing');
+    try { await fetchSbUsage(); } catch(e) {}
+    btn.disabled = false;
+    btn.classList.remove('syncing');
+  });
   $('sb-reset-btn').addEventListener('click', resetAllDb);
-  $('storage-refresh-btn').addEventListener('click', updateStorage);
+  $('storage-refresh-btn').addEventListener('click', () => {
+    const btn = $('storage-refresh-btn');
+    btn.classList.add('syncing');
+    updateStorage();
+    setTimeout(() => btn.classList.remove('syncing'), 500);
+  });
   $('learning-refresh-btn').addEventListener('click', async () => {
     const btn = $('learning-refresh-btn');
     btn.disabled = true;
