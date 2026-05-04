@@ -960,7 +960,6 @@ function sbHeaders() {
 async function sbFetch(path, opts = {}) {
   const { url } = getSbConfig();
   if (!url) return null;
-  // URLを安全に構築（iOSのfetchが厳しいので明示的にエンコード）
   const fullUrl = `${url}/rest/v1${path}`;
   let res;
   try {
@@ -974,7 +973,16 @@ async function sbFetch(path, opts = {}) {
     const truncated = detail ? ` ${detail.slice(0, 200)}` : '';
     throw new Error(`データベース操作に失敗しました (HTTP ${res.status})${truncated}`);
   }
-  return res.status === 204 ? null : res.json();
+  // 204 No Content または空ボディの場合はnullを返す
+  if (res.status === 204) return null;
+  // bodyが空かどうかチェック（merge-duplicates などで空ボディが返る場合がある）
+  const text = await res.text();
+  if (!text) return null;
+  try {
+    return JSON.parse(text);
+  } catch(e) {
+    return null;
+  }
 }
 async function syncFromSb() {
   try {
