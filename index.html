@@ -2292,8 +2292,13 @@ function startQuiz(reviewWords) {
 
   if (mode === 'sentence') {
     const usable = (reviewWords || allWords).filter(w => hasUsableSentence(w, dir));
-    if (usable.length < 2) {
-      area.innerHTML = '<div class="empty-state">文章テストには例文付きの単語が2語以上必要です。<br>新しい単語を検索して追加してください。</div><button class="quiz-back-btn" id="quiz-back-btn">← テスト選択に戻る</button>';
+    // 復習モードなら1単語以上、通常テストなら2単語以上
+    const minWords = reviewWords ? 1 : 2;
+    if (usable.length < minWords) {
+      const msg = reviewWords
+        ? '復習対象の例文付き単語がありません。'
+        : '文章テストには例文付きの単語が2語以上必要です。<br>新しい単語を検索して追加してください。';
+      area.innerHTML = `<div class="empty-state">${msg}</div><button class="quiz-back-btn" id="quiz-back-btn">← テスト選択に戻る</button>`;
       $('quiz-back-btn').addEventListener('click', showQuizModeSelect);
       return;
     }
@@ -2316,8 +2321,19 @@ function startQuiz(reviewWords) {
     }
   } else {
     // 単語テスト
-    if ((reviewWords || allWords).length < 2) {
-      area.innerHTML = '<div class="empty-state">テストには2語以上必要です。<br>まず単語を検索して追加してください。</div><button class="quiz-back-btn" id="quiz-back-btn">← テスト選択に戻る</button>';
+    // 復習モードなら1単語以上、通常テストなら2単語以上
+    const minWords = reviewWords ? 1 : 2;
+    if ((reviewWords || allWords).length < minWords) {
+      const msg = reviewWords
+        ? '復習対象の単語がありません。'
+        : 'テストには2語以上必要です。<br>まず単語を検索して追加してください。';
+      area.innerHTML = `<div class="empty-state">${msg}</div><button class="quiz-back-btn" id="quiz-back-btn">← テスト選択に戻る</button>`;
+      $('quiz-back-btn').addEventListener('click', showQuizModeSelect);
+      return;
+    }
+    // 4択を作るには単語帳全体に最低4語必要
+    if (allWords.length < 4) {
+      area.innerHTML = '<div class="empty-state">4択テストには単語帳全体で4語以上必要です。<br>新しい単語を検索して追加してください。</div><button class="quiz-back-btn" id="quiz-back-btn">← テスト選択に戻る</button>';
       $('quiz-back-btn').addEventListener('click', showQuizModeSelect);
       return;
     }
@@ -2365,7 +2381,9 @@ function renderQuiz() {
 
 function renderWordQuiz(q, pct, dir, target) {
   const area = $('quiz-area');
-  const pool = target.length >= 4 ? target : state.quizWords;
+  // 選択肢プール：常に単語帳全体を使う（復習時は復習対象が1語でも、他から選択肢を補える）
+  const allWords = wb(dir);
+  const pool = allWords.length >= 4 ? allWords : (target.length >= 4 ? target : state.quizWords);
   const wrongs = pool.filter(w => w.word !== q.word).sort(() => Math.random() - 0.5).slice(0, 3);
   const choices = [...wrongs.map(w => ({ text:getPrimary(w), correct:false, word:w.word })), { text:getPrimary(q), correct:true, word:q.word }].sort(() => Math.random() - 0.5);
   const phoneticHtml = dir === 'en2ja' ? `<div class="quiz-phonetic">${sanitize(q.phonetic||'')}</div>` : '';
@@ -2395,8 +2413,9 @@ function renderSentenceQuiz(q, pct, dir, target) {
   // 例文中の対象単語を空欄に置換
   const safeEn = sanitize(sq.ex.en);
   const blanked = safeEn.replace(new RegExp('\\b' + escapeRegex(sq.blankWord) + '\\b', 'gi'), '<span class="blank">_____</span>');
-  // 不正解選択肢：他の単語から取得
-  const pool = target.filter(w => w.word !== q.word);
+  // 不正解選択肢：単語帳全体から取得（復習対象が少なくても4択が作れるように）
+  const allWordsForQuiz = wb(dir);
+  const pool = (allWordsForQuiz.length > target.length ? allWordsForQuiz : target).filter(w => w.word !== q.word);
   const wrongCandidates = [];
   for (const w of pool.sort(() => Math.random() - 0.5)) {
     if (wrongCandidates.length >= 3) break;
