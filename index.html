@@ -1318,14 +1318,25 @@ async function saveLearningStatsSb(stats) {
   } catch(e) {}
 }
 
-// 学習統計のマージ：Supabase側と端末側を統合（B案：合計を取る）
-// 学習統計のマージ：Supabase側と端末側を統合（B案：合計を取る）
+// 学習統計のマージ：Supabase側と端末側を統合
 // 双方向同期：リモートとローカルをマージして、両方に最新の統合結果を保存
 async function mergeLearningStats() {
   const remote = await fetchLearningStatsSb();
   const local = getLearningStats();
-  // リモートが取得できない場合（未保存等）はローカルをアップロード
+  // リモートが取得できない場合
   if (!remote) {
+    // Supabase上の単語帳とクイズ統計がともに空なら、リセット直後の可能性が高い
+    // → ローカルもリセットして整合性を保つ（古いローカルデータがSupabaseに復活するのを防ぐ）
+    const wbEmpty = (state.wb.length === 0 && state.wbJa.length === 0);
+    const statsEmpty = Object.keys(state.stats).length === 0 && Object.keys(state.statsJa).length === 0;
+    if (wbEmpty && statsEmpty) {
+      // ローカルもクリア
+      const empty = { totalDays:0, streak:0, lastStudyDate:null, totalReviews:0, totalCorrect:0 };
+      safeSet(LS.LEARNING_STATS, JSON.stringify(empty));
+      return;
+    }
+    // 単語帳やクイズ統計が残っていて、リモートにだけ学習統計がない場合は初回同期
+    // → ローカルの値をSupabaseに送信
     if (getSbConfig().url && (local.totalReviews > 0 || local.totalDays > 0)) {
       await saveLearningStatsSb(local);
     }
@@ -3166,6 +3177,11 @@ async function resetAllDb() {
     [LS.HIST, LS.HIST_JA, LS.STATS, LS.STATS_JA].forEach(k => safeSet(k, '{}'));
     safeSet(LS.LEARNING_STATS, JSON.stringify({ totalDays:0, streak:0, lastStudyDate:null, totalReviews:0, totalCorrect:0 }));
     renderWordbook();
+    // 学習統計＆レポートモーダルが表示されている場合は再描画
+    const lsModal = $('learning-stats-modal');
+    if (lsModal && lsModal.classList.contains('open')) {
+      renderLearningStats();
+    }
     await fetchSbUsage();
     $('sb-reset-msg').style.display = 'block';
     setTimeout(() => $('sb-reset-msg').style.display = 'none', 3000);
