@@ -148,8 +148,12 @@ body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:-appl
 .quiz-choice.correct{background:var(--green-light);border-color:var(--green);color:var(--green)}
 .quiz-choice.wrong{background:var(--red-light);border-color:var(--red);color:var(--red)}
 .quiz-skip{margin-top:14px;background:transparent;border:none;color:var(--text-muted);font-size:13px;cursor:pointer;padding:8px;font-family:inherit}
-.quiz-mode-card{cursor:pointer;text-align:center;padding:24px 20px;transition:transform .15s,border-color .15s}
+.quiz-mode-card{cursor:pointer;padding:18px 20px;transition:transform .15s,border-color .15s;display:flex;align-items:center;gap:16px}
 .quiz-mode-card:hover{transform:translateY(-2px);border-color:var(--accent)}
+.quiz-mode-icon{font-size:32px;flex-shrink:0;line-height:1}
+.quiz-mode-text{flex:1;min-width:0}
+.quiz-mode-title{font-family:Georgia,'Times New Roman',serif;font-size:18px;color:var(--text);margin-bottom:2px}
+.quiz-mode-desc{font-size:13px;color:var(--text-muted);line-height:1.5}
 .due-review-card{background:linear-gradient(135deg,var(--accent-light) 0%,#fff 100%);border:1px solid var(--accent);display:flex;align-items:center;gap:14px;padding:16px 18px}
 .learning-stats-btn{width:100%;display:flex;align-items:center;gap:10px;padding:14px 18px;margin-bottom:12px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);font-family:inherit;font-size:14px;font-weight:500;color:var(--text);cursor:pointer;transition:all .15s;box-shadow:var(--shadow)}
 .learning-stats-btn:hover{border-color:var(--accent);background:var(--accent-light);color:var(--accent)}
@@ -161,9 +165,6 @@ body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:-appl
 .due-review-btn{flex-shrink:0;background:var(--accent);color:#fff;border:none;padding:10px 14px;border-radius:var(--radius-sm);font-family:inherit;font-size:13px;font-weight:500;cursor:pointer;white-space:nowrap}
 .due-review-btn:hover{opacity:.9}
 @media(max-width:480px){.due-review-card{flex-wrap:wrap}.due-review-btn{width:100%;margin-top:4px}}
-.quiz-mode-icon{font-size:36px;margin-bottom:8px}
-.quiz-mode-title{font-family:Georgia,'Times New Roman',serif;font-size:20px;color:var(--text);margin-bottom:4px}
-.quiz-mode-desc{font-size:13px;color:var(--text-muted);line-height:1.6}
 .quiz-back-btn{display:inline-flex;align-items:center;gap:6px;background:transparent;border:none;color:var(--text-muted);font-size:13px;cursor:pointer;padding:6px 12px;font-family:inherit;margin-bottom:8px}
 .quiz-back-btn:hover{color:var(--text)}
 .quiz-sentence{font-size:18px;color:var(--text);line-height:1.7;margin-bottom:18px;font-family:Georgia,'Times New Roman',serif}
@@ -354,7 +355,7 @@ input,textarea,button{font-family:inherit}
         <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
           <button id="reload-app-btn" class="refresh-btn" style="white-space:nowrap;font-size:12px;padding:6px 10px" title="キャッシュクリアして最新版に更新">
             <svg width="12" height="12" viewBox="0 0 14 14" fill="none" style="vertical-align:-2px;margin-right:3px"><path d="M2 7a5 5 0 1 1 1.5 3.5M2 11V7h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
-            最新バージョンへ更新
+            最新版へ更新
           </button>
           <button class="modal-close" data-close-modal aria-label="閉じる">×</button>
         </div>
@@ -607,13 +608,17 @@ input,textarea,button{font-family:inherit}
       </div>
       <div class="card quiz-mode-card" data-mode="word">
         <div class="quiz-mode-icon">📝</div>
-        <div class="quiz-mode-title">単語テスト</div>
-        <div class="quiz-mode-desc" id="quiz-mode-desc-word">単語の意味を4択で答える</div>
+        <div class="quiz-mode-text">
+          <div class="quiz-mode-title">単語テスト</div>
+          <div class="quiz-mode-desc" id="quiz-mode-desc-word">単語の意味を4択で答える</div>
+        </div>
       </div>
       <div class="card quiz-mode-card" data-mode="sentence">
         <div class="quiz-mode-icon">📖</div>
-        <div class="quiz-mode-title">文章テスト</div>
-        <div class="quiz-mode-desc" id="quiz-mode-desc-sentence">例文の空欄を4択で埋める</div>
+        <div class="quiz-mode-text">
+          <div class="quiz-mode-title">文章テスト</div>
+          <div class="quiz-mode-desc" id="quiz-mode-desc-sentence">例文の空欄を4択で埋める</div>
+        </div>
       </div>
       <button class="learning-stats-btn" id="open-srs-help-btn">
         <span style="font-size:18px">📚</span>
@@ -3115,6 +3120,14 @@ function updateClearBtn() {
 
 // ===== Init =====
 document.addEventListener('DOMContentLoaded', () => {
+  // キャッシュバスト用の_tパラメータをURLから削除（見た目をクリーンに保つ）
+  if (window.history && window.history.replaceState) {
+    const url = new URL(location.href);
+    if (url.searchParams.has('_t')) {
+      url.searchParams.delete('_t');
+      window.history.replaceState(null, '', url.pathname + url.search + url.hash);
+    }
+  }
   migrateToSrs();
   updateApiStatus();
   updateSyncStatus();
