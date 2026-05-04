@@ -151,7 +151,7 @@ body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:-appl
 .quiz-mode-card{cursor:pointer;text-align:center;padding:24px 20px;transition:transform .15s,border-color .15s}
 .quiz-mode-card:hover{transform:translateY(-2px);border-color:var(--accent)}
 .due-review-card{background:linear-gradient(135deg,var(--accent-light) 0%,#fff 100%);border:1px solid var(--accent);display:flex;align-items:center;gap:14px;padding:16px 18px}
-.learning-stats-btn{width:100%;display:flex;align-items:center;gap:10px;padding:14px 18px;margin-bottom:12px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-md);font-family:inherit;font-size:14px;font-weight:500;color:var(--text);cursor:pointer;transition:all .15s}
+.learning-stats-btn{width:100%;display:flex;align-items:center;gap:10px;padding:14px 18px;margin-bottom:12px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);font-family:inherit;font-size:14px;font-weight:500;color:var(--text);cursor:pointer;transition:all .15s;box-shadow:var(--shadow)}
 .learning-stats-btn:hover{border-color:var(--accent);background:var(--accent-light);color:var(--accent)}
 .due-review-icon{font-size:32px;flex-shrink:0}
 .due-review-content{flex:1;min-width:0}
@@ -278,7 +278,6 @@ input,textarea,button{font-family:inherit}
       </button>
       <div class="gear-menu" id="gear-menu">
         <button data-menu="settings">⚙️ 設定</button>
-        <button data-menu="srs-help">📚 SM-2について</button>
         <button data-menu="version">ℹ️ バージョン情報</button>
       </div>
     </div>
@@ -592,7 +591,6 @@ input,textarea,button{font-family:inherit}
       <button class="learning-stats-btn" id="open-learning-stats-btn">
         <span style="font-size:18px">📈</span>
         <span>学習統計＆レポート</span>
-        <span style="margin-left:auto;color:var(--text-faint);font-size:13px">→</span>
       </button>
       <div id="due-review-card" class="card due-review-card" style="display:none">
         <div class="due-review-icon">🔔</div>
@@ -612,6 +610,10 @@ input,textarea,button{font-family:inherit}
         <div class="quiz-mode-title">文章テスト</div>
         <div class="quiz-mode-desc" id="quiz-mode-desc-sentence">例文の空欄を4択で埋める</div>
       </div>
+      <button class="learning-stats-btn" id="open-srs-help-btn">
+        <span style="font-size:18px">📚</span>
+        <span>SM-2について</span>
+      </button>
     </div>
     <div id="quiz-area"></div>
   </div>
@@ -3246,7 +3248,6 @@ document.addEventListener('DOMContentLoaded', () => {
       gearMenu.classList.remove('open');
       const m = b.dataset.menu;
       if (m === 'settings') showPage('settings', null);
-      else if (m === 'srs-help') $('srs-help-modal').classList.add('open');
       else if (m === 'version') $('version-modal').classList.add('open');
     })
   );
@@ -3255,6 +3256,11 @@ document.addEventListener('DOMContentLoaded', () => {
   $('open-learning-stats-btn').addEventListener('click', () => {
     renderLearningStats();
     $('learning-stats-modal').classList.add('open');
+  });
+
+  // テストタブの「SM-2について」ボタン
+  $('open-srs-help-btn').addEventListener('click', () => {
+    $('srs-help-modal').classList.add('open');
   });
 
   // Modal close（複数モーダル対応）
