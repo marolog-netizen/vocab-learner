@@ -77,7 +77,6 @@ body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:-appl
 .word-header{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:0}
 .word-title{font-family:Georgia,'Times New Roman',serif;font-size:28px;color:var(--text)}
 .word-phonetic{font-size:14px;color:var(--text-muted)}
-.word-pos{font-size:12px;padding:2px 8px;background:var(--accent-light);color:var(--accent);border-radius:4px;font-weight:500}
 .search-count-badge{font-size:11px;padding:3px 8px;border-radius:20px;font-weight:500;background:var(--bg);color:var(--text-muted)}
 .search-count-badge.repeat{background:var(--green-light);color:var(--green)}
 .direction-badge{font-size:11px;padding:3px 8px;border-radius:20px;font-weight:500}
@@ -253,7 +252,6 @@ input,textarea,button{font-family:inherit}
 .progress-word-item .date{font-size:11px;color:var(--text-faint)}
 .progress-show-more{padding:8px 12px;text-align:center;color:var(--accent);font-size:12px;cursor:pointer;background:var(--accent-light);border-radius:var(--radius-sm);margin:0 8px 6px;border:1px dashed var(--accent)}
 .progress-show-more:hover{background:#fff}
-.progress-empty{padding:8px 12px;color:var(--text-faint);font-size:11px;text-align:center}
 .srs-help-grid{display:flex;flex-direction:column;gap:8px;margin-bottom:14px}
 .srs-help-item{display:flex;gap:12px;background:var(--bg);border-radius:var(--radius-sm);padding:10px 12px;align-items:center}
 .srs-help-icon{font-size:26px;flex-shrink:0}
@@ -367,8 +365,8 @@ input,textarea,button{font-family:inherit}
       <div style="overflow-y:auto;flex:1;padding:14px">
         <div style="margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid var(--border)">
           <div style="font-family:Georgia,'Times New Roman',serif;font-size:22px;color:var(--text)">Vocab Learner</div>
-          <div style="font-size:13px;color:var(--text-muted);margin-top:2px">Version 2.0.0</div>
-          <div style="font-size:12px;color:var(--text-faint);margin-top:2px">リリース: 2026-05-03 11:55 (JST)</div>
+          <div style="font-size:13px;color:var(--text-muted);margin-top:2px">Version 3.0.0</div>
+          <div style="font-size:12px;color:var(--text-faint);margin-top:2px">リリース: 2026-05-04 13:14 (JST)</div>
         </div>
         <div id="reload-msg" style="display:none;font-size:12px;margin-bottom:12px;padding:8px 10px;border-radius:var(--radius-sm)"></div>
         <div style="font-size:14px;line-height:1.7">
@@ -380,17 +378,20 @@ input,textarea,button{font-family:inherit}
           <li>スペルミス候補の表示・選択</li>
           <li>複数の意味・品詞・例文（Cambridge Dictionary形式）</li>
           <li>類語タグ＋ニュアンス解説</li>
+          <li>反対語（antonyms）・派生語（derivatives）を品詞別に表示</li>
+          <li>類語・反対語・派生語のタップで再検索</li>
           <li>使用年代の表示</li>
           <li>発音記号・「発音を聞く」ボタン</li>
           <li>検索回数・履歴表示</li>
           <li>単語帳キャッシュ利用でAPI節約</li>
-          <li>検索窓クリアボタン</li>
         </ul>
 
         <div style="font-weight:500;margin-bottom:6px">📚 単語帳機能</div>
         <ul style="margin:0 0 14px 18px;color:var(--text-muted);font-size:13px">
           <li>英→日 / 日→英のトグル切替</li>
-          <li>単語タップで詳細展開（意味・例文・類語・発音）</li>
+          <li>単語タップで詳細展開（意味・例文・類語・反対語・派生語・発音）</li>
+          <li>記憶強度を5段階（☆☆☆☆☆〜★★★★★）で表示</li>
+          <li>各単語のSRS情報（連続正解・次回復習日・累計レビュー）</li>
           <li>習得済み／未習得バッジ</li>
           <li>検索回数・最終検索日の表示</li>
           <li>削除時に検索履歴もリセット</li>
@@ -401,20 +402,38 @@ input,textarea,button{font-family:inherit}
           <li>英→日 / 日→英のトグル切替</li>
           <li>📝 単語テスト（4択クイズ・最大10問）</li>
           <li>📖 文章テスト（例文の空欄に入る単語を4択で選ぶ）</li>
+          <li>選択肢はFisher-Yates法で完全ランダム化</li>
           <li>各問題で正解/不正解を即時フィードバック表示</li>
           <li>不正解時は意味・例文を表示して学習効果UP</li>
-          <li>「次へ」ボタンで自分のペースで進められる</li>
-          <li>完了後に間違えた単語の一覧を表示・復習可能</li>
           <li>間違いが多い・古い単語を優先出題</li>
+          <li>完了後に間違えた単語の一覧を表示・復習可能</li>
+        </ul>
+
+        <div style="font-weight:500;margin-bottom:6px">🧠 SM-2 記憶定着システム</div>
+        <ul style="margin:0 0 14px 18px;color:var(--text-muted);font-size:13px">
+          <li>科学的な間隔反復（Spaced Repetition）アルゴリズム</li>
+          <li>4段階評価ボタン（思い出せず/難しい/普通/簡単）</li>
+          <li>「今日の復習」カードで復習タイミング通知（1単語から実施可能）</li>
+          <li>SM-2の仕組みを丁寧に解説するモーダル</li>
+        </ul>
+
+        <div style="font-weight:500;margin-bottom:6px">📈 学習統計＆レポート</div>
+        <ul style="margin:0 0 14px 18px;color:var(--text-muted);font-size:13px">
+          <li>累計学習日数・連続学習日数（🔥）・累計テスト数・正解率</li>
+          <li>記憶状態の分布グラフ（5段階）</li>
+          <li>週単位/月単位の学習進捗レポート（棒+折れ線グラフ）</li>
+          <li>期間選択（過去2ヶ月/6ヶ月/1年/全期間）</li>
+          <li>バーをタップで該当期間の単語一覧 → 単語タップで詳細展開</li>
         </ul>
 
         <div style="font-weight:500;margin-bottom:6px">⚙️ 設定・同期</div>
         <ul style="margin:0 0 14px 18px;color:var(--text-muted);font-size:13px">
-          <li>Anthropic APIキー管理</li>
-          <li>Supabaseによる端末間リアルタイム同期</li>
+          <li>Anthropic APIキー管理＋クレジット残高リンク</li>
+          <li>Supabaseによる端末間の双方向マージ同期</li>
+          <li>ヘッダーの🔄ボタンでワンタップ同期</li>
           <li>DB使用状況（方向別内訳付き）</li>
           <li>ローカルストレージ使用状況表示</li>
-          <li>クレジット残高確認・追加リンク</li>
+          <li>「最新版へ更新」でキャッシュクリア＆強制リロード</li>
         </ul>
 
         <div style="font-weight:500;margin-bottom:6px">🛡️ セキュリティ</div>
@@ -427,6 +446,68 @@ input,textarea,button{font-family:inherit}
         <details style="margin-top:14px;background:var(--bg);border-radius:var(--radius-sm);border:1px solid var(--border)">
           <summary style="cursor:pointer;padding:10px 14px;font-size:13px;font-weight:500;color:var(--text-muted);user-select:none">📜 バージョン履歴</summary>
           <div style="padding:8px 14px 14px;border-top:1px solid var(--border)">
+
+            <details open style="margin-top:8px;background:var(--surface);border-radius:var(--radius-sm);border:1px solid var(--border)">
+              <summary style="cursor:pointer;padding:9px 12px;font-size:13px;font-weight:500;color:var(--text);user-select:none">
+                Version 3.0.0 <span style="font-size:11px;color:var(--text-faint);font-weight:400;margin-left:6px">2026-05-04 13:14 (JST)</span>
+              </summary>
+              <div style="padding:10px 14px;border-top:1px solid var(--border)">
+                <div style="font-size:12px;color:var(--green);font-weight:500;margin-bottom:8px">✨ 追加・強化された機能</div>
+
+                <div style="font-weight:500;margin-bottom:4px;font-size:13px">🧠 SM-2 スパースド・リペティション（科学的学習法）</div>
+                <ul style="margin:0 0 8px 18px;color:var(--text-muted);font-size:12px">
+                  <li><b style="color:var(--text)">SM-2アルゴリズム</b>を採用した間隔反復学習システム</li>
+                  <li><b style="color:var(--text)">4段階評価ボタン</b>（思い出せず / 難しい / 普通 / 簡単）で次回復習日を最適化</li>
+                  <li><b style="color:var(--text)">記憶強度を5段階表示</b>（☆☆☆☆☆ 未学習 → ★★★★★ 完全定着）</li>
+                  <li><b style="color:var(--text)">「今日の復習」カード</b>で復習タイミングを通知（1単語からテスト可能）</li>
+                  <li>SM-2解説モーダルで仕組みを丁寧に説明</li>
+                </ul>
+
+                <div style="font-weight:500;margin-bottom:4px;font-size:13px">📈 学習統計＆レポート（モーダル化）</div>
+                <ul style="margin:0 0 8px 18px;color:var(--text-muted);font-size:12px">
+                  <li><b style="color:var(--text)">学習統計カード</b>：累計学習日数・連続日数（🔥）・累計テスト数・正解率</li>
+                  <li><b style="color:var(--text)">記憶状態の分布グラフ</b>（5段階の記憶強度ごとの単語数）</li>
+                  <li><b style="color:var(--text)">学習進捗レポート</b>：週単位/月単位の棒+折れ線グラフ（カスタムSVG）</li>
+                  <li>期間選択（過去2ヶ月/6ヶ月/1年/全期間）・モード選択（学習中/定着中/両方）</li>
+                  <li>バーをタップ → 該当期間の単語一覧表示 → 単語タップで詳細展開</li>
+                </ul>
+
+                <div style="font-weight:500;margin-bottom:4px;font-size:13px">🔍 検索機能の拡張</div>
+                <ul style="margin:0 0 8px 18px;color:var(--text-muted);font-size:12px">
+                  <li><b style="color:var(--text)">反対語（antonyms）</b>を追加</li>
+                  <li><b style="color:var(--text)">派生語（derivatives）</b>を品詞別にグループ化して表示</li>
+                  <li>類語・反対語・派生語のタップで再検索可能</li>
+                </ul>
+
+                <div style="font-weight:500;margin-bottom:4px;font-size:13px">🔄 完全な多端末同期</div>
+                <ul style="margin:0 0 8px 18px;color:var(--text-muted);font-size:12px">
+                  <li>ヘッダーに<b style="color:var(--text)">同期ボタン</b>（🔄）を配置・ワンタップで全データ同期</li>
+                  <li>単語帳・SRS情報・クイズ統計・学習統計の<b style="color:var(--text)">双方向マージ同期</b></li>
+                  <li>各端末のテスト履歴が累積される<b style="color:var(--text)">最大値方式マージ</b></li>
+                  <li>初回到達日時(firstReachedAt)は古い方を保持し進捗の正確性を維持</li>
+                </ul>
+
+                <div style="font-weight:500;margin-bottom:4px;font-size:13px">🎨 UI/UXの全面改善</div>
+                <ul style="margin:0 0 8px 18px;color:var(--text-muted);font-size:12px">
+                  <li>全モーダルのデザイン統一（固定ヘッダー + ×ボタン + スクロール本文）</li>
+                  <li>更新ボタンを統一の円形🔄アイコンに（回転アニメーション付き）</li>
+                  <li>テスト画面のレイアウト最適化（4択評価ボタンまで一画面に収まる）</li>
+                  <li>「スキップ→」ボタンをカード内右下に配置</li>
+                  <li>「✓ 正解！」と「理解度は？」を1行に統合してスペース節約</li>
+                  <li>選択肢を <b style="color:var(--text)">Fisher-Yatesアルゴリズム</b>で完全ランダム化</li>
+                  <li>「最新版へ更新」ボタンでキャッシュクリア＆強制リロード</li>
+                  <li>テスト・学習統計・SM-2解説をテストタブにアクセスしやすく配置</li>
+                </ul>
+
+                <div style="font-weight:500;margin-bottom:4px;font-size:13px">⚡ パフォーマンスとコード品質</div>
+                <ul style="margin:0 0 4px 18px;color:var(--text-muted);font-size:12px">
+                  <li>変更があった単語のみ送信する効率的な保存処理</li>
+                  <li>Anthropic API（Claude Haiku 4.5）はキャッシュ優先で無駄な呼び出しを抑制</li>
+                  <li>未使用関数・CSSクラスを削除してコード最適化</li>
+                  <li>学習進捗グラフのX軸ラベルを右側起点で配置（重なり防止）</li>
+                </ul>
+              </div>
+            </details>
 
             <details style="margin-top:8px;background:var(--surface);border-radius:var(--radius-sm);border:1px solid var(--border)">
               <summary style="cursor:pointer;padding:9px 12px;font-size:13px;font-weight:500;color:var(--text);user-select:none">
@@ -3009,37 +3090,6 @@ function renderProgressWordList(words, section, maxShow) {
 }
 
 // 単語帳の該当エントリにジャンプ
-function jumpToWordbookEntry(wordStr) {
-  // 該当単語がどちらの単語帳にあるか判定
-  const inEn = state.wb.find(w => w.word === wordStr);
-  const inJa = state.wbJa.find(w => w.word === wordStr);
-  if (!inEn && !inJa) return;
-  const targetDir = inEn ? 'en2ja' : 'ja2en';
-  // 単語帳タブの方向トグルを変更
-  localStorage.setItem(LS.WL_DIR, targetDir);
-  document.querySelectorAll('#wl-toggle button').forEach(b => {
-    b.classList.toggle('active', b.dataset.wlDir === targetDir);
-  });
-  // モーダルを閉じる
-  $('progress-modal').classList.remove('open');
-  // 単語帳タブに移動
-  showPage('wordbook', document.querySelector('.tab[data-page="wordbook"]'));
-  // 該当単語の詳細を展開（少し遅延を入れてDOMが描画されるのを待つ）
-  setTimeout(() => {
-    const items = document.querySelectorAll('#wordbook-list .wl-item');
-    for (const item of items) {
-      const wordEl = item.querySelector('.wl-word');
-      if (wordEl && wordEl.textContent === wordStr) {
-        const detail = item.querySelector('.wl-detail');
-        document.querySelectorAll('.wl-detail.open').forEach(d => d.classList.remove('open'));
-        detail.classList.add('open');
-        item.scrollIntoView({ behavior:'smooth', block:'center' });
-        break;
-      }
-    }
-  }, 150);
-}
-
 function showSbPanel() {
   const { url } = getSbConfig();
   if (url) {
