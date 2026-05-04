@@ -1806,6 +1806,11 @@ async function syncWordbookManually() {
     await uploadLocalDataToSb();
     migrateToSrs();
     renderWordbook();
+    // 学習統計＆レポートページが表示されている場合は再描画
+    const lsPage = $('page-learning-stats');
+    if (lsPage && lsPage.classList.contains('active')) {
+      renderLearningStats();
+    }
     const dir = wlDir();
     showToast(`✓ 同期完了（${wb(dir).length} 単語・全学習データを統合しました）`, 'success');
     setTimeout(() => toast.style.display = 'none', 3500);
@@ -3126,7 +3131,22 @@ document.addEventListener('DOMContentLoaded', () => {
   $('sb-refresh-btn').addEventListener('click', fetchSbUsage);
   $('sb-reset-btn').addEventListener('click', resetAllDb);
   $('storage-refresh-btn').addEventListener('click', updateStorage);
-  $('learning-refresh-btn').addEventListener('click', renderLearningStats);
+  $('learning-refresh-btn').addEventListener('click', async () => {
+    const btn = $('learning-refresh-btn');
+    btn.disabled = true;
+    btn.textContent = '⏳';
+    try {
+      if (getSbConfig().url) {
+        await syncFromSb();
+        await mergeLearningStats();
+      }
+      renderLearningStats();
+    } catch(e) {
+    } finally {
+      btn.disabled = false;
+      btn.textContent = '更新';
+    }
+  });
 
   // 進捗レポートのトグル
   document.querySelectorAll('#progress-unit-toggle button').forEach(b => {
