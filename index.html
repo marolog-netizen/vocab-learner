@@ -1085,7 +1085,17 @@ async function saveWordbook(dir, specificWord) {
         headers:{ Prefer:'resolution=merge-duplicates' },
         body: JSON.stringify({ user_id:getUserId(), word:w.word, phonetic:w.phonetic||'', definitions:w.definitions||[], synonyms:w.synonyms||[], synonymsnuance:w.synonymsNuance||'', antonyms:w.antonyms||[], derivatives:w.derivatives||[], era:w.era||'', learned:w.learned, direction:dir, added_at:new Date(w.addedAt).toISOString(), srs: w.srs || initSrs() })
       });
-    } catch(e) {}
+    } catch(e) {
+      // 視覚的に通知（トースト表示があれば使う）
+      const toast = document.getElementById('sync-toast');
+      if (toast) {
+        toast.textContent = `⚠️ 保存エラー: ${w.word} (${e.message || 'unknown'})`;
+        toast.style.background = 'var(--red-light)';
+        toast.style.color = 'var(--red)';
+        toast.style.display = 'block';
+        setTimeout(() => { toast.style.display = 'none'; }, 5000);
+      }
+    }
   }
 }
 async function deleteWordSb(word, dir) {
